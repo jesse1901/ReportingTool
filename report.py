@@ -1,4 +1,6 @@
 import pyslurm
+import streamlit as st
+import pandas as pd
 
 
 # Zählt die Schlüssel unter dem 'steps'-Schlüssel in einem gegebenen Dictionary.
@@ -70,4 +72,6 @@ if __name__ == "__main__":
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
-        print(stats)
+        job_eff_list = []
+        job_eff_list.append[stats]
+        st.write(pd.Dataframe({stats}))
