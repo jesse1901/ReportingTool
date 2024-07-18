@@ -1,7 +1,7 @@
 import pyslurm
 import streamlit as st
 import pandas as pd
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 # Zählt die Schlüssel unter dem 'steps'-Schlüssel in einem gegebenen Dictionary.
@@ -23,6 +23,7 @@ class GetStats:
         self.job_eff = 0
         self.job_steps = {}
         self.job_elapsed = 0
+        self.end = 0
 
         self.job_data = {}
         self.job_cpu = {}
@@ -37,15 +38,12 @@ class GetStats:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
         self.job_state = self.job_data.state
-
-        if self.job_state != 'COMPLETED':
-            return
-
         self.job_cpu = self.job_data.steps.to_dict()
         self.job_all = self.job_data.to_dict()
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
+        self.end = self.job_data.end_time
 
         # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
@@ -74,12 +72,13 @@ class GetStats:
             "job_state": self.job_state,
             "job_steps": self.job_steps,
             "genutzte Zeit": self.used_time,
-            "gebuchte Zeit": self.job_elapsed
+            "gebuchte Zeit": self.job_elapsed,
+            "end": self.end,
         }
 
 
 if __name__ == "__main__":
-    db_filter = pyslurm.db.JobFilter(end_time=['2099-01-01'])
+    db_filter = pyslurm.db.JobFilter()
     jobs = pyslurm.db.Jobs.load(db_filter)
 
     job_eff_list = []
