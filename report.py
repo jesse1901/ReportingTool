@@ -1,6 +1,7 @@
 import pyslurm
 import streamlit as st
 import pandas as pd
+import mysql.connector
 from datetime import timedelta, datetime
 
 
@@ -64,6 +65,8 @@ class GetStats:
         else:
             self.job_eff = 0
 
+    #def check_state(self) -> bool:
+
     def to_dict(self) -> dict:
         return {
             "job_id": self.job_id,
@@ -85,7 +88,9 @@ if __name__ == "__main__":
     for keys in jobs.keys():
         stats = GetStats()
         stats.job_stats(keys)
-        job_eff_list.append(stats.to_dict())
-        print(job_eff_list)
+        if stats.end is not None:
+            job_eff_list.append(stats.to_dict())
+            print(job_eff_list)
+
 #    df = pd.DataFrame(job_eff_list)
 #    st.write(df)
