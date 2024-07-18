@@ -75,11 +75,13 @@ if __name__ == "__main__":
 
     jobs = pyslurm.db.Jobs.load()
     job_eff_list = []
-
+    i = 0
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
         job_eff_list.append(stats.to_dict())
-
+        i =+ 1
+        if i == 100:
+            break
     df = pd.DataFrame(job_eff_list)
     st.write(df)
