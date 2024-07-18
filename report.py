@@ -51,6 +51,7 @@ class GetStats:
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 3600000, 3)
 
         self.calculate_efficiency()
+
     #Berechnent Effizienz
     def calculate_efficiency(self) -> None:
 
@@ -72,16 +73,12 @@ class GetStats:
 
 
 if __name__ == "__main__":
-
-    jobs = pyslurm.db.Jobs.load()
+    jobs = [8201745, 8201746, 8201845, 8201846, 8201847, 8201848, 8201849, 8201850, 8201851, 8201852, 8201853, 8201854,
+            8201855, 8201856, 8201857, 8201858, 8201859, 8201863, 8201864, 8201865, 8201866, 8201867, 8201868]
     job_eff_list = []
-    i = 0
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
         job_eff_list.append(stats.to_dict())
-        i += 1
-        if i == 100:
-            break
     df = pd.DataFrame(job_eff_list)
     st.write(df)
