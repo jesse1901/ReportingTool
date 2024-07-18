@@ -79,13 +79,14 @@ class GetStats:
 
 
 if __name__ == "__main__":
-
-    jobs = pyslurm.db.Jobs.load()
+    db_filter = pyslurm.db.JobFilter(end_time=['2099-01-01'])
+    jobs = pyslurm.db.Jobs.load(db_filter)
 
     job_eff_list = []
     for keys in jobs.keys():
         stats = GetStats()
         stats.job_stats(keys)
         job_eff_list.append(stats.to_dict())
-    df = pd.DataFrame(job_eff_list)
-    st.write(df)
+        print(job_eff_list)
+#    df = pd.DataFrame(job_eff_list)
+#    st.write(df)
