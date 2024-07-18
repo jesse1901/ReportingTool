@@ -51,8 +51,8 @@ class GetStats:
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 3600000, 3)
 
         self.calculate_efficiency()
-        return self.joblist[self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff]
-    # Berechnent Effizienz
+        return self.job_list[self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff]
+    #Berechnent Effizienz
     def calculate_efficiency(self) -> None:
 
         if self.cores > 0 and self.job_elapsed > 0:
