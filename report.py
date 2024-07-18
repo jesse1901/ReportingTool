@@ -80,7 +80,7 @@ if __name__ == "__main__":
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
-        job_eff_list.extend([stats])
+        job_eff_list.append(stats.to_dict())
 
     df = pd.DataFrame(job_eff_list)
     st.write(df)
