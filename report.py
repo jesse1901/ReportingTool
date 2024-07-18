@@ -51,7 +51,6 @@ class GetStats:
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 3600000, 3)
 
         self.calculate_efficiency()
-        return self.job_list[self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff]
     #Berechnent Effizienz
     def calculate_efficiency(self) -> None:
 
@@ -60,9 +59,16 @@ class GetStats:
         else:
             self.job_eff = 0
 
-    def __repr__(self) -> list:
-        return "(Job-ID='{0}', Cores='{1}', Effizienz='{2}', State='{3}, Steps='{4}', Cpu-Sum='{5}, Elapsed='{6})".format(
-            self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff, )
+    def to_dict(self) -> dict:
+        return {
+            "job_id": self.job_id,
+            "cores": self.cores,
+            "job_efficiency": self.job_eff,
+            "job_state": self.job_state,
+            "job_steps": self.job_steps,
+            "total_cpu_sum": self.total_cpu_sum,
+            "job_elapsed_hours": self.job_elapsed
+        }
 
 
 if __name__ == "__main__":
@@ -76,4 +82,5 @@ if __name__ == "__main__":
         stats.job_stats(i)
         job_eff_list.extend([stats])
 
-    st.write(pd.Dataframe({job_eff_list}))
+    df = pd.DataFrame(job_eff_list)
+    st.write(df)
