@@ -47,15 +47,14 @@ class GetStats:
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
 
-        # Berechnung vergangene Zeit
-        self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s)) if not None else self.job_elapsed = 0
-
         # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
             self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
-        self.used_time = str(timedelta(seconds=self.total_cpu_sum)) if not None else self.used_time = 0
+        if self.job_elapsed_s is not None:
+            self.used_time = str(timedelta(seconds=self.total_cpu_sum))
+            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
 
         self.calculate_efficiency()
 
