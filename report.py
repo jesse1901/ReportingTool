@@ -1,6 +1,7 @@
 import pyslurm
 import streamlit as st
 import pandas as pd
+from datetime import timedelta
 
 
 # Zählt die Schlüssel unter dem 'steps'-Schlüssel in einem gegebenen Dictionary.
@@ -16,17 +17,18 @@ class GetStats:
     # Initialisiert die Klasse GetStats mit den notwendigen Attributen.
     def __init__(self):
         self.job_id = 0
+        self.cores = 0
+        self.job_state = ''
+        self.total_cpu_sum = 0
+        self.job_eff = 0
+        self.job_steps = {}
+        self.job_elapsed = 0
+
         self.job_data = {}
         self.job_cpu = {}
         self.job_all = {}
         self.job_elapsed_s = 0
-        self.cores = 0
-        self.job_steps = {}
-        self.job_state = ' '
-        self.job_eff = 0
         self.dict_steps = {}
-        self.total_cpu_sum = 0
-        self.job_elapsed = 0
         self.job_list = []
 
     # Lädt die Jobdaten und berechnet die Jobstatistiken.
@@ -41,18 +43,17 @@ class GetStats:
         self.job_state = self.job_data.state
 
         # Berechnung vergangene Zeit
-        self.job_elapsed = self.job_elapsed_s / 3600 if self.job_elapsed_s else 0
+        self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
+        # self.job_elapsed_s / 3600) if self.job_elapsed_s else 0
 
-        # Auslesen gesamter CPU-Zeit für Jobsteps
+        # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
-            self.total_cpu_val = self.job_cpu[i]["stats"]["total_cpu_time"]
-            self.dict_steps[i] = self.total_cpu_val
+            self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
-        self.total_cpu_sum = round(sum(self.dict_steps.values()) / 3600000, 3)
-
+        self.total_cpu_sum = timedelta(milliseconds=sum(self.dict_steps.values()))
         self.calculate_efficiency()
 
-    #Berechnent Effizienz
+    # Berechnent Effizienz
     def calculate_efficiency(self) -> None:
 
         if self.cores > 0 and self.job_elapsed > 0:
@@ -67,8 +68,8 @@ class GetStats:
             "job_efficiency": self.job_eff,
             "job_state": self.job_state,
             "job_steps": self.job_steps,
-            "total_cpu_sum": self.total_cpu_sum,
-            "job_elapsed_hours": self.job_elapsed
+            "genutzte Zeit": self.total_cpu_sum,
+            "gebuchte Zeit": self.job_elapsed
         }
 
 
