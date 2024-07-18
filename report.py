@@ -43,7 +43,7 @@ class GetStats:
 
         self.job_cpu = self.job_data.steps.to_dict()
         self.job_all = self.job_data.to_dict()
-        self.job_elapsed_s = self.job_data.elapsed_time
+        self.job_elapsed_s = self.job_data.elapsed_time if not None else self.job_elapsed = 0
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
 
