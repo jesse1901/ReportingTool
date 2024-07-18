@@ -27,9 +27,10 @@ class GetStats:
         self.dict_steps = {}
         self.total_cpu_sum = 0
         self.job_elapsed = 0
+        self.job_list = []
 
     # Lädt die Jobdaten und berechnet die Jobstatistiken.
-    def job_stats(self, job_id: int) -> None:
+    def job_stats(self, job_id: int) -> list:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
         self.job_cpu = self.job_data.steps.to_dict()
@@ -50,7 +51,7 @@ class GetStats:
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 3600000, 3)
 
         self.calculate_efficiency()
-
+        return self.joblist[self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff]
     # Berechnent Effizienz
     def calculate_efficiency(self) -> None:
 
@@ -59,7 +60,7 @@ class GetStats:
         else:
             self.job_eff = 0
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> list:
         return "(Job-ID='{0}', Cores='{1}', Effizienz='{2}', State='{3}, Steps='{4}', Cpu-Sum='{5}, Elapsed='{6})".format(
             self.job_id, self.cores, self.job_eff, self.job_state, self.job_steps, self.total_cpu_sum, self.job_eff, )
 
@@ -73,6 +74,6 @@ if __name__ == "__main__":
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
-        job_eff_list.append[stats]
+        job_eff_list.extend([stats])
 
     st.write(pd.Dataframe({job_eff_list}))
