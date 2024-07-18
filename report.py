@@ -36,22 +36,26 @@ class GetStats:
     def job_stats(self, job_id: int) -> None:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
+        self.job_state = self.job_data.state
+
+        if self.job_state != 'COMPLETED':
+            return
+
         self.job_cpu = self.job_data.steps.to_dict()
         self.job_all = self.job_data.to_dict()
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
-        self.job_state = self.job_data.state
 
         # Berechnung vergangene Zeit
-        self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
+        self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s)) if not None else self.job_elapsed = 0
 
         # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
             self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
-        self.used_time = str(timedelta(seconds=self.total_cpu_sum))
+        self.used_time = str(timedelta(seconds=self.total_cpu_sum)) if not None else self.used_time = 0
 
         self.calculate_efficiency()
 
