@@ -68,10 +68,11 @@ if __name__ == "__main__":
 
     jobs = [8201745, 8201746, 8201845, 8201846, 8201847, 8201848, 8201849, 8201850, 8201851, 8201852, 8201853, 8201854,
             8201855, 8201856, 8201857, 8201858, 8201859, 8201863, 8201864, 8201865, 8201866, 8201867, 8201868]
+    job_eff_list = []
 
     for i in jobs:
         stats = GetStats()
         stats.job_stats(i)
-        job_eff_list = []
         job_eff_list.append[stats]
-        st.write(pd.Dataframe({stats}))
+
+    st.write(pd.Dataframe({job_eff_list}))
