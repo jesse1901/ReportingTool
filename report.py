@@ -30,7 +30,7 @@ class GetStats:
         self.job_list = []
 
     # Lädt die Jobdaten und berechnet die Jobstatistiken.
-    def job_stats(self, job_id: int) -> list:
+    def job_stats(self, job_id: int) -> None:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
         self.job_cpu = self.job_data.steps.to_dict()
