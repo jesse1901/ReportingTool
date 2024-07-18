@@ -19,7 +19,7 @@ class GetStats:
         self.job_id = 0
         self.cores = 0
         self.job_state = ''
-        self.total_cpu_sum = 0
+        self.used_time = ''
         self.job_eff = 0
         self.job_steps = {}
         self.job_elapsed = 0
@@ -28,6 +28,7 @@ class GetStats:
         self.job_cpu = {}
         self.job_all = {}
         self.job_elapsed_s = 0
+        self.total_cpu_sum = 0
         self.dict_steps = {}
         self.job_list = []
 
@@ -44,20 +45,21 @@ class GetStats:
 
         # Berechnung vergangene Zeit
         self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
-        # self.job_elapsed_s / 3600) if self.job_elapsed_s else 0
 
         # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
             self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
-        self.total_cpu_sum = timedelta(milliseconds=sum(self.dict_steps.values()))
+        self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
+        self.used_time = str(timedelta(seconds=self.total_cpu_sum))
+
         self.calculate_efficiency()
 
-    # Berechnent Effizienz
+    # Berechnet Effizienz
     def calculate_efficiency(self) -> None:
 
-        if self.cores > 0 and self.job_elapsed > 0:
-            self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed)) * 100, 3)
+        if self.cores > 0 and self.job_elapsed_s > 0:
+            self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 3)
         else:
             self.job_eff = 0
 
@@ -68,7 +70,7 @@ class GetStats:
             "job_efficiency": self.job_eff,
             "job_state": self.job_state,
             "job_steps": self.job_steps,
-            "genutzte Zeit": self.total_cpu_sum,
+            "genutzte Zeit": self.used_time,
             "gebuchte Zeit": self.job_elapsed
         }
 
