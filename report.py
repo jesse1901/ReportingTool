@@ -104,7 +104,8 @@ if __name__ == "__main__":
         cur.execute("""
                     SELECT MAX(jobID) FROM reportdata
         """)
-        jobID = cur.fetchall()
+        x = cur.fetchall()
+        jobID = x[0]
         list_filter = []
         for i in range(50):
             jobID += 1
