@@ -100,10 +100,18 @@ if __name__ == "__main__":
     df_all = pd.DataFrame(frame_all)
     st.write(df_all)
 
-    frame_group_by_user = conn_streamlit.query("SELECT username, AVG(efficiency) AS avg_efficiency FROM reportdata GROUP BY username", ttl=0)
+    frame_group_by_user = conn_streamlit.query("SELECT username, AVG(efficiency) AS avg_efficiency, COUNT(jobID) AS anzahl_jobs FROM reportdata GROUP BY username", ttl=0)
     df_gbu = pd.DataFrame(frame_group_by_user)
     st.write(df_gbu)
 
+
+    frame_chart = conn_streamlit.query("""
+        SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, AVG(efficiency) AS avg_efficiency
+        FROM reportdata
+        GROUP BY strftime('%Y-%m-%d %H:00:00', start)
+        ORDER BY period""", ttl=0)
+    df_chart = pd.DataFrame(frame_chart)
+    st.line_chart(df_chart.set_index('period'))
 
 
     while True:
