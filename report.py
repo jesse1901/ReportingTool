@@ -89,12 +89,14 @@ class GetStats:
 
 if __name__ == "__main__":
     #Database connection
-    con = sqlite3.connect('reports.db')
+    con = sqlite3.connect('reports.db') #sqlite connection
     cur = con.cursor()
     cur.execute("""
                 CREATE TABLE IF NOT EXISTS reportdata (
                 jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
                 booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
+
+    conn_streamlit = st.connection('reports.db', type='sql')
 
     db_filter = pyslurm.db.JobFilter()
     jobs = pyslurm.db.Jobs.load()
@@ -118,7 +120,7 @@ if __name__ == "__main__":
             con.commit()
             c += 1
             if c%5 == 0:
-                x = cur.execute("SELECT * FROM reportdata")
+                x = conn_streamlit.query("SELECT * FROM reportdata", ttl=20)
                 df = pd.DataFrame(x)
                 st.write(df)
 
