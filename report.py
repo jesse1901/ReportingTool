@@ -116,14 +116,14 @@ if __name__ == "__main__":
 
     while True:
         cur.execute("""
-                    SELECT MIN(jobID) FROM reportdata
+                    SELECT MAX(jobID) FROM reportdata
         """)
         x = cur.fetchall()
         jobID = x[0][0]
         print(jobID)
         list_filter = []
         for i in range(500):
-            jobID -= 1
+            jobID += 1
             list_filter.append(jobID)
         db_filter = pyslurm.db.JobFilter(ids=list_filter)
         jobs = pyslurm.db.Jobs.load(db_filter)
