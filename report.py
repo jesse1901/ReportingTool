@@ -101,7 +101,6 @@ if __name__ == "__main__":
     st.write(df)
 
     while True:
-
         cur.execute("""
                     SELECT MAX(jobID) FROM reportdata
         """)
