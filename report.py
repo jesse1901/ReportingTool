@@ -84,7 +84,7 @@ class GetStats:
             "start": self.start,
             "end": self.end,
         }
-
+    def get_and_write_data(self):
 
 if __name__ == "__main__":
     #Database connection
@@ -103,28 +103,29 @@ if __name__ == "__main__":
 #    filter_select = cur.fetchall()
 #    db_filter= pyslurm.db.JobFilter(filter_select)
     jobs = pyslurm.db.Jobs.load()
-    job_eff_list = []
-    c = 0
-    for keys in jobs.keys():
-        stats = GetStats()
-        stats.job_stats(keys)
-        if stats.job_data.end_time is not None:
-            data = stats.to_dict()
-            print(data)
-            cur.execute("""
-                INSERT INTO reportdata (
-                    jobID, username, account, efficiency, used_time, booked_time,
-                    state, cores, start, end
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-            """, (
-                data['job_id'], data['user'], data['account'], data['efficiency'],
-                data['used'], data['booked'], data['state'], data['cores'],
-                data['start'], data['end']))
-            con.commit()
-            c += 1
-    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=120)
+    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=600)
     df = pd.DataFrame(x)
     st.write(df)
+    for keys in jobs.keys():
+        try:
+            stats = GetStats()
+            stats.job_stats(keys)
+            if stats.job_data.end_time is not None:
+                data = stats.to_dict()
+                print(data)
+                cur.execute("""
+                    INSERT INTO reportdata (
+                        jobID, username, account, efficiency, used_time, booked_time,
+                        state, cores, start, end
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                """, (
+                    data['job_id'], data['user'], data['account'], data['efficiency'],
+                    data['used'], data['booked'], data['state'], data['cores'],
+                    data['start'], data['end']))
+                con.commit()
+        except:
+            print("error")
+
 
 #             job_eff_list.append(stats.to_dict())
 #            print(job_eff_list)
