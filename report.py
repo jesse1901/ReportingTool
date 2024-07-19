@@ -81,7 +81,6 @@ class GetStats:
             "booked": self.job_elapsed,
             "state": self.job_data.state,
             "cores": self.cores,
-#            "steps": self.job_steps,
             "start": self.start,
             "end": self.end,
         }
@@ -98,11 +97,11 @@ if __name__ == "__main__":
 
     conn_streamlit = st.connection('reports_db', type='sql')
 
-    cur.execute("""
-                SELECT MAX(end) FROM reportdata
-    """)
-    filter_select = cur.fetchall()
-    db_filter= pyslurm.db.JobFilter(filter_select)
+#    cur.execute("""
+#                SELECT MAX(end) FROM reportdata
+#    """)
+#    filter_select = cur.fetchall()
+#    db_filter= pyslurm.db.JobFilter(filter_select)
     jobs = pyslurm.db.Jobs.load()
     job_eff_list = []
     c = 0
