@@ -96,20 +96,20 @@ if __name__ == "__main__":
 
     conn_streamlit = st.connection('reports_db', type='sql')
 
-    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=600)
+    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=0)
     df = pd.DataFrame(x)
     st.write(df)
 
     while True:
         cur.execute("""
-                    SELECT MAX(jobID) FROM reportdata
+                    SELECT MIN(jobID) FROM reportdata
         """)
         x = cur.fetchall()
         jobID = x[0][0]
         print(jobID)
         list_filter = []
         for i in range(500):
-            jobID += 1
+            jobID -= 1
             list_filter.append(jobID)
         db_filter = pyslurm.db.JobFilter(ids=list_filter)
         jobs = pyslurm.db.Jobs.load(db_filter)
