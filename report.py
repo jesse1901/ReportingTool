@@ -20,7 +20,7 @@ class GetStats:
     def __init__(self):
         self.job_id = 0
         self.cores = 0
-        self.used_time = ''
+        self.used_time = 0
         self.job_eff = 0
         self.job_steps = {}
         self.job_elapsed = 0
@@ -51,11 +51,11 @@ class GetStats:
 
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
 
-        if self.job_elapsed_s is not None:
+        if self.job_elapsed_s and self.used_time is not None:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
             self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
 
-        if self.job_data.end_time is not None:
+        if self.job_data.end_time and self.job_data.start_time is not None:
             self.start = datetime.utcfromtimestamp(self.job_data.start_time).strftime('%Y-%m-%dT%H:%M:%S')
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -98,7 +98,11 @@ if __name__ == "__main__":
 
     conn_streamlit = st.connection('reports_db', type='sql')
 
-    db_filter = pyslurm.db.JobFilter()
+    cur.execute("""
+                SELECT MAX(end) FROM reportdata
+    """)
+    filter_select = cur.fetchall()
+    db_filter= pyslurm.db.JobFilter(filter_select)
     jobs = pyslurm.db.Jobs.load()
     job_eff_list = []
     c = 0
