@@ -96,9 +96,15 @@ if __name__ == "__main__":
 
     conn_streamlit = st.connection('reports_db', type='sql')
 
-    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=0)
-    df = pd.DataFrame(x)
-    st.write(df)
+    frame_all = conn_streamlit.query("SELECT * FROM reportdata", ttl=0)
+    df_all = pd.DataFrame(frame_all)
+    st.write(df_all)
+
+    frame_group_by_user = conn_streamlit.query("SELECT username, AVG(efficiency) AS avg_efficiency FROM reportdata GROUP BY username", ttl=0)
+    df_gbu = pd.DataFrame(frame_group_by_user)
+    st.write(df_gbu)
+
+
 
     while True:
         cur.execute("""
