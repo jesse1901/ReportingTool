@@ -49,7 +49,7 @@ class GetStats:
         for i in self.job_steps:
             self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
-        self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
+        self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 1)
 
         if self.job_elapsed_s and self.used_time is not None:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
@@ -65,7 +65,7 @@ class GetStats:
     def calculate_efficiency(self) -> None:
 
         if self.cores > 0 and self.job_elapsed_s > 0:
-            self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 3)
+            self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
         else:
             self.job_eff = 0
 
