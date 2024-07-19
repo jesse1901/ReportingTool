@@ -84,48 +84,47 @@ class GetStats:
             "start": self.start,
             "end": self.end,
         }
-    def get_and_write_data(self):
 
 if __name__ == "__main__":
-        #Database connection
-        con = sqlite3.connect('reports.db') #sqlite connection
-        cur = con.cursor()
-        cur.execute("""
-                    CREATE TABLE IF NOT EXISTS reportdata (
-                    jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
-                    booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
+    #Database connection
+    con = sqlite3.connect('reports.db') #sqlite connection
+    cur = con.cursor()
+    cur.execute("""
+                CREATE TABLE IF NOT EXISTS reportdata (
+                jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
+                booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
 
-        conn_streamlit = st.connection('reports_db', type='sql')
+    conn_streamlit = st.connection('reports_db', type='sql')
 
-    #    cur.execute("""
-    #                SELECT MAX(end) FROM reportdata
-    #    """)
-    #    filter_select = cur.fetchall()
-    #    db_filter= pyslurm.db.JobFilter(filter_select)
-        jobs = pyslurm.db.Jobs.load()
-        x = conn_streamlit.query("SELECT * FROM reportdata", ttl=600)
-        df = pd.DataFrame(x)
-        st.write(df)
-        for keys in jobs.keys():
-            try:
-                stats = GetStats()
-                stats.job_stats(keys)
-                if stats.job_data.end_time is not None:
-                    data = stats.to_dict()
-                    print(data)
-                    cur.execute("""
-                        INSERT INTO reportdata (
-                            jobID, username, account, efficiency, used_time, booked_time,
-                            state, cores, start, end
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-                    """, (
-                        data['job_id'], data['user'], data['account'], data['efficiency'],
-                        data['used'], data['booked'], data['state'], data['cores'],
-                        data['start'], data['end']))
-                    con.commit()
-            except:
-                print("error")
+#    cur.execute("""
+#                SELECT MAX(end) FROM reportdata
+#    """)
+#    filter_select = cur.fetchall()
+#    db_filter= pyslurm.db.JobFilter(filter_select)
+    jobs = pyslurm.db.Jobs.load()
+    x = conn_streamlit.query("SELECT * FROM reportdata", ttl=600)
+    df = pd.DataFrame(x)
+    st.write(df)
+    for keys in jobs.keys():
+        try:
+            stats = GetStats()
+            stats.job_stats(keys)
+            if stats.job_data.end_time is not None:
+                data = stats.to_dict()
+                print(data)
+                cur.execute("""
+                    INSERT INTO reportdata (
+                        jobID, username, account, efficiency, used_time, booked_time,
+                        state, cores, start, end
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                """, (
+                    data['job_id'], data['user'], data['account'], data['efficiency'],
+                    data['used'], data['booked'], data['state'], data['cores'],
+                    data['start'], data['end']))
+                con.commit()
+        except:
+            print("error")
 
 
-    #             job_eff_list.append(stats.to_dict())
-    #            print(job_eff_list)
+#             job_eff_list.append(stats.to_dict())
+#            print(job_eff_list)
