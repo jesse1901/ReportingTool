@@ -1,8 +1,9 @@
 import pyslurm
 import streamlit as st
 import pandas as pd
-import mysql.connector
 from datetime import timedelta, datetime
+import sqlite3
+
 
 
 # Zählt die Schlüssel unter dem 'steps'-Schlüssel in einem gegebenen Dictionary.
@@ -19,12 +20,12 @@ class GetStats:
     def __init__(self):
         self.job_id = 0
         self.cores = 0
-        self.job_state = ''
         self.used_time = ''
         self.job_eff = 0
         self.job_steps = {}
         self.job_elapsed = 0
-        self.end = 0
+        self.start = ''
+        self.end = ''
 
         self.job_data = {}
         self.job_cpu = {}
@@ -38,22 +39,25 @@ class GetStats:
     def job_stats(self, job_id: int) -> None:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
-        self.job_state = self.job_data.state
         self.job_cpu = self.job_data.steps.to_dict()
         self.job_all = self.job_data.to_dict()
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
-        self.end = self.job_data.end_time
 
         # Auslesen gesamter CPU-Zeit für Job steps
         for i in self.job_steps:
             self.dict_steps[i] = self.job_cpu[i]["stats"]["total_cpu_time"]
 
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 3)
+
         if self.job_elapsed_s is not None:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
             self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
+
+        if self.job_data.end_time is not None:
+            self.start = datetime.utcfromtimestamp(self.job_data.start_time).strftime('%Y-%m-%dT%H:%M:%S')
+            self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
 
         self.calculate_efficiency()
 
@@ -70,27 +74,53 @@ class GetStats:
     def to_dict(self) -> dict:
         return {
             "job_id": self.job_id,
+            "user": self.job_data.user_name,
+            "account": self.job_data.account,
+            "efficiency": self.job_eff,
+            "used": self.used_time,
+            "booked": self.job_elapsed,
+            "state": self.job_data.state,
             "cores": self.cores,
-            "job_efficiency": self.job_eff,
-            "job_state": self.job_state,
-            "job_steps": self.job_steps,
-            "genutzte Zeit": self.used_time,
-            "gebuchte Zeit": self.job_elapsed,
+#            "steps": self.job_steps,
+            "start": self.start,
             "end": self.end,
         }
 
 
 if __name__ == "__main__":
-    db_filter = pyslurm.db.JobFilter()
-    jobs = pyslurm.db.Jobs.load(db_filter)
+    #Database connection
+    con = sqlite3.connect('reports.db')
+    cur = con.cursor()
+    cur.execute("""
+                CREATE TABLE IF NOT EXISTS reportdata (
+                jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
+                booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
 
+    db_filter = pyslurm.db.JobFilter()
+    jobs = pyslurm.db.Jobs.load()
     job_eff_list = []
+    c = 0
     for keys in jobs.keys():
         stats = GetStats()
         stats.job_stats(keys)
-        if stats.end is not None:
-            job_eff_list.append(stats.to_dict())
-            print(job_eff_list)
+        if stats.job_data.end_time is not None:
+            data = stats.to_dict()
+            print(data)
+            cur.execute("""
+                INSERT INTO reportdata (
+                    jobID, username, account, efficiency, used_time, booked_time,
+                    state, cores, start, end
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+            """, (
+                data['job_id'], data['user'], data['account'], data['efficiency'],
+                data['used'], data['booked'], data['state'], data['cores'],
+                data['start'], data['end']))
+            con.commit()
+            c += 1
+            if c%5 == 0:
+                x = cur.execute("SELECT * FROM reportdata")
+                df = pd.DataFrame(x)
+                st.write(df)
 
-#    df = pd.DataFrame(job_eff_list)
-#    st.write(df)
+#             job_eff_list.append(stats.to_dict())
+#            print(job_eff_list)
