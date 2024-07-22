@@ -63,10 +63,6 @@ class GetStats:
             self.job_eff = 0
 
     def calculate_avg_eff(self, cur) -> None:
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, start TEXT UNIQUE, end TEXT)
-        """)
-        cur.fetchone()[0]
         # Get the latest average efficiency start
         cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
         self.latest_avg_eff = cur.fetchone()[0] or self.min_start
@@ -187,6 +183,9 @@ if __name__ == "__main__":
             start TEXT, 
             end TEXT
         )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, start TEXT UNIQUE, end TEXT)
     """)
 
     create = CreateFigures(con)
