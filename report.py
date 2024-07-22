@@ -80,7 +80,7 @@ class GetStats:
         self.intervall = self.min_start if not self.latest_avg_eff or self.min_start > self.latest_avg_eff else self.latest_avg_eff
         print(self.intervall)
 
-        while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') + timedelta(hours=1) < datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):
+        while self.intervall < datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):
             interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
             interval_end = interval_start + timedelta(hours=1)
 
@@ -91,7 +91,7 @@ class GetStats:
             """, (interval_end, interval_start))
             self.avg_eff = cur.fetchone()[0]
 
-            cur.execute(""" SELECT COUNT(job_id) 
+            cur.execute(""" SELECT COUNT(jobID) 
                 FROM reportdata """)
             self.count_job = cur.fetchone()[0]
 
