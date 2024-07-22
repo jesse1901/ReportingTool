@@ -199,6 +199,7 @@ if __name__ == "__main__":
     while True:
         get = GetStats()
         get.get_jobs_calculate_insert_data()
+        get.calculate_avg_eff()
 
 
 
