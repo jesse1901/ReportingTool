@@ -122,7 +122,7 @@ class GetStats:
             # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
             cur.execute("""
                 INSERT INTO avg_eff (eff, cores, start, end)
-                VALUES (?, ?, ?, ?) ON CONFLICT(start) UPDATE
+                VALUES (?, ?, ?, ?) ON CONFLICT(start) DO UPDATE
             """, (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
             print(self.intervall)
