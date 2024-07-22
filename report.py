@@ -91,7 +91,7 @@ class GetStats:
 
             cur.execute("""
                 INSERT INTO avg_eff (eff, start, end)
-                VALUES (?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                VALUES (?, ?, ?) ON CONFLICT(start) DO NOTHING
             """, (self.avg_eff, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
 
             cur.connection.commit()
