@@ -44,14 +44,11 @@ class GetStats:
         self.latest_avg_eff = ''
         self.avg_eff = 0
         self.intervall = ''
-        self.count_job = 0
+        self.cores_job = 0
 
     def job_stats(self, job_id: int) -> None:
         """
         Loads job data and calculates job statistics.
-
-        Args:
-            job_id (int): ID of the job to load and process.
         """
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
@@ -92,26 +89,20 @@ class GetStats:
     def calculate_avg_eff(self, cur) -> None:
         """
         Calculates and updates the average efficiency over time intervals.
-
-        Args:
-            cur (sqlite3.Cursor): Database cursor for executing SQL queries.
         """
         # Retrieve the latest efficiency start time from the avg_eff table
         cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
         self.latest_avg_eff = cur.fetchone()[0] or self.min_start
 
-        # Retrieve the minimum start time and maximum end time from the reportdata table
+        # Retrieve the minimum start time
         cur.execute("""
-            SELECT MIN(start) AS min_start, MAX(end) AS max_end 
+            SELECT MIN(start) AS min_start
             FROM reportdata 
             WHERE start IS NOT NULL AND start <> ''
         """)
-        min_start, max_end = cur.fetchone()
-        self.min_start = min_start
-        self.max_end = max_end
-
+        min_start = cur.fetchone()
         # Set the interval for calculating average efficiency
-        self.intervall = self.min_start if not self.latest_avg_eff or self.min_start > self.latest_avg_eff else self.latest_avg_eff
+        self.intervall = min_start
         print(self.intervall)
 
         # Loop through each time interval and calculate average efficiency
@@ -121,26 +112,19 @@ class GetStats:
 
             # Calculate average efficiency and count of jobs in the interval
             cur.execute("""
-                SELECT AVG(efficiency) as a_eff, COUNT(jobID) as c_job
+                SELECT AVG(efficiency) as a_eff, COUNT(cores) as c_job
                 FROM reportdata 
                 WHERE start <= ? AND end >= ?
             """, (interval_end, interval_start))
             a_eff, c_job = cur.fetchone()
             self.avg_eff = a_eff
-            self.count_job = c_job
-
-            # Update count of jobs in the reportdata table
-            cur.execute(""" 
-                SELECT COUNT(jobID) 
-                FROM reportdata 
-            """)
-            self.count_job = cur.fetchone()[0]
+            self.cores_job = c_job
 
             # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
             cur.execute("""
-                INSERT INTO avg_eff (eff, count_job, start, end)
+                INSERT INTO avg_eff (eff, cores, start, end)
                 VALUES (?, ?, ?, ?) ON CONFLICT(start) DO NOTHING
-            """, (self.avg_eff, self.count_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
+            """, (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
             cur.connection.commit()
 
@@ -152,9 +136,6 @@ class GetStats:
     def to_dict(self) -> dict:
         """
         Converts job statistics to a dictionary format.
-
-        Returns:
-            dict: Dictionary representation of job statistics.
         """
         return {
             "job_id": self.job_id,
@@ -172,9 +153,6 @@ class GetStats:
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
         Fetches jobs, calculates their statistics, and inserts them into the database.
-
-        Args:
-            cur (sqlite3.Cursor): Database cursor for executing SQL queries.
         """
         # Retrieve the highest jobID currently in the reportdata table
         cur.execute("SELECT MAX(jobID) FROM reportdata")
@@ -182,7 +160,7 @@ class GetStats:
         print(self.jobID_count)
 
         # Create a list of job IDs to filter and load jobs
-        self.list_filter = [self.jobID_count + i + 1 for i in range(50)]
+        self.list_filter = [self.jobID_count + i + 1 for i in range(1000)]
         self.db_filter = pyslurm.db.JobFilter(ids=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
 
@@ -251,26 +229,8 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS reportdata (
-            jobID INTEGER NOT NULL UNIQUE, 
-            username TEXT, 
-            account TEXT, 
-            efficiency REAL, 
-            used_time TEXT,
-            booked_time TEXT, 
-            state TEXT, 
-            cores INT, 
-            start TEXT, 
-            end TEXT
-        )
-    """)
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
-    """)
-    cur.fetchall()
 
-    # Create figures and display them using Streamlit
+    # Create figures and display them
     create = CreateFigures(con)
     create.frame_user_all()
     create.frame_group_by_user()
@@ -281,3 +241,24 @@ if __name__ == "__main__":
         get = GetStats()
         get.get_jobs_calculate_insert_data(cur)
         get.calculate_avg_eff(cur)
+
+
+# create table
+    # cur.execute("""
+    #     CREATE TABLE IF NOT EXISTS reportdata (
+    #         jobID INTEGER NOT NULL UNIQUE,
+    #         username TEXT,
+    #         account TEXT,
+    #         efficiency REAL,
+    #         used_time TEXT,
+    #         booked_time TEXT,
+    #         state TEXT,
+    #         cores INT,
+    #         start TEXT,
+    #         end TEXT
+    #     )
+    # """)
+    # cur.execute("""
+    #     CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
+    # """)
+    # cur.fetchall()
