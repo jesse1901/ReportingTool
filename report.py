@@ -34,6 +34,23 @@ class GetStats:
         self.total_cpu_sum = 0
         self.dict_steps = {}
         self.job_list = []
+        #var for calculate_avg_eff
+        self.min_start = ''
+        self.max_end = ''
+        self.latest_avg_eff = ''
+        self.avg_eff = []
+        self.intervall = ''
+
+
+        #var for get_jobs_calculate_insert_data
+        self.jobID_count = 0
+        self.list_filter = []
+        self.db_filter = []
+        self.jobs = {}
+        self.keys = 0
+        self.stats = []
+        self.data = {}
+
 
     # Lädt die Jobdaten und berechnet die Jobstatistiken.
     def job_stats(self, job_id: int) -> None:
@@ -69,7 +86,25 @@ class GetStats:
         else:
             self.job_eff = 0
 
-    #def check_state(self) -> bool:
+
+    def calculate_avg_eff(self) -> None:
+        cur.execute("""
+                    CREATE TABLE IF NOT EXISTS avg_eff ( eff INT, start TEXT, end TEXT)
+                    """)
+        self.latest_avg_eff = cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
+        self.min_start = cur.execute("SELECT MIN(start) AS min_start FROM reportdata WHERE start <> '' AND start IS NOT NULL")
+        self.max_end = self.min_start = cur.execute("SELECT MAX(end) AS min_start FROM reportdata WHERE start <> '' AND start IS NOT NULL")
+
+        self.intervall = self.min_start if self.min_start > self.latest_avg_eff else self.latest_avg_eff
+
+        while self.intervall < datetime.now():
+            self.avg_eff = cur.execute("SELECT AVG(efficiency) FROM reportdata WHERE start <= ? AND end >= ?",
+                                   (self.self.intervall, datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') + timedelta(hours=1)))
+
+            cur.execute("INSERT INTO reportdata( jobID, start, end )VALUES (?,?,?)",
+                    (self.avg_eff, self.intervall, datetime.strptime(self.intervall, '%Y-%m-%dT%H:00:00') + timedelta(hours=1)))
+            self.intervall = datetime.strptime(self.intervall, '%Y-%m-%dT%H:00:00') + timedelta(hours=1)
+            print(self.intervall)
 
     def to_dict(self) -> dict:
         return {
@@ -84,6 +119,39 @@ class GetStats:
             "start": self.start,
             "end": self.end,
         }
+
+    def get_jobs_calculate_insert_data(self):
+        cur.execute("""
+                    SELECT MAX(jobID) FROM reportdata
+        """)
+        x = cur.fetchall()
+        self.jobID_count = x[0][0]
+        print(self.jobID_count)
+        for i in range(500):
+            self.jobID_count += 1
+            self.list_filter.append(self.jobID_count)
+        self.db_filter = pyslurm.db.JobFilter(ids=self.list_filter)
+        self.jobs = pyslurm.db.Jobs.load(self.db_filter)
+
+        for self.keys in self.jobs.keys():
+            try:
+                self.stats = GetStats()
+                self.stats.job_stats(self.keys)
+                if self.stats.job_data.end_time is not None:
+                    self.data = self.stats.to_dict()
+                    cur.execute("""
+                        INSERT INTO reportdata (
+                            jobID, username, account, efficiency, used_time, booked_time,
+                            state, cores, start, end
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                    """, (
+                        self.data['job_id'], self.data['user'], self.data['account'], self.data['efficiency'],
+                        self.data['used'], self.data['booked'], self.data['state'], self.data['cores'],
+                        self.data['start'], self.data['end']))
+                    con.commit()
+            except:
+                print("error")
+
 
 
 class CreateFigures:
@@ -100,15 +168,15 @@ class CreateFigures:
         self.frame_group_user = pd.read_sql_query(
             "SELECT username, AVG(efficiency) AS avg_efficiency, COUNT(jobID) AS anzahl_jobs FROM reportdata GROUP BY username",
             con)
-        st.write(pd.DataFrame(self.frame_group_by_user))
+        st.write(pd.DataFrame(self.frame_group_user))
 
-    def chart_cpu_utilization(self):
-        self.chart_cpu_u = pd.read_sql_query("""
-            SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, AVG(efficiency) AS avg_efficiency
-            FROM reportdata
-            GROUP BY strftime('%Y-%m-%d %H:00:00', start)
-            ORDER BY period""", con)
-        st.line_chart(pd.DataFrame(self.chart_cpu_u).set_index('period'))
+    # def chart_cpu_utilization(self):
+    #     self.chart_cpu_u = pd.read_sql_query("""
+    #         SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, AVG(efficiency) AS avg_efficiency
+    #         FROM reportdata
+    #         GROUP BY strftime('%Y-%m-%d %H:00:00', start)
+    #         ORDER BY period""", con)
+    #     st.line_chart(pd.DataFrame(self.chart_cpu_u).set_index('period'))
 
 
 
@@ -121,37 +189,17 @@ if __name__ == "__main__":
                 jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
                 booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
 
-    CreateFigures()
+    create = CreateFigures()
+
+    create.frame_user_all()
+    create.frame_user_all()
+   # create.chart_cpu_utilization()
 
     while True:
-        cur.execute("""
-                    SELECT MAX(jobID) FROM reportdata
-        """)
-        x = cur.fetchall()
-        jobID = x[0][0]
-        print(jobID)
-        list_filter = []
-        for i in range(500):
-            jobID += 1
-            list_filter.append(jobID)
-        db_filter = pyslurm.db.JobFilter(ids=list_filter)
-        jobs = pyslurm.db.Jobs.load(db_filter)
+        get.calculate_avg_eff()
+    while True:
+        get = GetStats()
+        get.get_jobs_calculate_insert_data()
 
-        for keys in jobs.keys():
-            try:
-                stats = GetStats()
-                stats.job_stats(keys)
-                if stats.job_data.end_time is not None:
-                    data = stats.to_dict()
-                    cur.execute("""
-                        INSERT INTO reportdata (
-                            jobID, username, account, efficiency, used_time, booked_time,
-                            state, cores, start, end
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-                    """, (
-                        data['job_id'], data['user'], data['account'], data['efficiency'],
-                        data['used'], data['booked'], data['state'], data['cores'],
-                        data['start'], data['end']))
-                    con.commit()
-            except:
-                print("error")
+
+
