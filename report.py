@@ -102,11 +102,10 @@ class GetStats:
         """)
         min_start = cur.fetchone()
         # Set the interval for calculating average efficiency
-        self.intervall = min_start
-        print(self.intervall)
+        self.intervall = min_start[0]
 
         # Loop through each time interval and calculate average efficiency
-        while self.intervall < datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):
+        while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') < datetime.now():
             interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
             interval_end = interval_start + timedelta(hours=1)
 
@@ -126,6 +125,7 @@ class GetStats:
                 VALUES (?, ?, ?, ?) ON CONFLICT(start) DO NOTHING
             """, (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
+            print(self.intervall)
             cur.connection.commit()
 
         # Sleep for 2 seconds to avoid excessive querying
