@@ -195,8 +195,7 @@ if __name__ == "__main__":
     create.frame_user_all()
    # create.chart_cpu_utilization()
 
-    while True:
-        get.calculate_avg_eff()
+
     while True:
         get = GetStats()
         get.get_jobs_calculate_insert_data()
