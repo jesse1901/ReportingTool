@@ -155,7 +155,7 @@ class GetStats:
         Fetches jobs, calculates their statistics, and inserts them into the database.
         """
         # Retrieve the highest jobID currently in the reportdata table
-        cur.execute("SELECT MAX(jobID) FROM reportdata")
+        cur.execute("SELECT MAX(end) FROM reportdata")
         self.jobID_count = cur.fetchone()[0] or 0
         print(self.jobID_count)
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
-
+########## NACH ID FILTERN NICHT ALLE JOBS
     # Create figures and display them
     create = CreateFigures(con)
     create.frame_user_all()
