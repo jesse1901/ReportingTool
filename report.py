@@ -85,6 +85,33 @@ class GetStats:
             "end": self.end,
         }
 
+
+class CreateFigures:
+    def __init__(self):
+        self.frame_all = ''
+        self.frame_group_user = ''
+        self.chart_cpu_u = ''
+
+    def frame_user_all(self):
+        self.frame_all = pd.read_sql_query("SELECT * FROM reportdata", con)
+        st.write(pd.DataFrame(self.frame_all))
+
+    def frame_group_by_user(self):
+        self.frame_group_user = pd.read_sql_query(
+            "SELECT username, AVG(efficiency) AS avg_efficiency, COUNT(jobID) AS anzahl_jobs FROM reportdata GROUP BY username",
+            con)
+        st.write(pd.DataFrame(self.frame_group_by_user))
+
+    def chart_cpu_utilization(self):
+        self.chart_cpu_u = pd.read_sql_query("""
+            SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, AVG(efficiency) AS avg_efficiency
+            FROM reportdata
+            GROUP BY strftime('%Y-%m-%d %H:00:00', start)
+            ORDER BY period""", con)
+        st.line_chart(pd.DataFrame(self.chart_cpu_u).set_index('period'))
+
+
+
 if __name__ == "__main__":
     #Database connection
     con = sqlite3.connect('reports.db') #sqlite connection
@@ -94,25 +121,7 @@ if __name__ == "__main__":
                 jobID INTEGER NOT NULL UNIQUE, username TEXT, account TEXT, efficiency REAL, used_time TEXT,
                 booked_time TEXT, state TEXT, cores INT, start TEXT, end TEXT  )""")
 
-    conn_streamlit = st.connection('reports_db', type='sql')
-
-    frame_all = conn_streamlit.query("SELECT * FROM reportdata", ttl=0)
-    df_all = pd.DataFrame(frame_all)
-    st.write(df_all)
-
-    frame_group_by_user = conn_streamlit.query("SELECT username, AVG(efficiency) AS avg_efficiency, COUNT(jobID) AS anzahl_jobs FROM reportdata GROUP BY username", ttl=0)
-    df_gbu = pd.DataFrame(frame_group_by_user)
-    st.write(df_gbu)
-
-
-    frame_chart = conn_streamlit.query("""
-        SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, AVG(efficiency) AS avg_efficiency
-        FROM reportdata
-        GROUP BY strftime('%Y-%m-%d %H:00:00', start)
-        ORDER BY period""", ttl=0)
-    df_chart = pd.DataFrame(frame_chart)
-    st.line_chart(df_chart.set_index('period'))
-
+    CreateFigures()
 
     while True:
         cur.execute("""
