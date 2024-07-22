@@ -91,7 +91,7 @@ class GetStats:
 
             cur.execute("""
                 INSERT INTO avg_eff (eff, start, end)
-                VALUES (?, ?, ?)
+                VALUES (?, ?, ?) ON CONFLICT(jobID) DO NOTHING
             """, (self.avg_eff, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
 
             cur.connection.commit()
@@ -187,6 +187,7 @@ if __name__ == "__main__":
     cur.execute("""
         CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, start TEXT UNIQUE, end TEXT)
     """)
+    cur.fetchall()
 
     create = CreateFigures(con)
     create.frame_user_all()
