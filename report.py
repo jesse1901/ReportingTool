@@ -85,23 +85,26 @@ class GetStats:
             interval_end = interval_start + timedelta(hours=1)
 
             cur.execute("""
-                SELECT AVG(efficiency)  
+                SELECT AVG(efficiency) as a_eff, COUNT(jobID) as c_job
                 FROM reportdata 
                 WHERE start <= ? AND end >= ?
             """, (interval_end, interval_start))
-            self.avg_eff = cur.fetchone()[0]
+            a_eff, c_job = cur.fetchone()
+            self.avg_eff = a_eff
+            self.count_job = c_job
 
             cur.execute(""" SELECT COUNT(jobID) 
                 FROM reportdata """)
             self.count_job = cur.fetchone()[0]
 
             cur.execute("""
-                INSERT INTO avg_eff (eff, job_count, start, end)
+                INSERT INTO avg_eff (eff, count_job, start, end)
                 VALUES (?, ?, ?, ?) ON CONFLICT(start) DO NOTHING
             """, (self.avg_eff, self.count_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
-            cur.connection.commit()
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
+            cur.connection.commit()
         else:
+            print('sleep')
             time.sleep(2)
             return
 
@@ -123,7 +126,7 @@ class GetStats:
         cur.execute("SELECT MAX(jobID) FROM reportdata")
         self.jobID_count = cur.fetchone()[0] or 0
         print(self.jobID_count)
-        self.list_filter = [self.jobID_count + i + 1 for i in range(100)]
+        self.list_filter = [self.jobID_count + i + 1 for i in range(50)]
         self.db_filter = pyslurm.db.JobFilter(ids=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
 
