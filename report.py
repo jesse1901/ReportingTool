@@ -1,6 +1,7 @@
 import pyslurm
 import streamlit as st
 import pandas as pd
+import time
 from datetime import timedelta, datetime
 import sqlite3
 
@@ -31,7 +32,7 @@ class GetStats:
         self.latest_avg_eff = ''
         self.avg_eff = 0
         self.intervall = ''
-
+        self.count_job = 0
     def job_stats(self, job_id: int) -> None:
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
@@ -77,27 +78,31 @@ class GetStats:
         self.max_end = max_end
 
         self.intervall = self.min_start if not self.latest_avg_eff or self.min_start > self.latest_avg_eff else self.latest_avg_eff
+        print(self.intervall)
 
-        while self.intervall < datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):
+        while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') + timedelta(hours=1) < datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):
             interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
             interval_end = interval_start + timedelta(hours=1)
 
             cur.execute("""
-                SELECT AVG(efficiency) 
+                SELECT AVG(efficiency)  
                 FROM reportdata 
                 WHERE start <= ? AND end >= ?
             """, (interval_end, interval_start))
             self.avg_eff = cur.fetchone()[0]
 
-            cur.execute("""
-                INSERT INTO avg_eff (eff, start, end)
-                VALUES (?, ?, ?) ON CONFLICT(start) DO NOTHING
-            """, (self.avg_eff, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
+            cur.execute(""" SELECT COUNT(job_id) 
+                FROM reportdata """)
+            self.count_job = cur.fetchone()[0]
 
+            cur.execute("""
+                INSERT INTO avg_eff (eff, job_count, start, end)
+                VALUES (?, ?, ?, ?) ON CONFLICT(start) DO NOTHING
+            """, (self.avg_eff, self.count_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
             cur.connection.commit()
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-            print(f"Processed interval: {self.intervall}")
         else:
+            time.sleep(2)
             return
 
     def to_dict(self) -> dict:
@@ -117,8 +122,8 @@ class GetStats:
     def get_jobs_calculate_insert_data(self, cur) -> None:
         cur.execute("SELECT MAX(jobID) FROM reportdata")
         self.jobID_count = cur.fetchone()[0] or 0
-
-        self.list_filter = [self.jobID_count + 1 for i in range(500)]
+        print(self.jobID_count)
+        self.list_filter = [self.jobID_count + i + 1 for i in range(100)]
         self.db_filter = pyslurm.db.JobFilter(ids=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
 
@@ -139,6 +144,7 @@ class GetStats:
                         data['start'], data['end']
                     ))
                     cur.connection.commit()
+                    print(f'inserted{data["job_id"]}')
             except Exception as e:
                 print(f"Error processing job {job_id}: {e}")
 
@@ -185,7 +191,7 @@ if __name__ == "__main__":
         )
     """)
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, start TEXT UNIQUE, end TEXT)
+        CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
     """)
     cur.fetchall()
 
@@ -196,5 +202,5 @@ if __name__ == "__main__":
 
     while True:
         get = GetStats()
-        get.calculate_avg_eff(cur)
         get.get_jobs_calculate_insert_data(cur)
+        get.calculate_avg_eff(cur)
