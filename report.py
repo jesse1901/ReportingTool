@@ -155,7 +155,7 @@ class GetStats:
         Fetches jobs, calculates their statistics, and inserts them into the database.
         """
         # Retrieve the highest jobID currently in the reportdata table
-        cur.execute("SELECT jobID FROM reportdata WHERE MAX(end)")
+        cur.execute("SELECT jobID FROM reportdata WHERE end = (SELECT MAX(end) FROM reportdata)")
         self.jobID_count = cur.fetchone()[0] or 0
         print(self.jobID_count)
 
