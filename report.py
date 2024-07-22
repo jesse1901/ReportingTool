@@ -102,7 +102,7 @@ class GetStats:
                                    (self.self.intervall, datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') + timedelta(hours=1)))
 
             cur.execute("INSERT INTO reportdata( jobID, start, end )VALUES (?,?,?)",
-                    (self.avg_eff, self.intervall, datetime.strptime(self.intervall, '%Y-%m-%dT%H:00:00') + timedelta(hours=1)))
+                    (self.avg_eff, self.intervall, datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') + timedelta(hours=1)))
             self.intervall = datetime.strptime(self.intervall, '%Y-%m-%dT%H:00:00') + timedelta(hours=1)
             print(self.intervall)
 
