@@ -239,8 +239,9 @@ if __name__ == "__main__":
     # Main loop to continuously fetch job data and update average efficiency
     while True:
         get = GetStats()
-        get.get_jobs_calculate_insert_data(cur)
         get.calculate_avg_eff(cur)
+        get.get_jobs_calculate_insert_data(cur)
+
 
 
 # create table
