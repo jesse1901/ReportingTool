@@ -176,7 +176,7 @@ class GetStats:
                 if stats.job_data.end_time is not None:
                     end_time = datetime.fromtimestamp(stats.job_data.end_time)
                     end_time = end_time.isoformat('T', 'auto')
-                    print(self.latest_end, end_time, stats.job_data.state)
+                    print(type(self.latest_end), self.latest_end, type(end_time), end_time, stats.job_data.state)
                     try:
                         if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
                             print('execute')
