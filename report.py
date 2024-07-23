@@ -174,6 +174,7 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
+                print(self.latest_end, stats.job_data.end_time)
                 try:
                     if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
                         data = stats.to_dict()
