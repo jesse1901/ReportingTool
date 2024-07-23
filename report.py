@@ -160,7 +160,7 @@ class GetStats:
         """
         # Retrieve the highest jobID currently in the reportdata table
         cur.execute("SELECT MAX(end) FROM reportdata")
-        self.latest_end = cur.fetchone()[0] or 0
+        self.latest_end = str(cur.fetchone()[0] or 0)
 
         # Create a list of job IDs to filter and load jobs
         self.list_filter = round(time.time())
@@ -176,7 +176,6 @@ class GetStats:
                 if stats.job_data.end_time is not None:
                     end_time = datetime.fromtimestamp(stats.job_data.end_time)
                     end_time = end_time.isoformat('T', 'auto')
-                    int(end_time)
                     print(self.latest_end, end_time, stats.job_data.state)
                     try:
                         if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
