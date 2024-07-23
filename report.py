@@ -174,8 +174,9 @@ class GetStats:
                 stats = GetStats()
                 stats.job_stats(job_id)
                 if stats.job_data.end_time is not None:
-                    end_time = int(datetime.fromtimestamp(stats.job_data.end_time))
-                    end_time = int(end_time.isoformat('T', 'auto'))
+                    end_time = datetime.fromtimestamp(stats.job_data.end_time)
+                    end_time = end_time.isoformat('T', 'auto')
+                    int(end_time)
                     print(self.latest_end, end_time, stats.job_data.state)
                     try:
                         if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
