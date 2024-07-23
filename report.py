@@ -251,7 +251,7 @@ if __name__ == "__main__":
 #        if x == 30:
 #            get.calculate_avg_eff(cur)
 #            x = 0
-#        get.get_jobs_calculate_insert_data(cur)
+        get.get_jobs_calculate_insert_data(cur)
 #        x += 1
 
 
