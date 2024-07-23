@@ -175,7 +175,7 @@ class GetStats:
                 stats = GetStats()
                 stats.job_stats(job_id)
                 try:
-                    if stats.job_data.end_time > self.latest_end:
+                    if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
                         data = stats.to_dict()
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
