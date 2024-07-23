@@ -25,6 +25,11 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.latest_end = None
+        self.jobs = None
+        self.db_filter = None
+        self.list_filter = None
+        self.cores_job = None
         self.job_id = 0
         self.cores = 0
         self.used_time = ''
@@ -44,7 +49,6 @@ class GetStats:
         self.latest_avg_eff = ''
         self.avg_eff = 0
         self.intervall = ''
-        self.cores_job = 0
 
     def job_stats(self, job_id: int) -> None:
         """
@@ -155,13 +159,14 @@ class GetStats:
         Fetches jobs, calculates their statistics, and inserts them into the database.
         """
         # Retrieve the highest jobID currently in the reportdata table
-        cur.execute("SELECT jobID FROM reportdata WHERE end = (SELECT MAX(end) FROM reportdata)")
-        self.jobID_count = cur.fetchone()[0] or 0
-        print(self.jobID_count)
+        cur.execute("SELECT MAX(end) FROM reportdata")
+        self.latest_end = cur.fetchone()[0] or 0
+        print(self.latest_end)
 
         # Create a list of job IDs to filter and load jobs
-        self.list_filter = [self.jobID_count + i + 1 for i in range(1000)]
-        self.db_filter = pyslurm.db.JobFilter(ids=self.list_filter)
+        self.list_filter = round(time.time())
+# [self.jobID_count + i + 1 for i in range(1000)]
+        self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
 
         # Process each job
@@ -169,7 +174,7 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-                if stats.job_data.end_time:
+                if stats.job_data.end_time > self.latest_end:
                     data = stats.to_dict()
                     # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                     cur.execute("""
@@ -208,8 +213,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
             SELECT username, AVG(efficiency) AS avg_efficiency, COUNT(jobID) AS anzahl_jobs 
             FROM reportdata 
-            GROUP BY username
-        """, self.con)
+            GROUP BY username""", self.con)
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
@@ -238,9 +242,9 @@ if __name__ == "__main__":
 
     # Main loop to continuously fetch job data and update average efficiency
     while True:
-        x = 10
+        x = 30
         get = GetStats()
-        if x == 10:
+        if x == 30:
             get.calculate_avg_eff(cur)
             x = 0
         get.get_jobs_calculate_insert_data(cur)
