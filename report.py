@@ -258,6 +258,7 @@ if __name__ == "__main__":
         x = 29
         get = GetStats()
         if x == 30:
+            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
             get.calculate_avg_eff(cur)
             x = 0
         get.get_jobs_calculate_insert_data(cur)
