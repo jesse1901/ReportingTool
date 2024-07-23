@@ -247,13 +247,13 @@ if __name__ == "__main__":
 
     # Main loop to continuously fetch job data and update average efficiency
     while True:
-        x = 30
+        x = 29
         get = GetStats()
-#        if x == 30:
-#            get.calculate_avg_eff(cur)
-#            x = 0
+        if x == 30:
+            get.calculate_avg_eff(cur)
+            x = 0
         get.get_jobs_calculate_insert_data(cur)
-#        x += 1
+        x += 1
 
 
 
