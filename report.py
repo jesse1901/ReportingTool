@@ -179,7 +179,7 @@ class GetStats:
                     print(type(self.latest_end), self.latest_end, type(end_time), end_time, stats.job_data.state)
                     try:
                         if end_time is not None and end_time > self.latest_end:
-                            print('execute')
+                            print(f'execute query: {end_time} > {self.latest_end}')
                             data = stats.to_dict()
                             # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                             cur.execute("""
@@ -192,7 +192,6 @@ class GetStats:
                                 data['used'], data['booked'], data['state'], data['cores'],
                                 data['start'], data['end']
                             ))
-                            print(data)
                             cur.connection.commit()
                     except Exception as err:
                         print(f'Error endtime, job {job_id}:{err}')
