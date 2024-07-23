@@ -137,23 +137,6 @@ class GetStats:
         time.sleep(2)
         return
 
-    def to_dict(self) -> dict:
-        """
-        Converts job statistics to a dictionary format.
-        """
-        return {
-            "job_id": self.job_id,
-            "user": self.job_data.user_name,
-            "account": self.job_data.account,
-            "efficiency": self.job_eff,
-            "used": self.used_time,
-            "booked": self.job_elapsed,
-            "state": self.job_data.state,
-            "cores": self.cores,
-            "start": self.start,
-            "end": self.end,
-        }
-
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
         Fetches jobs, calculates their statistics, and inserts them into the database.
@@ -178,7 +161,7 @@ class GetStats:
                     end_time = end_time.isoformat('T', 'auto')
                     try:
                         if end_time is not None and end_time > self.latest_end:
-                            print(f'execute query: {end_time} > {self.latest_end}')
+                            print(f'execute query cause: {end_time} > {self.latest_end} jobID: {job_id}')
                             data = stats.to_dict()
                             # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                             cur.execute("""
@@ -197,6 +180,23 @@ class GetStats:
             except Exception as e:
                 # Print an error message if job processing fails
                 print(f"Error processing job {job_id}: {e}")
+
+    def to_dict(self) -> dict:
+        """
+        Converts job statistics to a dictionary format.
+        """
+        return {
+            "job_id": self.job_id,
+            "user": self.job_data.user_name,
+            "account": self.job_data.account,
+            "efficiency": self.job_eff,
+            "used": self.used_time,
+            "booked": self.job_elapsed,
+            "state": self.job_data.state,
+            "cores": self.cores,
+            "start": self.start,
+            "end": self.end,
+        }
 
 
 class CreateFigures:
@@ -238,7 +238,6 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
-########## NACH ID FILTERN NICHT ALLE JOBS
     # Create figures and display them
     create = CreateFigures(con)
     create.frame_user_all()
