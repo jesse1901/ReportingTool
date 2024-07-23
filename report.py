@@ -161,7 +161,6 @@ class GetStats:
         # Retrieve the highest jobID currently in the reportdata table
         cur.execute("SELECT MAX(end) FROM reportdata")
         self.latest_end = cur.fetchone()[0] or 0
-        print(self.latest_end)
 
         # Create a list of job IDs to filter and load jobs
         self.list_filter = round(time.time())
@@ -177,6 +176,7 @@ class GetStats:
                 print(self.latest_end, stats.job_data.end_time)
                 try:
                     if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
+                        print('execute')
                         data = stats.to_dict()
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
@@ -248,11 +248,11 @@ if __name__ == "__main__":
     while True:
         x = 30
         get = GetStats()
-        if x == 30:
-            get.calculate_avg_eff(cur)
-            x = 0
-        get.get_jobs_calculate_insert_data(cur)
-        x += 1
+#        if x == 30:
+#            get.calculate_avg_eff(cur)
+#            x = 0
+#        get.get_jobs_calculate_insert_data(cur)
+#        x += 1
 
 
 
