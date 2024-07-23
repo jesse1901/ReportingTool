@@ -4,6 +4,7 @@ import pandas as pd
 import time
 from datetime import timedelta, datetime
 import sqlite3
+import plotly.express as px
 
 
 def count_keys_under_steps(d):
@@ -233,6 +234,13 @@ class CreateFigures:
         """, self.con)
         st.line_chart(df.set_index('period'))
 
+    def scatter_chart_data(self):
+        df = pd.read_sql_query("SELECT jobID, efficiency, booked_time FROM reportdata")
+        fig = px.scatter(df, x="booked_time", y="efficiency", color="species", symbol="species")
+        st.plotly_chart(fig, theme=None)
+
+
+
 
 if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
@@ -243,6 +251,7 @@ if __name__ == "__main__":
     create.frame_user_all()
     create.frame_group_by_user()
     create.chart_cpu_utilization()
+    create.scatter_chart_data()
 
     # Main loop to continuously fetch job data and update average efficiency
     while True:
