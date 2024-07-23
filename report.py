@@ -187,6 +187,7 @@ class GetStats:
                         data['used'], data['booked'], data['state'], data['cores'],
                         data['start'], data['end']
                     ))
+                    print(data)
                     cur.connection.commit()
                     print(f'Inserted job {data["job_id"]}')
             except Exception as e:
