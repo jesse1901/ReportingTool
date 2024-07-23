@@ -236,7 +236,7 @@ class CreateFigures:
 
     def scatter_chart_data(self):
         df = pd.read_sql_query("SELECT jobID, efficiency, booked_time FROM reportdata ORDER BY booked_time ASC", self.con)
-        fig = px.scatter(df, x="booked_time", y="efficiency", color="efficiency", size='dummy_column_for_size', size_max=10)
+        fig = px.scatter(df, x="booked_time", y="efficiency", color="efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
 
 
