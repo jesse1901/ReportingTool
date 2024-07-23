@@ -173,27 +173,28 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-                end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                print(self.latest_end, end_time, stats.job_data.state)
-                try:
-                    if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
-                        print('execute')
-                        data = stats.to_dict()
-                        # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                        cur.execute("""
-                            INSERT INTO reportdata (
-                                jobID, username, account, efficiency, used_time, booked_time,
-                                state, cores, start, end
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-                        """, (
-                            data['job_id'], data['user'], data['account'], data['efficiency'],
-                            data['used'], data['booked'], data['state'], data['cores'],
-                            data['start'], data['end']
-                        ))
-                        print(data)
-                        cur.connection.commit()
-                except Exception as err:
-                    print(f'Error endtime, job {job_id}:{err}')
+                if stats.job_data.end_time is not None:
+                    end_time = datetime.fromtimestamp(stats.job_data.end_time)
+                    print(self.latest_end, end_time, stats.job_data.state)
+                    try:
+                        if stats.job_data.end_time is not None and stats.job_data.end_time > self.latest_end:
+                            print('execute')
+                            data = stats.to_dict()
+                            # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                            cur.execute("""
+                                INSERT INTO reportdata (
+                                    jobID, username, account, efficiency, used_time, booked_time,
+                                    state, cores, start, end
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                            """, (
+                                data['job_id'], data['user'], data['account'], data['efficiency'],
+                                data['used'], data['booked'], data['state'], data['cores'],
+                                data['start'], data['end']
+                            ))
+                            print(data)
+                            cur.connection.commit()
+                    except Exception as err:
+                        print(f'Error endtime, job {job_id}:{err}')
             except Exception as e:
                 # Print an error message if job processing fails
                 print(f"Error processing job {job_id}: {e}")
