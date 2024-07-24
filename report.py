@@ -236,7 +236,7 @@ class GetStats:
             "efficiency": self.job_eff,
             "used": self.used_time,
             "booked": self.job_elapsed,
-            "real_time": self.job_elapsed,
+            "real_time": self.real_time,
             "state": self.job_data.state,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
             "gpu_efficiency": self.gpu_eff,
