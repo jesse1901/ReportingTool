@@ -73,7 +73,7 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.nodelist if node in set_nodes]
-        print(self.job_nodes)
+        print(self.nodelist)
 
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
@@ -312,11 +312,11 @@ if __name__ == "__main__":
         x = 29
         get = GetStats()
         get.get_jobs_calculate_insert_data(cur)
-        if x == 30:
+#        if x == 30:
 #            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
 #            get.calculate_avg_eff(cur)
-            x = 0
-        x += 1
+#            x = 0
+#        x += 1
 
 
 
