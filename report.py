@@ -312,7 +312,6 @@ if __name__ == "__main__":
     while True:
         x = 29
         get = GetStats()
-        get.job_stats()
         get.get_jobs_calculate_insert_data(cur)
 #        if x == 30:
 #            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
