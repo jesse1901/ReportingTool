@@ -224,7 +224,7 @@ class GetStats:
             "booked": self.job_elapsed,
             "state": self.job_data.state,
             "gpu_nodes": self.job_nodes,
-            "gpu_efficiency": self.
+            "gpu_efficiency": self.gpu_eff,
             "cores": self.cores,
             "start": self.start,
             "end": self.end,
