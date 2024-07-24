@@ -30,14 +30,14 @@ class GetStats:
         # Initialize attributes for storing job statistics and calculations
         self.gpu_eff = None
         self.job_nodes = None
-        self.latest_end = None
+        self.latest_end = ''
         self.jobs = None
         self.db_filter = None
         self.list_filter = None
-        self.cores_job = None
+        self.cores_job = 0
         self.job_id = 0
         self.cores = 0
-        self.used_time = None
+        self.used_time = ''
         self.job_eff = 0
         self.job_steps = {}
         self.job_elapsed = None
@@ -73,6 +73,7 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.nodelist if node in set_nodes]
+        self.job_nodes = ''.join(self.job_nodes)
         print(self.job_nodes)
 
         # Calculate total CPU time used for job steps
@@ -136,7 +137,7 @@ class GetStats:
                     try:
                         if end_time is not None and end_time > self.latest_end:
 
-                            print(f'execute query cause: {self.end}  jobID: {job_id}')
+                            print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
                             data = stats.to_dict()
                             # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                             cur.execute("""
