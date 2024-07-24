@@ -90,6 +90,8 @@ class GetStats:
         if self.job_data.end_time and self.job_data.start_time:
             self.start = datetime.utcfromtimestamp(self.job_data.start_time).strftime('%Y-%m-%dT%H:%M:%S')
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
+            print(self.end)
+        print(self.jobdata.end_time)
 
         # Calculate job efficiency
         self.calculate_efficiency()
