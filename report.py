@@ -76,7 +76,7 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.nodelist if node in set_nodes]
-        self.job_hostlist = self.job_nodes.expand_hostlist(self.job_nodes)
+        self.job_hostlist = hostlist.expand_hostlist(self.job_nodes)
         self.job_nodes_string = ''.join(self.job_hostlist)
         print(self.job_nodes)
         print(self.nodelist)
