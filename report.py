@@ -296,7 +296,11 @@ class GetStats:
         try:
             response = requests.get(prometheus_url, params=params)
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
+
             data = response.json()
+            # Debug: Print the full JSON response
+            print(f"Full JSON response: {data}")
+
             if 'data' in data and 'result' in data['data']:
                 self.gpu_eff = data['data']['result']
                 print(f"gpu-usage: {self.gpu_eff}")
