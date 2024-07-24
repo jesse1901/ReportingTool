@@ -285,6 +285,7 @@ class GetStats:
         return
 
     def get_gpu_data(self):
+        print(self.job_nodes)
         prometheus_url = 'http://max-infra008.desy.de:9090/api/v1/query_range'
         modified_nodes = [f"{node}.desy.de" for node in self.job_nodes]
         print(f"Modified nodes: {modified_nodes}")  # Debug: Print modified nodes
