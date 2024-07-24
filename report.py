@@ -91,7 +91,7 @@ class GetStats:
         if self.job_elapsed_s:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
-            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * 100))
+            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * self.cores))
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
