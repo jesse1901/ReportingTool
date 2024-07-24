@@ -293,9 +293,20 @@ class GetStats:
             'end': f'{self.end}Z',
             'step': '1m'
         }
-        response = requests.get(prometheus_url, params=params)
-        print(f"gpu-usage: {response.json()['gpu_usage']}")
-        self.gpu_eff = response.json()['gpu_usage']
+        try:
+            response = requests.get(prometheus_url, params=params)
+            response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
+            data = response.json()
+            if 'data' in data and 'result' in data['data']:
+                self.gpu_eff = data['data']['result']
+                print(f"gpu-usage: {self.gpu_eff}")
+            else:
+                print("Error: Unexpected response structure")
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+#        response = requests.get(prometheus_url, params=params)
+#        print(f"gpu-usage: {response.json()['gpu_usage']}")
+#        self.gpu_eff = response.json()['gpu_usage']
 
     def to_dict(self) -> dict:
         """
