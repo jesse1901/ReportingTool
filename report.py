@@ -90,8 +90,7 @@ class GetStats:
         if self.job_data.end_time and self.job_data.start_time:
             self.start = datetime.utcfromtimestamp(self.job_data.start_time).strftime('%Y-%m-%dT%H:%M:%S')
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
-            print(self.end)
-        print(self.job_data.end_time)
+            print(f'start: {self.start}, end: {self.end}')
 
         # Calculate job efficiency
         self.calculate_efficiency()
@@ -125,12 +124,10 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-                if self.start is not None and self.end is not None:
-                    stats.get_gpu_data()
 #                if self.end is not None:
 #                    end_time = datetime.fromtimestamp()
 #                    end_time = end_time.isoformat('T', 'auto')
-                if self.job_nodes and self.end is not None:
+                if self.job_nodes and self.end is not None and self.start is not None:
                     try:
                         GetStats.get_gpu_data()
                     except Exception as e:
