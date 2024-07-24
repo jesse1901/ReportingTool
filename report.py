@@ -212,9 +212,8 @@ class GetStats:
             'step': '1m'
         }
         response = requests.get(prometheus_url, params=params)
-        self.gpu_eff = response.json()['gpu_usage']
-
         print(response.json())
+        self.gpu_eff = response.json()['gpu_usage']
 
 
 
