@@ -300,11 +300,11 @@ class GetStats:
 
             data = response.json()
             # Debug: Print the full JSON response
-            print(f"Full JSON response: {data}")
+            #print(f"Full JSON response: {data}")
 
             if 'data' in data and 'result' in data['data']:
                 self.gpu_eff = data['data']['result']
-                print(f"gpu-usage: {self.gpu_eff}")
+                #print(f"gpu-usage: {self.gpu_eff}")
             else:
                 print("Error: Unexpected response structure")
         except requests.exceptions.RequestException as e:
