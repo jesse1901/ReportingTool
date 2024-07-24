@@ -202,10 +202,11 @@ class GetStats:
             #try:
             stats = GetStats()
             stats.job_stats(job_id)
+            print(f'NO GPU-Data nodes = {self.job_nodes} end = {self.end} start = {self.start}')
             try:
                 if self.job_nodes is not None and self.end is not None and self.start is not None:
                     print("get gpu data")
-                    GetStats.get_gpu_data()
+                    stats.get_gpu_data()
                     print(self.job_hostlist)
             except Exception as e:
                 print(f'NO GPU-Data nodes = {self.job_nodes} end = {self.end} start = {self.start}')
