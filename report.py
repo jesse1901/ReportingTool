@@ -277,6 +277,26 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
+    cur.execute("""
+             CREATE TABLE IF NOT EXISTS reportdata (
+                 jobID INTEGER NOT NULL UNIQUE,
+                 username TEXT,
+                 account TEXT,
+                 efficiency REAL,
+                 used_time TEXT,
+                 booked_time TEXT,
+                 state TEXT,
+                 gpu_nodes TEXT,
+                 gpu_eff REAL,
+                 cores INT,
+                 start TEXT,
+                 end TEXT
+             )
+         """)
+    cur.execute("""
+             CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
+         """)
+    cur.fetchall()
     # Create figures and display them
     create = CreateFigures(con)
 #    create.frame_user_all()
@@ -305,23 +325,4 @@ if __name__ == "__main__":
 
 
 # create table
-    # cur.execute("""
-    #     CREATE TABLE IF NOT EXISTS reportdata (
-    #         jobID INTEGER NOT NULL UNIQUE,
-    #         username TEXT,
-    #         account TEXT,
-    #         efficiency REAL,
-    #         used_time TEXT,
-    #         booked_time TEXT,
-    #         state TEXT,
-    #         gpu_nodes TEXT,
-    #         gpu_eff REAL,
-    #         cores INT,
-    #         start TEXT,
-    #         end TEXT
-    #     )
-    # """)
-    # cur.execute("""
-    #     CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
-    # """)
-    # cur.fetchall()
+
