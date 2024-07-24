@@ -134,12 +134,12 @@ class GetStats:
                         cur.execute("""
                             INSERT INTO reportdata (
                                 jobID, username, account, efficiency, used_time, booked_time,
-                                state, gpu_nodes, cores, start, end
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                                state, gpu_nodes, gpu_efficiency, cores, start, end
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
                         """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'],
-                            data['used'], data['booked'], data['state'], data['gpu_nodes'], data['cores'],
-                            data['start'], data['end']
+                            data['used'], data['booked'], data['state'], data['gpu_nodes'],
+                            data['gpu_efficiency'], data['cores'], data['start'], data['end']
                         ))
                         cur.connection.commit()
                 except Exception as err:
