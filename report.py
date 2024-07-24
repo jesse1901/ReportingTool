@@ -124,9 +124,9 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-#                if self.end is not None:
-#                    end_time = datetime.fromtimestamp()
-#                    end_time = end_time.isoformat('T', 'auto')
+                if self.end is not None:
+                    end_time = datetime.fromtimestamp()
+                    end_time = end_time.isoformat('T', 'auto')
                 if self.job_nodes and self.end is not None and self.start is not None:
                     try:
                         GetStats.get_gpu_data()
