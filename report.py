@@ -79,7 +79,7 @@ class GetStats:
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.job_hostlist if node in set_nodes]
-        self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ' | '.join(self.job_hostlist)
+        self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else '|'.join(self.job_hostlist)
 
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
