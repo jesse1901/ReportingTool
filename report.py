@@ -76,13 +76,9 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         #set_nodes = set(self.all_nodes)
         #self.job_nodes = [node for node in self.nodelist if node in set_nodes]
-
-
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ''.join(self.job_hostlist)
-        print(self.job_nodes)
-        print(self.nodelist)
-# self.job_nodes if self.job_nodes is str else
+
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
@@ -98,7 +94,6 @@ class GetStats:
         if self.job_data.end_time and self.job_data.start_time:
             self.start = datetime.utcfromtimestamp(self.job_data.start_time).strftime('%Y-%m-%dT%H:%M:%S')
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
-            print(f'start: {self.start}, end: {self.end}')
 
         # Calculate job efficiency
         self.calculate_efficiency()
@@ -111,7 +106,6 @@ class GetStats:
             self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
         else:
             self.job_eff = 0
-        print('calculate eff')
 
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
@@ -126,7 +120,6 @@ class GetStats:
         # [self.jobID_count + i + 1 for i in range(1000)]
         self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
-        print('go in for loop')
         # Process each job
         for job_id in self.jobs.keys():
             #try:
@@ -135,6 +128,8 @@ class GetStats:
                 if self.job_nodes and self.end is not None and self.start is not None:
                     try:
                         GetStats.get_gpu_data()
+                        print("get gpu data")
+                        print(self.job_hostlist)
                     except Exception as e:
                         print(f'NO GPU-Data {job_id}')
 
