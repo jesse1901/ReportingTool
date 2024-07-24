@@ -117,7 +117,7 @@ class GetStats:
         # [self.jobID_count + i + 1 for i in range(1000)]
         self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
-
+        print('go in for loop')
         # Process each job
         for job_id in self.jobs.keys():
             try:
