@@ -287,7 +287,7 @@ if __name__ == "__main__":
                  booked_time TEXT,
                  state TEXT,
                  gpu_nodes TEXT,
-                 gpu_eff REAL,
+                 gpu_efficiency REAL,
                  cores INT,
                  start TEXT,
                  end TEXT
