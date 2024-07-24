@@ -298,8 +298,8 @@ if __name__ == "__main__":
          """)
     cur.fetchall()
     # Create figures and display them
-#    create = CreateFigures(con)
-#    create.frame_user_all()
+    create = CreateFigures(con)
+    create.frame_user_all()
 #    create.frame_group_by_user()
 #    create.chart_cpu_utilization()
 #    create.scatter_chart_data()
