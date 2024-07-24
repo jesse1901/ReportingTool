@@ -74,14 +74,14 @@ class GetStats:
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
         self.nodelist = self.job_data.nodelist
-        set_nodes = set(self.all_nodes)
-        self.job_nodes = [node for node in self.nodelist if node in set_nodes]
-        print(self.job_nodes)
-        self.job_hostlist = self.job_nodes if self.job_nodes is str else hostlist.expand_hostlist(self.job_nodes)
+        #set_nodes = set(self.all_nodes)
+        #self.job_nodes = [node for node in self.nodelist if node in set_nodes]
+
+        self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ''.join(self.job_hostlist)
         print(self.job_nodes)
         print(self.nodelist)
-
+# self.job_nodes if self.job_nodes is str else
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
