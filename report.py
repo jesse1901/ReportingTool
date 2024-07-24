@@ -73,6 +73,7 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.nodelist if node in set_nodes]
+        print(self.job_nodes)
 
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
@@ -91,6 +92,7 @@ class GetStats:
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
 
         # Calculate job efficiency
+        print('calculate eff')
         self.calculate_efficiency()
 
     def calculate_efficiency(self) -> None:
