@@ -205,7 +205,7 @@ class GetStats:
             data_dict = stats.to_dict()
             try:
                 if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
-                    print(f"NO GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
+                    print(f"GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
                     print("get gpu data")
                     stats.get_gpu_data()
                     print(self.job_hostlist)
@@ -296,7 +296,7 @@ class GetStats:
             'step': '1m'
         }
         response = requests.get(prometheus_url, params=params)
-        print(response.json()['gpu_usage'])
+        print(f"gpu-usage: {response.json()['gpu_usage']}")
         self.gpu_eff = response.json()['gpu_usage']
 
     def to_dict(self) -> dict:
