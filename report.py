@@ -126,24 +126,24 @@ class GetStats:
 #                    end_time = end_time.isoformat('T', 'auto')
                 if self.job_nodes and self.end is not None:
                     GetStats.get_gpu_data()
-                    try:
-                        if self.end is not None:
-                            print(f'execute query cause: {self.end}  jobID: {job_id}')
-                            data = stats.to_dict()
-                            # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                            cur.execute("""
-                                INSERT INTO reportdata (
-                                    jobID, username, account, efficiency, used_time, booked_time,
-                                    state, gpu_nodes, cores, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-                            """, (
-                                data['job_id'], data['user'], data['account'], data['efficiency'],
-                                data['used'], data['booked'], data['state'], data['gpu_nodes'], data['cores'],
-                                data['start'], data['end']
-                            ))
-                            cur.connection.commit()
-                    except Exception as err:
-                        print(f'Error endtime, job {job_id}:{err}')
+                try:
+                    if self.end is not None:
+                        print(f'execute query cause: {self.end}  jobID: {job_id}')
+                        data = stats.to_dict()
+                        # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                        cur.execute("""
+                            INSERT INTO reportdata (
+                                jobID, username, account, efficiency, used_time, booked_time,
+                                state, gpu_nodes, cores, start, end
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                        """, (
+                            data['job_id'], data['user'], data['account'], data['efficiency'],
+                            data['used'], data['booked'], data['state'], data['gpu_nodes'], data['cores'],
+                            data['start'], data['end']
+                        ))
+                        cur.connection.commit()
+                except Exception as err:
+                    print(f'Error endtime, job {job_id}:{err}')
             except Exception as e:
                 # Print an error message if job processing fails
                 print(f"Error processing job {job_id}: {e}")
