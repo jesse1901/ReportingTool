@@ -203,9 +203,9 @@ class GetStats:
             stats = GetStats()
             stats.job_stats(job_id)
             data_dict = stats.to_dict()
-            print(f"NO GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
             try:
                 if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
+                    print(f"NO GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
                     print("get gpu data")
                     stats.get_gpu_data()
                     print(self.job_hostlist)
