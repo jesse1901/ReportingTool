@@ -124,29 +124,32 @@ class GetStats:
             try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-                if self.end is not None:
-                    end_time = datetime.fromtimestamp()
-                    end_time = end_time.isoformat('T', 'auto')
                 if self.job_nodes and self.end is not None and self.start is not None:
                     try:
                         GetStats.get_gpu_data()
                     except Exception as e:
                         print(f'NO GPU-Data {job_id}')
-                if self.end is not None:
-                    print(f'execute query cause: {self.end}  jobID: {job_id}')
-                    data = stats.to_dict()
-                    # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                    cur.execute("""
-                        INSERT INTO reportdata (
-                            jobID, username, account, efficiency, used_time, booked_time,
-                            state, gpu_nodes, gpu_efficiency, cores, start, end
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
-                    """, (
-                        data['job_id'], data['user'], data['account'], data['efficiency'],
-                        data['used'], data['booked'], data['state'], data['gpu_nodes'],
-                        data['gpu_efficiency'], data['cores'], data['start'], data['end']
-                    ))
-                    cur.connection.commit()
+
+                if stats.job_data.end_time is not None:
+                    end_time = datetime.fromtimestamp(stats.job_data.end_time)
+                    end_time = end_time.isoformat('T', 'auto')
+                    try:
+                        if end_time is not None and end_time > self.latest_end:
+
+                            print(f'execute query cause: {self.end}  jobID: {job_id}')
+                            data = stats.to_dict()
+                            # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                            cur.execute("""
+                                INSERT INTO reportdata (
+                                    jobID, username, account, efficiency, used_time, booked_time,
+                                    state, gpu_nodes, gpu_efficiency, cores, start, end
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                            """, (
+                                data['job_id'], data['user'], data['account'], data['efficiency'],
+                                data['used'], data['booked'], data['state'], data['gpu_nodes'],
+                                data['gpu_efficiency'], data['cores'], data['start'], data['end']
+                            ))
+                            cur.connection.commit()
             except Exception as err:
                 print(f'Error endtime, job {job_id}:{err}')
             #except Exception as e:
