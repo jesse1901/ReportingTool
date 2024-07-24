@@ -89,7 +89,7 @@ class GetStats:
         # Calculate used time and booked time
         if self.job_elapsed_s:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
-            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s))
+            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * 100))
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
@@ -289,6 +289,27 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
+    # # create table
+    cur.execute("""
+              CREATE TABLE IF NOT EXISTS reportdata (
+                  jobID INTEGER NOT NULL UNIQUE,
+                  username TEXT,
+                  account TEXT,
+                  efficiency REAL,
+                  used_time TEXT,
+                  booked_time TEXT,
+                  state TEXT,
+                  gpu_nodes TEXT,
+                  gpu_efficiency REAL,
+                  cores INT,
+                  start TEXT,
+                  end TEXT
+              )
+          """)
+    # cur.execute("""
+    #          CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
+    #      """)
+    cur.fetchall()
 
     # Create figures and display them
     create = CreateFigures(con)
@@ -311,27 +332,7 @@ if __name__ == "__main__":
 
 
 
-    # # create table
-    # cur.execute("""
-    #          CREATE TABLE IF NOT EXISTS reportdata (
-    #              jobID INTEGER NOT NULL UNIQUE,
-    #              username TEXT,
-    #              account TEXT,
-    #              efficiency REAL,
-    #              used_time TEXT,
-    #              booked_time TEXT,
-    #              state TEXT,
-    #              gpu_nodes TEXT,
-    #              gpu_efficiency REAL,
-    #              cores INT,
-    #              start TEXT,
-    #              end TEXT
-    #          )
-    #      """)
-    # cur.execute("""
-    #          CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
-    #      """)
-    # cur.fetchall()
+
 
 
 
