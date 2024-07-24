@@ -115,9 +115,9 @@ class GetStats:
         Fetches jobs, calculates their statistics, and inserts them into the database.
         """
         # Retrieve the highest jobID currently in the reportdata table
-        cur.execute("SELECT MAX(end) FROM reportdata")
-        self.latest_end = str(cur.fetchone()[0] or 0)
-
+        # cur.execute("SELECT MAX(end) FROM reportdata")
+        # self.latest_end = str(cur.fetchone()[0] or 0)
+        self.latest_end = '2024-07-03T17:27:15'
         # Create a list of job IDs to filter and load jobs
         self.list_filter = round(time.time())
         # [self.jobID_count + i + 1 for i in range(1000)]
@@ -310,10 +310,10 @@ if __name__ == "__main__":
                   end TEXT
               )
           """)
-    # cur.execute("""
-    #          CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
-    #      """)
-    cur.fetchall()
+    cur.execute("""
+              CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
+          """)
+    cur.connection.commit()
 
     # Create figures and display them
     create = CreateFigures(con)
