@@ -29,6 +29,7 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.real_time = None
         self.job_hostlist = None
         self.job_nodes_string = None
         self.gpu_eff = None
@@ -89,6 +90,7 @@ class GetStats:
         # Calculate used time and booked time
         if self.job_elapsed_s:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
+            self.real_time = str(timedelta(seconds=self.job_elapsed_s))
             self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * 100))
 
         # Format start and end times
@@ -145,12 +147,12 @@ class GetStats:
                             # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                             cur.execute("""
                                 INSERT INTO reportdata (
-                                    jobID, username, account, efficiency, used_time, booked_time,
+                                    jobID, username, account, efficiency, used_time, booked_time, real_time,
                                     state, gpu_nodes, gpu_efficiency, cores, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING
                             """, (
                                 data['job_id'], data['user'], data['account'], data['efficiency'],
-                                data['used'], data['booked'], data['state'], data['gpu_nodes'],
+                                data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
                                 data['gpu_efficiency'], data['cores'], data['start'], data['end']
                             ))
                             cur.connection.commit()
@@ -234,6 +236,7 @@ class GetStats:
             "efficiency": self.job_eff,
             "used": self.used_time,
             "booked": self.job_elapsed,
+            "real_time": self.job_elapsed
             "state": self.job_data.state,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
             "gpu_efficiency": self.gpu_eff,
@@ -298,6 +301,7 @@ if __name__ == "__main__":
                   efficiency REAL,
                   used_time TEXT,
                   booked_time TEXT,
+                  real_time TEXT,
                   state TEXT,
                   gpu_nodes TEXT,
                   gpu_efficiency REAL,
