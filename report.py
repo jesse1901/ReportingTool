@@ -223,7 +223,7 @@ class GetStats:
                                     jobID, username, account, efficiency, used_time, booked_time, real_time,
                                     state, gpu_nodes, gpu_efficiency, cores, start, end
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
-                                gpu_nodes = excluded.gpu_nodes
+                                gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'],
