@@ -153,7 +153,7 @@ class GetStats:
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.job_hostlist if node in set_nodes]
-        self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else '|'.join(self.job_hostlist)
+        self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ' | '.join(self.job_hostlist)
 
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
@@ -222,7 +222,7 @@ class GetStats:
                             INSERT INTO reportdata (
                                 jobID, username, account, efficiency, used_time, booked_time, real_time,
                                 state, gpu_nodes, gpu_efficiency, cores, start, end
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO NOTHING 
                         """, (
                         data['job_id'], data['user'], data['account'], data['efficiency'],
                         data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
