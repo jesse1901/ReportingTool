@@ -127,7 +127,7 @@ class GetStats:
         print('go in for loop')
         # Process each job
         for job_id in self.jobs.keys():
-            try:
+            #try:
                 stats = GetStats()
                 stats.job_stats(job_id)
                 if self.job_nodes and self.end is not None and self.start is not None:
@@ -158,8 +158,8 @@ class GetStats:
                             cur.connection.commit()
                     except Exception as e:
                         print(f"Error processing job {job_id}: {e}")
-            except Exception as err:
-                print(f'Error endtime, job {job_id}:{err}')
+            #except Exception as err:
+            #    print(f'Error endtime, job {job_id}:{err}')
                 # Print an error message if job processing fails
 
 
