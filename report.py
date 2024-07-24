@@ -28,6 +28,7 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.job_nodes_string = None
         self.gpu_eff = None
         self.job_nodes = None
         self.latest_end = ''
@@ -73,7 +74,7 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.nodelist if node in set_nodes]
-        self.job_nodes = ''.join(self.job_nodes)
+        self.job_nodes_string = ''.join(self.job_nodes)
         print(self.job_nodes)
 
         # Calculate total CPU time used for job steps
@@ -232,7 +233,7 @@ class GetStats:
             "used": self.used_time,
             "booked": self.job_elapsed,
             "state": self.job_data.state,
-            "gpu_nodes": self.job_nodes,
+            "gpu_nodes": self.job_nodes_string,
             "gpu_efficiency": self.gpu_eff,
             "cores": self.cores,
             "start": self.start,
