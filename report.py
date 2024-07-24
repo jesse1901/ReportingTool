@@ -59,9 +59,83 @@ class GetStats:
         self.avg_eff = 0
         self.intervall = ''
         self.nodelist = []
-        self.all_nodes = ['exflong03.desy.de', 'exflong04.desy.de', 'exflong05.desy.de', 'exflong06.desy.de', 'max-cfelg007.desy.de', 'max-cfelg007.desy.de', 'max-cmsg001.desy.de', 'max-cmsg002.desy.de', 'max-cmsg005.desy.de', 'max-cmsg006.desy.de', 'max-cmsg007.desy.de', 'max-cmsg008.desy.de', 'max-cmsg009.desy.de', 'max-cmsg010.desy.de', 'max-cssbg002.desy.de', 'max-cssbg002.desy.de', 'max-cssbg003.desy.de', 'max-cssbg003.desy.de', 'max-cssbg004.desy.de', 'max-cssbg004.desy.de', 'max-cssbg005.desy.de', 'max-cssbg005.desy.de', 'max-cssbg012.desy.de', 'max-cssbg012.desy.de', 'max-cssbg012.desy.de', 'max-cssbg012.desy.de', 'max-cssbg018.desy.de', 'max-cssbg018.desy.de', 'max-cssbg018.desy.de', 'max-cssbg018.desy.de', 'max-display001.desy.de', 'max-display001.desy.de', 'max-display001.desy.de', 'max-display001.desy.de', 'max-display002.desy.de', 'max-display002.desy.de', 'max-display002.desy.de', 'max-display002.desy.de', 'max-display003.desy.de', 'max-display003.desy.de', 'max-display003.desy.de', 'max-display003.desy.de', 'max-display004.desy.de', 'max-display004.desy.de', 'max-display004.desy.de', 'max-display004.desy.de', 'max-display005.desy.de', 'max-display005.desy.de', 'max-display005.desy.de', 'max-display005.desy.de', 'max-display007.desy.de', 'max-display007.desy.de', 'max-display008.desy.de', 'max-display008.desy.de', 'max-display009.desy.de', 'max-display009.desy.de', 'max-display010.desy.de', 'max-display010.desy.de', 'max-exfl-display001.desy.de', 'max-exfl-display001.desy.de', 'max-exfl-display002.desy.de', 'max-exfl-display002.desy.de', 'max-exfl-display003.desy.de', 'max-exfl-display003.desy.de', 'max-exfl-display004.desy.de', 'max-exfl-display004.desy.de', 'max-exflg005.desy.de', 'max-exflg005.desy.de', 'max-exflg006.desy.de', 'max-exflg007.desy.de', 'max-exflg009.desy.de', 'max-exflg010.desy.de', 'max-exflg011.desy.de', 'max-exflg012.desy.de', 'max-exflg013.desy.de', 'max-exflg014.desy.de', 'max-exflg015.desy.de', 'max-exflg016.desy.de', 'max-exflg017.desy.de', 'max-exflg018.desy.de', 'max-exflg019.desy.de', 'max-exflg020.desy.de', 'max-exflg021.desy.de', 'max-exflg022.desy.de', 'max-exflg023.desy.de', 'max-exflg024.desy.de', 'max-exflg025.desy.de', 'max-exflg026.desy.de', 'max-exflg027.desy.de', 'max-exflg028.desy.de', 'max-exflg028.desy.de', 'max-exflg029.desy.de',
-                          'max-exflg029.desy.de', 'max-exflg030.desy.de', 'max-exflg030.desy.de', 'max-exflg031.desy.de', 'max-exflg031.desy.de', 'max-exflg032.desy.de', 'max-exflg033.desy.de', 'max-exflg034.desy.de', 'max-exflg035.desy.de', 'max-fs-display001.desy.de', 'max-fs-display001.desy.de', 'max-fs-display002.desy.de', 'max-fs-display002.desy.de', 'max-fs-display003.desy.de', 'max-fs-display003.desy.de', 'max-fs-display004.desy.de', 'max-fs-display004.desy.de', 'max-fs-display005.desy.de', 'max-fs-display005.desy.de', 'max-fs-display006.desy.de', 'max-fs-display006.desy.de', 'max-hzgg001.desy.de', 'max-hzgg001.desy.de', 'max-hzgg003.desy.de', 'max-hzgg003.desy.de', 'max-hzgg004.desy.de', 'max-hzgg004.desy.de', 'max-hzgg007.desy.de', 'max-hzgg007.desy.de', 'max-hzgg008.desy.de', 'max-hzgg008.desy.de', 'max-hzgg009.desy.de', 'max-hzgg009.desy.de', 'max-hzgg010.desy.de', 'max-hzgg010.desy.de', 'max-nova001.desy.de', 'max-nova001.desy.de', 'max-nova002.desy.de', 'max-nova002.desy.de', 'max-p3ag004.desy.de', 'max-p3ag005.desy.de', 'max-p3ag007.desy.de', 'max-p3ag008.desy.de', 'max-p3ag010.desy.de', 'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag012.desy.de', 'max-p3ag014.desy.de', 'max-p3ag015.desy.de', 'max-p3ag016.desy.de', 'max-p3ag017.desy.de', 'max-p3ag018.desy.de', 'max-p3ag019.desy.de', 'max-p3ag020.desy.de', 'max-p3ag021.desy.de', 'max-p3ag022.desy.de', 'max-p3ag023.desy.de', 'max-p3ag024.desy.de', 'max-p3ag025.desy.de', 'max-p3ag026.desy.de', 'max-p3ag027.desy.de', 'max-p3ag028.desy.de', 'max-p3ag029.desy.de', 'max-p3ag030.desy.de', 'max-p3ag031.desy.de', 'max-uhhg001.desy.de', 'max-uhhg001.desy.de', 'max-uhhg001.desy.de', 'max-uhhg001.desy.de', 'max-uhhg002.desy.de', 'max-uhhg002.desy.de', 'max-uhhg002.desy.de', 'max-uhhg002.desy.de', 'max-uhhg003.desy.de', 'max-uhhg003.desy.de', 'max-uhhg003.desy.de', 'max-uhhg003.desy.de', 'max-uhhg004.desy.de', 'max-uhhg004.desy.de', 'max-uhhg004.desy.de', 'max-uhhg004.desy.de', 'max-uhhg005.desy.de', 'max-uhhg005.desy.de', 'max-uhhg005.desy.de', 'max-uhhg005.desy.de', 'max-uhhg006.desy.de', 'max-uhhg006.desy.de', 'max-uhhg006.desy.de', 'max-uhhg006.desy.de', 'max-uhhg007.desy.de', 'max-uhhg007.desy.de', 'max-uhhg007.desy.de', 'max-uhhg007.desy.de', 'max-uhhg008.desy.de', 'max-uhhg008.desy.de',
-                          'max-uhhg008.desy.de', 'max-uhhg008.desy.de', 'max-uhhg009.desy.de', 'max-uhhg009.desy.de', 'max-uhhg009.desy.de', 'max-uhhg009.desy.de', 'max-uhhg010.desy.de', 'max-uhhg010.desy.de', 'max-uhhg010.desy.de', 'max-uhhg010.desy.de', 'max-uhhg011.desy.de', 'max-uhhg011.desy.de', 'max-uhhg011.desy.de', 'max-uhhg011.desy.de', 'max-uhhg012.desy.de', 'max-uhhg012.desy.de', 'max-uhhg012.desy.de', 'max-uhhg012.desy.de', 'max-uhhg013.desy.de', 'max-uhhg013.desy.de', 'max-uhhg013.desy.de', 'max-uhhg013.desy.de', 'max-wng002.desy.de', 'max-wng002.desy.de', 'max-wng004.desy.de', 'max-wng005.desy.de', 'max-wng006.desy.de', 'max-wng007.desy.de', 'max-wng008.desy.de', 'max-wng008.desy.de', 'max-wng009.desy.de', 'max-wng009.desy.de', 'max-wng010.desy.de', 'max-wng012.desy.de', 'max-wng013.desy.de', 'max-wng014.desy.de', 'max-wng015.desy.de', 'max-wng016.desy.de', 'max-wng017.desy.de', 'max-wng018.desy.de', 'max-wng019.desy.de', 'max-wng020.desy.de', 'max-wng020.desy.de', 'max-wng021.desy.de', 'max-wng021.desy.de', 'max-wng022.desy.de', 'max-wng023.desy.de', 'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng063.desy.de', 'max-wng064.desy.de']
+        self.all_nodes = ['exflong03.desy.de', 'exflong04.desy.de', 'exflong05.desy.de', 'exflong06.desy.de',
+                          'max-cfelg007.desy.de', 'max-cfelg007.desy.de', 'max-cmsg001.desy.de', 'max-cmsg002.desy.de',
+                          'max-cmsg005.desy.de', 'max-cmsg006.desy.de', 'max-cmsg007.desy.de', 'max-cmsg008.desy.de',
+                          'max-cmsg009.desy.de', 'max-cmsg010.desy.de', 'max-cssbg002.desy.de', 'max-cssbg002.desy.de',
+                          'max-cssbg003.desy.de', 'max-cssbg003.desy.de', 'max-cssbg004.desy.de',
+                          'max-cssbg004.desy.de', 'max-cssbg005.desy.de', 'max-cssbg005.desy.de',
+                          'max-cssbg012.desy.de', 'max-cssbg012.desy.de', 'max-cssbg012.desy.de',
+                          'max-cssbg012.desy.de', 'max-cssbg018.desy.de', 'max-cssbg018.desy.de',
+                          'max-cssbg018.desy.de', 'max-cssbg018.desy.de', 'max-display001.desy.de',
+                          'max-display001.desy.de', 'max-display001.desy.de', 'max-display001.desy.de',
+                          'max-display002.desy.de', 'max-display002.desy.de', 'max-display002.desy.de',
+                          'max-display002.desy.de', 'max-display003.desy.de', 'max-display003.desy.de',
+                          'max-display003.desy.de', 'max-display003.desy.de', 'max-display004.desy.de',
+                          'max-display004.desy.de', 'max-display004.desy.de', 'max-display004.desy.de',
+                          'max-display005.desy.de', 'max-display005.desy.de', 'max-display005.desy.de',
+                          'max-display005.desy.de', 'max-display007.desy.de', 'max-display007.desy.de',
+                          'max-display008.desy.de', 'max-display008.desy.de', 'max-display009.desy.de',
+                          'max-display009.desy.de', 'max-display010.desy.de', 'max-display010.desy.de',
+                          'max-exfl-display001.desy.de', 'max-exfl-display001.desy.de', 'max-exfl-display002.desy.de',
+                          'max-exfl-display002.desy.de', 'max-exfl-display003.desy.de', 'max-exfl-display003.desy.de',
+                          'max-exfl-display004.desy.de', 'max-exfl-display004.desy.de', 'max-exflg005.desy.de',
+                          'max-exflg005.desy.de', 'max-exflg006.desy.de', 'max-exflg007.desy.de',
+                          'max-exflg009.desy.de', 'max-exflg010.desy.de', 'max-exflg011.desy.de',
+                          'max-exflg012.desy.de', 'max-exflg013.desy.de', 'max-exflg014.desy.de',
+                          'max-exflg015.desy.de', 'max-exflg016.desy.de', 'max-exflg017.desy.de',
+                          'max-exflg018.desy.de', 'max-exflg019.desy.de', 'max-exflg020.desy.de',
+                          'max-exflg021.desy.de', 'max-exflg022.desy.de', 'max-exflg023.desy.de',
+                          'max-exflg024.desy.de', 'max-exflg025.desy.de', 'max-exflg026.desy.de',
+                          'max-exflg027.desy.de', 'max-exflg028.desy.de', 'max-exflg028.desy.de',
+                          'max-exflg029.desy.de',
+                          'max-exflg029.desy.de', 'max-exflg030.desy.de', 'max-exflg030.desy.de',
+                          'max-exflg031.desy.de', 'max-exflg031.desy.de', 'max-exflg032.desy.de',
+                          'max-exflg033.desy.de', 'max-exflg034.desy.de', 'max-exflg035.desy.de',
+                          'max-fs-display001.desy.de', 'max-fs-display001.desy.de', 'max-fs-display002.desy.de',
+                          'max-fs-display002.desy.de', 'max-fs-display003.desy.de', 'max-fs-display003.desy.de',
+                          'max-fs-display004.desy.de', 'max-fs-display004.desy.de', 'max-fs-display005.desy.de',
+                          'max-fs-display005.desy.de', 'max-fs-display006.desy.de', 'max-fs-display006.desy.de',
+                          'max-hzgg001.desy.de', 'max-hzgg001.desy.de', 'max-hzgg003.desy.de', 'max-hzgg003.desy.de',
+                          'max-hzgg004.desy.de', 'max-hzgg004.desy.de', 'max-hzgg007.desy.de', 'max-hzgg007.desy.de',
+                          'max-hzgg008.desy.de', 'max-hzgg008.desy.de', 'max-hzgg009.desy.de', 'max-hzgg009.desy.de',
+                          'max-hzgg010.desy.de', 'max-hzgg010.desy.de', 'max-nova001.desy.de', 'max-nova001.desy.de',
+                          'max-nova002.desy.de', 'max-nova002.desy.de', 'max-p3ag004.desy.de', 'max-p3ag005.desy.de',
+                          'max-p3ag007.desy.de', 'max-p3ag008.desy.de', 'max-p3ag010.desy.de', 'max-p3ag011.desy.de',
+                          'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag012.desy.de',
+                          'max-p3ag014.desy.de', 'max-p3ag015.desy.de', 'max-p3ag016.desy.de', 'max-p3ag017.desy.de',
+                          'max-p3ag018.desy.de', 'max-p3ag019.desy.de', 'max-p3ag020.desy.de', 'max-p3ag021.desy.de',
+                          'max-p3ag022.desy.de', 'max-p3ag023.desy.de', 'max-p3ag024.desy.de', 'max-p3ag025.desy.de',
+                          'max-p3ag026.desy.de', 'max-p3ag027.desy.de', 'max-p3ag028.desy.de', 'max-p3ag029.desy.de',
+                          'max-p3ag030.desy.de', 'max-p3ag031.desy.de', 'max-uhhg001.desy.de', 'max-uhhg001.desy.de',
+                          'max-uhhg001.desy.de', 'max-uhhg001.desy.de', 'max-uhhg002.desy.de', 'max-uhhg002.desy.de',
+                          'max-uhhg002.desy.de', 'max-uhhg002.desy.de', 'max-uhhg003.desy.de', 'max-uhhg003.desy.de',
+                          'max-uhhg003.desy.de', 'max-uhhg003.desy.de', 'max-uhhg004.desy.de', 'max-uhhg004.desy.de',
+                          'max-uhhg004.desy.de', 'max-uhhg004.desy.de', 'max-uhhg005.desy.de', 'max-uhhg005.desy.de',
+                          'max-uhhg005.desy.de', 'max-uhhg005.desy.de', 'max-uhhg006.desy.de', 'max-uhhg006.desy.de',
+                          'max-uhhg006.desy.de', 'max-uhhg006.desy.de', 'max-uhhg007.desy.de', 'max-uhhg007.desy.de',
+                          'max-uhhg007.desy.de', 'max-uhhg007.desy.de', 'max-uhhg008.desy.de', 'max-uhhg008.desy.de',
+                          'max-uhhg008.desy.de', 'max-uhhg008.desy.de', 'max-uhhg009.desy.de', 'max-uhhg009.desy.de',
+                          'max-uhhg009.desy.de', 'max-uhhg009.desy.de', 'max-uhhg010.desy.de', 'max-uhhg010.desy.de',
+                          'max-uhhg010.desy.de', 'max-uhhg010.desy.de', 'max-uhhg011.desy.de', 'max-uhhg011.desy.de',
+                          'max-uhhg011.desy.de', 'max-uhhg011.desy.de', 'max-uhhg012.desy.de', 'max-uhhg012.desy.de',
+                          'max-uhhg012.desy.de', 'max-uhhg012.desy.de', 'max-uhhg013.desy.de', 'max-uhhg013.desy.de',
+                          'max-uhhg013.desy.de', 'max-uhhg013.desy.de', 'max-wng002.desy.de', 'max-wng002.desy.de',
+                          'max-wng004.desy.de', 'max-wng005.desy.de', 'max-wng006.desy.de', 'max-wng007.desy.de',
+                          'max-wng008.desy.de', 'max-wng008.desy.de', 'max-wng009.desy.de', 'max-wng009.desy.de',
+                          'max-wng010.desy.de', 'max-wng012.desy.de', 'max-wng013.desy.de', 'max-wng014.desy.de',
+                          'max-wng015.desy.de', 'max-wng016.desy.de', 'max-wng017.desy.de', 'max-wng018.desy.de',
+                          'max-wng019.desy.de', 'max-wng020.desy.de', 'max-wng020.desy.de', 'max-wng021.desy.de',
+                          'max-wng021.desy.de', 'max-wng022.desy.de', 'max-wng023.desy.de', 'max-wng037.desy.de',
+                          'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng038.desy.de',
+                          'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng039.desy.de',
+                          'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng040.desy.de',
+                          'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng041.desy.de',
+                          'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng042.desy.de',
+                          'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng061.desy.de',
+                          'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng062.desy.de',
+                          'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng063.desy.de',
+                          'max-wng064.desy.de']
 
     def job_stats(self, job_id: int) -> None:
         """
@@ -126,42 +200,40 @@ class GetStats:
         # Process each job
         for job_id in self.jobs.keys():
             #try:
-                stats = GetStats()
-                stats.job_stats(job_id)
-                if self.job_nodes and self.end is not None and self.start is not None:
-                    try:
-                        GetStats.get_gpu_data()
-                        print("get gpu data")
-                        print(self.job_hostlist)
-                    except Exception as e:
-                        print(f'NO GPU-Data {job_id}')
+            stats = GetStats()
+            stats.job_stats(job_id)
+            if self.job_nodes and self.end is not None and self.start is not None:
+                try:
+                    GetStats.get_gpu_data()
+                    print("get gpu data")
+                    print(self.job_hostlist)
+                except Exception as e:
+                    print(f'NO GPU-Data {job_id}')
 
-                if stats.job_data.end_time is not None:
-                    end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                    end_time = end_time.isoformat('T', 'auto')
-                    try:
-                        if end_time is not None and end_time > self.latest_end:
-
-                            print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
-                            data = stats.to_dict()
-                            # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                            cur.execute("""
-                                INSERT INTO reportdata (
-                                    jobID, username, account, efficiency, used_time, booked_time, real_time,
-                                    state, gpu_nodes, gpu_efficiency, cores, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE
-                            """, (
-                                data['job_id'], data['user'], data['account'], data['efficiency'],
-                                data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
-                                data['gpu_efficiency'], data['cores'], data['start'], data['end']
-                            ))
-                            cur.connection.commit()
-                    except Exception as e:
-                        print(f"Error processing job {job_id}: {e}")
-            #except Exception as err:
-            #    print(f'Error endtime, job {job_id}:{err}')
-                # Print an error message if job processing fails
-
+            if stats.job_data.end_time is not None:
+                end_time = datetime.fromtimestamp(stats.job_data.end_time)
+                end_time = end_time.isoformat('T', 'auto')
+                #try:
+                if end_time is not None and end_time > self.latest_end:
+                    print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
+                    data = stats.to_dict()
+                    # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                    cur.execute("""
+                            INSERT INTO reportdata (
+                                jobID, username, account, efficiency, used_time, booked_time, real_time,
+                                state, gpu_nodes, gpu_efficiency, cores, start, end
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE
+                        """, (
+                        data['job_id'], data['user'], data['account'], data['efficiency'],
+                        data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
+                        data['gpu_efficiency'], data['cores'], data['start'], data['end']
+                    ))
+                    cur.connection.commit()
+                #except Exception as e:
+                #    print(f"Error processing job {job_id}: {e}")
+        #except Exception as err:
+        #    print(f'Error endtime, job {job_id}:{err}')
+        # Print an error message if job processing fails
 
     def calculate_avg_eff(self, cur) -> None:
         """
@@ -199,7 +271,7 @@ class GetStats:
             # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
             cur.execute(""" INSERT INTO avg_eff (eff, cores, start, end) VALUES (?, ?, ?, ?)
             ON CONFLICT(start) DO UPDATE SET eff = excluded.eff, cores = excluded.cores""",
-            (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
+                        (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
 
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
             print(self.intervall)
@@ -222,8 +294,6 @@ class GetStats:
         response = requests.get(prometheus_url, params=params)
         print(response.json())
         self.gpu_eff = response.json()['gpu_usage']
-
-
 
     def to_dict(self) -> dict:
         """
@@ -281,11 +351,10 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data(self):
-        df = pd.read_sql_query("SELECT jobID, efficiency, booked_time FROM reportdata ORDER BY booked_time ASC", self.con)
+        df = pd.read_sql_query("SELECT jobID, efficiency, booked_time FROM reportdata ORDER BY booked_time ASC",
+                               self.con)
         fig = px.scatter(df, x="booked_time", y="efficiency", color="efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
-
-
 
 
 if __name__ == "__main__":
@@ -318,9 +387,9 @@ if __name__ == "__main__":
     # Create figures and display them
     create = CreateFigures(con)
     create.frame_user_all()
-#    create.frame_group_by_user()
-#    create.chart_cpu_utilization()
-#    create.scatter_chart_data()
+    #    create.frame_group_by_user()
+    #    create.chart_cpu_utilization()
+    #    create.scatter_chart_data()
 
     # Main loop to continuously fetch job data and update average efficiency
     while True:
@@ -332,17 +401,3 @@ if __name__ == "__main__":
 #            get.calculate_avg_eff(cur)
 #            x = 0
 #        x += 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
