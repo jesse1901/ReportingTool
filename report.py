@@ -73,10 +73,11 @@ class GetStats:
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
+
         self.nodelist = self.job_data.nodelist
-        #set_nodes = set(self.all_nodes)
-        #self.job_nodes = [node for node in self.nodelist if node in set_nodes]
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
+        set_nodes = set(self.all_nodes)
+        self.job_nodes = [node for node in self.job_hostlist if node in set_nodes]
         self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ''.join(self.job_hostlist)
 
         # Calculate total CPU time used for job steps
@@ -125,7 +126,7 @@ class GetStats:
             #try:
                 stats = GetStats()
                 stats.job_stats(job_id)
-                if self.job_hostlist and self.end is not None and self.start is not None:
+                if self.job_nodes and self.end is not None and self.start is not None:
                     try:
                         GetStats.get_gpu_data()
                         print("get gpu data")
