@@ -92,7 +92,6 @@ class GetStats:
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
 
         # Calculate job efficiency
-        print('calculate eff')
         self.calculate_efficiency()
 
     def calculate_efficiency(self) -> None:
@@ -103,6 +102,7 @@ class GetStats:
             self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
         else:
             self.job_eff = 0
+        print('calculate eff')
 
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
@@ -312,6 +312,7 @@ if __name__ == "__main__":
     while True:
         x = 29
         get = GetStats()
+        get.job_stats()
         get.get_jobs_calculate_insert_data(cur)
 #        if x == 30:
 #            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
