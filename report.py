@@ -29,6 +29,7 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.join_nodes = None
         self.real_time = None
         self.job_hostlist = None
         self.job_nodes_string = None
@@ -153,6 +154,7 @@ class GetStats:
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         set_nodes = set(self.all_nodes)
         self.job_nodes = [node for node in self.job_hostlist if node in set_nodes]
+        self.join_nodes = '|'.join([f"{node}.desy.de" for node in self.job_nodes])
         self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ' | '.join(self.job_hostlist)
 
         # Calculate total CPU time used for job steps
@@ -287,13 +289,8 @@ class GetStats:
     def get_gpu_data(self):
         print(self.job_nodes)
         prometheus_url = 'http://max-infra008.desy.de:9090/api/v1/query_range'
-        modified_nodes = [f"{node}.desy.de" for node in self.job_nodes]
-        print(f"Modified nodes: {modified_nodes}")  # Debug: Print modified nodes
-
-        join_nodes = '|'.join(modified_nodes)
-        print(f"Joined nodes: {join_nodes}")  # Debug: Print joined nodes
         params = {
-            'query': f'nvidia_smi_utilization_gpu_ratio{{instance="{join_nodes}"}}',
+            'query': f'nvidia_smi_utilization_gpu_ratio{{instance="{self.join_nodes}"}}',
             'start': f'{self.start}Z',
             'end': f'{self.end}Z',
             'step': '1m'
