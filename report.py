@@ -202,13 +202,13 @@ class GetStats:
             #try:
             stats = GetStats()
             stats.job_stats(job_id)
-            if self.job_nodes and self.end is not None and self.start is not None:
-                try:
-                    GetStats.get_gpu_data()
+            try:
+                if self.job_nodes is not None and self.end is not None and self.start is not None:
                     print("get gpu data")
+                    GetStats.get_gpu_data()
                     print(self.job_hostlist)
-                except Exception as e:
-                    print(f'NO GPU-Data {job_id}')
+            except Exception as e:
+                print(f'NO GPU-Data nodes = {self.job_nodes} end = {self.end} start = {self.start}')
 
             if stats.job_data.end_time is not None:
                 end_time = datetime.fromtimestamp(stats.job_data.end_time)
