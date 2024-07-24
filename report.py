@@ -207,8 +207,8 @@ class GetStats:
         join_nodes = '|'.join(self.job_nodes)
         params = {
             'query': f'nvidia_smi_utilization_gpu_ratio{{instance="{join_nodes}"}}',
-            'start': self.start,
-            'end': self.end,
+            'start': f'{self.start}Z',
+            'end': f'{self.end}Z',
             'step': '1m'
         }
         response = requests.get(prometheus_url, params=params)
