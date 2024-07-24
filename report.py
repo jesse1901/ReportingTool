@@ -150,11 +150,12 @@ class GetStats:
                                 data['gpu_efficiency'], data['cores'], data['start'], data['end']
                             ))
                             cur.connection.commit()
+                    except Exception as e:
+                        print(f"Error processing job {job_id}: {e}")
             except Exception as err:
                 print(f'Error endtime, job {job_id}:{err}')
-            #except Exception as e:
                 # Print an error message if job processing fails
-            #    print(f"Error processing job {job_id}: {e}")
+
 
     def calculate_avg_eff(self, cur) -> None:
         """
