@@ -331,7 +331,7 @@ class GetStats:
                 self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
                 #print(f"gpu-usage: {self.gpu_eff}"))
             else:
-                print("Error: Unexpected response structure")
+                print(f"Error: Unexpected response structure{data}")
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 #        response = requests.get(prometheus_url, params=params)
@@ -395,7 +395,8 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data(self):
-        df = pd.read_sql_query("SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time, real_time, cores FROM reportdata ORDER BY lost_cpu_time ASC",
+        df = pd.read_sql_query("SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time, real_time, cores "
+                               "FROM reportdata ORDER BY job_cpu_time ASC",
                                self.con)
         fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
