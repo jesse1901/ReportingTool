@@ -230,12 +230,12 @@ class GetStats:
                                 INSERT INTO reportdata (
                                     jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, job_cpu_time,
                                     state, cores, gpu_nodes, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
                                 gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
-                            data['lost_gpu_time'], data['real_time'], data['job_cpu_time'],data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
+                            data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                     #    print(f"nodes: {data['gpu_nodes']}")
                     #    print(f"nodes: {data['gpu_efficiency']}")
