@@ -201,10 +201,13 @@ class GetStats:
         """
         Calculates the job efficiency as a percentage based on CPU time and elapsed time.
         """
-        if self.cores > 0 and self.job_elapsed_s > 0:
-            self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
-        else:
-            self.job_eff = 0
+        try:
+            if self.cores > 0 and self.job_elapsed_s > 0:
+                self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
+            else:
+                self.job_eff = 0
+        except:
+            print(f'cannot calculate job efficiency{self.job_id}')
 
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
