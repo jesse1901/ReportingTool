@@ -421,11 +421,11 @@ class CreateFigures:
         df_gpu = df[df['color_scale'] == 'gpu']
 
         # Create scatter plots for both datasets
-        fig = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
+        fig = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
                          color_continuous_scale="blues", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
 
-        fig_gpu = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
+        fig_gpu = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
                              color_continuous_scale="reds", size_max=1,
                              hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
 
