@@ -29,6 +29,7 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.hostlist = None
         self.join_nodes = None
         self.real_time = None
         self.job_hostlist = None
@@ -151,7 +152,9 @@ class GetStats:
         self.job_steps = count_keys_under_steps(self.job_all)
 
         self.nodelist = self.job_data.nodelist
-        self.job_hostlist = hostlist.expand_hostlist(self.nodelist).append('.desy.de')
+        self.hostlist = hostlist.expand_hostlist(self.nodelist)
+        self.job_hostlist = [host + '.desy.de' for host in self.hostlist]
+
         print(self.job_hostlist)
         set_nodes = set(self.all_nodes)
         self.job_nodes = ([node for node in self.job_hostlist if node in set_nodes]) if self.job_hostlist else None
