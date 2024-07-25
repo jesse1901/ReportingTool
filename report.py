@@ -29,13 +29,15 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.lost_gpu_time = None
+        self.lost_cpu_time = None
         self.hostlist = None
         self.join_nodes = None
         self.real_time = None
         self.job_hostlist = None
         self.job_nodes_string = None
         self.gpu_eff = None
-        self.job_nodes = None
+        self.job_gpu_nodes = None
         self.latest_end = ''
         self.jobs = None
         self.db_filter = None
@@ -155,11 +157,11 @@ class GetStats:
         self.hostlist = hostlist.expand_hostlist(self.nodelist)
         self.job_hostlist = [host + '.desy.de' for host in self.hostlist]
         set_nodes = set(self.all_nodes)
-        self.job_nodes = ([node for node in self.job_hostlist if node in set_nodes]) if self.job_hostlist else None
+        self.job_gpu_nodes = ([node for node in self.job_hostlist if node in set_nodes]) if self.job_hostlist else None
 
-        if self.job_nodes is not None:
-            self.join_nodes = '|'.join([node for node in self.job_nodes])
-            self.job_nodes_string = self.job_nodes if self.job_nodes is str else ' | '.join(self.job_nodes)
+        if self.job_gpu_nodes is not None:
+            self.join_nodes = '|'.join([node for node in self.job_gpu_nodes])
+            self.job_nodes_string = self.job_gpu_nodes if self.job_gpu_nodes is str else ' | '.join(self.job_gpu_nodes)
 
         # Calculate total CPU time used for job steps
         for step in self.job_steps:
@@ -172,6 +174,7 @@ class GetStats:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
             self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * self.cores))
+            self.lost_cpu_time = str(timedelta(seconds=self.job_elapsed_s - self.total_cpu_sum))
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
@@ -226,15 +229,15 @@ class GetStats:
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
                                 INSERT INTO reportdata (
-                                    jobID, username, account, efficiency, used_time, booked_time, real_time,
-                                    state, gpu_nodes, gpu_efficiency, cores, start, end
+                                    jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time,
+                                    state, cores, gpu_nodes, start, end
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
                                 gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
-                            data['job_id'], data['user'], data['account'], data['efficiency'],
-                            data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
-                            data['gpu_efficiency'], data['cores'], data['start'], data['end']
+                            data['job_id'], data['user'], data['account'], data['efficiency'], data['gpu_efficiency'], data['gpu_nodes'], data['real_time'],
+                            data['used'], data['booked'], data['state'],
+                             data['cores'], data['start'], data['end']
                         ))
                         print(f"nodes: {data['gpu_nodes']}")
                         print(f"nodes: {data['gpu_efficiency']}")
@@ -244,6 +247,7 @@ class GetStats:
         #except Exception as err:
         #    print(f'Error endtime, job {job_id}:{err}')
         # Print an error message if job processing fails
+
 
     def calculate_avg_eff(self, cur) -> None:
         """
@@ -313,7 +317,8 @@ class GetStats:
                 values = data['data']['result'][0]['values']
 
                 int_values = [float(value[1]) for value in values]
-                self.gpu_eff = (sum(int_values) / len(int_values))*100 if int_values else 0
+                self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
+                self.lost_gpu_time = str(timedelta(seconds=self.job_gpu_nodes.count() * self.real_time * (1 - self.gpu_eff)))
                 #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print("Error: Unexpected response structure")
@@ -332,13 +337,13 @@ class GetStats:
             "user": self.job_data.user_name,
             "account": self.job_data.account,
             "efficiency": self.job_eff,
-            "used": self.used_time,
-            "booked": self.job_elapsed,
+            "lost_cpu_time": self.used_time,
+            "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
+            "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
             "state": self.job_data.state,
-            "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
-            "gpu_efficiency": self.gpu_eff if self.gpu_eff else None,
             "cores": self.cores,
+            "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
             "start": self.start,
             "end": self.end,
         }
@@ -395,21 +400,21 @@ if __name__ == "__main__":
                   jobID INTEGER NOT NULL UNIQUE,
                   username TEXT,
                   account TEXT,
-                  efficiency REAL,
-                  used_time TEXT,
-                  booked_time TEXT,
+                  cpu_efficiency REAL,
+                  lost_cpu_time TEXT,
+                  gpu_efficiency REAL,
+                  lost_gpu_time TEXT,
                   real_time TEXT,
                   state TEXT,
-                  gpu_nodes TEXT,
-                  gpu_efficiency REAL,
                   cores INT,
+                  gpu_nodes TEXT,
                   start TEXT,
                   end TEXT
               )
-          """)
-    cur.execute("""
-              CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)
-          """)
+              """)
+
+    cur.execute("""CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)""")
+
     cur.connection.commit()
 
     # Create figures and display them
