@@ -395,13 +395,11 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data(self):
-        df = pd.read_sql_query("""SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time, real_time, cores
-                                    FROM reportdata
-                                    ORDER BY
-                                        EXTRACT(EPOCH FROM (
-                                            CAST(SPLIT_PART(job_cpu_time, 'T', 2) AS INTERVAL
-                                                HOUR TO SECOND))) ASC;
-                                        """, self.con)
+        df = pd.read_sql_query("""
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time, real_time, cores
+                    FROM reportdata
+                    ORDER BY (strftime('%s', job_cpu_time) - strftime('%s', '00:00:00')) ASC;""", self.con)
+
         fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
         st.plotly_chart(fig, theme=None)
