@@ -288,8 +288,6 @@ class GetStats:
         return
 
     def get_gpu_data(self):
-        print(self.job_nodes)
-        print(self.)
         prometheus_url = 'http://max-infra008.desy.de:9090/api/v1/query_range'
         params = {
             'query': f'nvidia_smi_utilization_gpu_ratio{{instance="{self.join_nodes}"}}',
@@ -300,6 +298,7 @@ class GetStats:
         try:
             print(prometheus_url, params)
             print(self.job_hostlist)
+            print(self.job_nodes)
             response = requests.get(prometheus_url, params=params)
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
 
