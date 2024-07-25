@@ -296,6 +296,7 @@ class GetStats:
             'step': '1m'
         }
         try:
+            print((prometheus_url, params))
             response = requests.get(prometheus_url, params=params)
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
 
