@@ -28,17 +28,19 @@ def count_keys_under_steps(d):
 
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
-    td = timedelta(seconds=total_seconds)
+    try:
+        td = timedelta(seconds=total_seconds)
 
-    # Extract days, hours, minutes, and seconds from timedelta
-    days = td.days
-    hours, remainder = divmod(td.seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
+        # Extract days, hours, minutes, and seconds from timedelta
+        days = td.days
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
 
-    # Format the result as a string
-    timestring = f"{days}T {hours}:{minutes}:{seconds}"
-    return timestring
-
+        # Format the result as a string
+        timestring = f"{days}T {hours}:{minutes}:{seconds}"
+        return timestring
+    except TypeError:
+        print('Typeerror')
 
 class GetStats:
     def __init__(self):
@@ -201,13 +203,10 @@ class GetStats:
         """
         Calculates the job efficiency as a percentage based on CPU time and elapsed time.
         """
-        try:
-            if self.cores > 0 and self.job_elapsed_s > 0:
-                self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
-            else:
-                self.job_eff = 0
-        except:
-            print(f'cannot calculate job efficiency{self.job_id}')
+        if self.cores > 0 and self.job_elapsed_s > 0:
+            self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
+        else:
+            self.job_eff = 0
 
     def get_jobs_calculate_insert_data(self, cur) -> None:
         """
