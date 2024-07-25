@@ -310,7 +310,8 @@ class GetStats:
             #print(f"Full JSON response: {data}")
 
             if 'data' in data and 'result' in data['data']:
-                self.gpu_eff = data['data']['result']
+                self.gpu_eff = sum(data['data']['result']['Metric']['__name__']['values'][1])/len(data['data']['result']['Metric']['__name__']['values'])
+                print(len(data['data']['result']['Metric']['__name__']['values']))
                 #print(f"gpu-usage: {self.gpu_eff}")
             else:
                 print("Error: Unexpected response structure")
