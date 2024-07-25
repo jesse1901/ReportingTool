@@ -168,7 +168,7 @@ class GetStats:
 
         self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 1)
 
-        # Calculate used time and booked time
+        #  Calculate used time and booked time
         if self.job_elapsed_s:
             self.used_time = str(timedelta(seconds=self.total_cpu_sum))
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
