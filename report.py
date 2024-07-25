@@ -402,7 +402,7 @@ if __name__ == "__main__":
                   gpu_efficiency REAL,
                   lost_gpu_time TEXT,
                   real_time TEXT,
-                  job_cpu_time TEXT,
+                  job_time_cpu TEXT,
                   state TEXT,
                   cores INT,
                   gpu_nodes TEXT,
