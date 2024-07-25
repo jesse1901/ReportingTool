@@ -188,7 +188,7 @@ class GetStats:
         if self.job_elapsed_s:
             self.used_time = seconds_to_timestring(self.total_cpu_time_sum)
             self.real_time = seconds_to_timestring(self.job_elapsed_s)
-            self.job_elapsed_cpu_time = seconds_to_timestring(self.job_elapsed_s * self.cores)
+            self.job_elapsed_cpu_time = seconds_to_timestring(self.job_elapsed_s * self.cores) if self.cores and self.job_elapsed_s else 0
             self.lost_cpu_time = seconds_to_timestring((self.job_elapsed_s * self.cores) - self.total_cpu_time_sum)
 
         # Format start and end times
