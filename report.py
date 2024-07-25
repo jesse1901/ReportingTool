@@ -352,7 +352,7 @@ class GetStats:
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
-            "job_cpu_time_s": self.job_elapsed_s / 3600,
+            "job_cpu_time_s": (self.job_elapsed_s / 3600),
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
