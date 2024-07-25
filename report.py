@@ -314,7 +314,7 @@ class GetStats:
                 values = data['data']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
-                num_gpu_nodes = self.job_gpu_nodes.count()
+                num_gpu_nodes = self.job_gpu_nodes.count() if not None else 0
                 lost_gpu_time_seconds = num_gpu_nodes * self.real_time * (1 - self.gpu_eff)
                 self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
                 #print(f"gpu-usage: {self.gpu_eff}"))
