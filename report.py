@@ -167,7 +167,7 @@ class GetStats:
         for step in self.job_steps:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
 
-        self.total_cpu_time_sum = (sum(self.dict_steps.values()) / 1000, 1)
+        self.total_cpu_time_sum = (sum(self.dict_steps.values()) / 1000)
 
         #  Calculate used time and booked time
         if self.job_elapsed_s:
