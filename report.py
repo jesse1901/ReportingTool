@@ -243,13 +243,13 @@ class GetStats:
                         cur.execute("""
                                 INSERT INTO reportdata (
                                     jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, job_cpu_time,
-                                    state, cores, gpu_nodes, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
+                                    job_cpu_time_s, state, cores, gpu_nodes, start, end
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?) ON CONFLICT(jobID) DO UPDATE SET 
                                 gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
-                            data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
+                            data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                     #    print(f"nodes: {data['gpu_nodes']}")
                     #    print(f"nodes: {data['gpu_efficiency']}")
@@ -352,6 +352,7 @@ class GetStats:
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
+            "job_cpu_time_s": self.job_elapsed_s,
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
@@ -396,9 +397,9 @@ class CreateFigures:
 
     def scatter_chart_data(self):
         df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time, real_time, cores
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores
                     FROM reportdata
-                    ORDER BY (strftime('%s', job_cpu_time) - strftime('%s', '00:00:00')) ASC;""", self.con)
+                    ORDER BY job_cpu_time_s ASC;""", self.con)
 
         fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
@@ -420,6 +421,7 @@ if __name__ == "__main__":
                   lost_gpu_time TEXT,
                   real_time TEXT,
                   job_cpu_time TEXT,
+                  job_cpu_time_s TEXT,
                   state TEXT,
                   cores INT,
                   gpu_nodes TEXT,
