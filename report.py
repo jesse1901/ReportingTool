@@ -397,13 +397,13 @@ class CreateFigures:
 
     def scatter_chart_data(self):
         df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state,
                     FROM reportdata
                     ORDER BY job_cpu_time_s ASC;""", self.con)
 
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
-                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
+                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
         st.plotly_chart(fig, theme=None)
 
 if __name__ == "__main__":
