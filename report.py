@@ -313,7 +313,7 @@ class GetStats:
                 values = data['data']['result'][0]['values']
 
                 int_values = [float(value[1]) for value in values]
-                self.gpu_eff = sum(int_values) / len(int_values) if int_values else 0
+                self.gpu_eff = (sum(int_values) / len(int_values))*100 if int_values else 0
                 #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print("Error: Unexpected response structure")
