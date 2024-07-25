@@ -29,6 +29,9 @@ def count_keys_under_steps(d):
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
     try:
+        if total_seconds is None:
+            timestring = '00:00:00'
+            return timestring
         td = timedelta(seconds=total_seconds)
 
         # Extract days, hours, minutes, and seconds from timedelta
