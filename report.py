@@ -229,14 +229,14 @@ class GetStats:
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
                                 INSERT INTO reportdata (
-                                    jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time,
+                                    jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, job_cpu_time,
                                     state, cores, gpu_nodes, start, end
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
                                 gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
-                            data['lost_gpu_time'], data['real_time'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
+                            data['lost_gpu_time'], data['real_time'], data['job_cpu_time'],data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                         print(f"nodes: {data['gpu_nodes']}")
                         print(f"nodes: {data['gpu_efficiency']}")
@@ -338,6 +338,7 @@ class GetStats:
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
+            "job_cpu_time": self.used_time,
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
@@ -381,12 +382,10 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data(self):
-        df = pd.read_sql_query("SELECT jobID, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time FROM reportdata ORDER BY lost_cpu_time ASC",
+        df = pd.read_sql_query("SELECT jobID, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_time_cpu FROM reportdata ORDER BY lost_cpu_time ASC",
                                self.con)
         fig = px.scatter(df, x="lost_cpu_time", y="cpu_efficiency", color="gpu_efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
-
-
 
 if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
@@ -403,6 +402,7 @@ if __name__ == "__main__":
                   gpu_efficiency REAL,
                   lost_gpu_time TEXT,
                   real_time TEXT,
+                  job_cpu_time TEXT,
                   state TEXT,
                   cores INT,
                   gpu_nodes TEXT,
