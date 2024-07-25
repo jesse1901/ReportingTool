@@ -235,9 +235,8 @@ class GetStats:
                                 gpu_nodes = excluded.gpu_nodes,
                                 gpu_efficiency = excluded.gpu_efficiency 
                             """, (
-                            data['job_id'], data['user'], data['account'], data['efficiency'], data['gpu_efficiency'], data['gpu_nodes'], data['real_time'],
-                            data['used'], data['booked'], data['state'],
-                             data['cores'], data['start'], data['end']
+                            data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
+                            data['lost_gpu_time'], data['real_time'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                         print(f"nodes: {data['gpu_nodes']}")
                         print(f"nodes: {data['gpu_efficiency']}")
@@ -337,7 +336,7 @@ class GetStats:
             "user": self.job_data.user_name,
             "account": self.job_data.account,
             "efficiency": self.job_eff,
-            "lost_cpu_time": self.used_time,
+            "lost_cpu_time": self.lost_cpu_time,
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
