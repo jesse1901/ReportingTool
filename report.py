@@ -352,7 +352,7 @@ class GetStats:
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
-            "job_cpu_time_s": self.job_elapsed_s,
+            "job_cpu_time_s": self.job_elapsed_s / 3600,
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
@@ -399,7 +399,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
             SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores
                     FROM reportdata
-                    ORDER BY job_cpu_time_s / 3600 ASC;""", self.con)
+                    ORDER BY job_cpu_time_sASC;""", self.con)
 
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
