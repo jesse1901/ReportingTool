@@ -28,10 +28,7 @@ def count_keys_under_steps(d):
 
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
-    try:
-        if total_seconds is None:
-            timestring = '00:00:00'
-            return timestring
+
         td = timedelta(seconds=total_seconds)
 
         # Extract days, hours, minutes, and seconds from timedelta
@@ -42,8 +39,7 @@ def seconds_to_timestring(total_seconds):
         # Format the result as a string
         timestring = f"{days}T {hours}:{minutes}:{seconds}"
         return timestring
-    except TypeError:
-        print('Typeerror')
+
 
 class GetStats:
     def __init__(self):
@@ -406,6 +402,9 @@ class CreateFigures:
                     FROM reportdata
                     ORDER BY job_cpu_time_s ASC;""", self.con)
 
+        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
+        df = df.dropna(subset=['job_cpu_time_s'])
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="reds", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
