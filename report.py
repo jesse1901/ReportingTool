@@ -381,10 +381,11 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data(self):
-        df = pd.read_sql_query("SELECT jobID, efficiency, booked_time FROM reportdata ORDER BY booked_time ASC",
+        df = pd.read_sql_query("SELECT jobID, efficiency, real_time FROM reportdata ORDER BY booked_time ASC",
                                self.con)
-        fig = px.scatter(df, x="booked_time", y="efficiency", color="efficiency", size_max=1)
+        fig = px.scatter(df, x="real_time", y="efficiency", color="efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
+
 
 
 if __name__ == "__main__":
@@ -419,7 +420,7 @@ if __name__ == "__main__":
     create.frame_user_all()
     #    create.frame_group_by_user()
     #    create.chart_cpu_utilization()
-    #    create.scatter_chart_data()
+    create.scatter_chart_data()
 
     # Main loop to continuously fetch job data and update average efficiency
     while True:
