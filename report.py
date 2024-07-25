@@ -312,9 +312,8 @@ class GetStats:
             # Debug: Print the full JSON response
             #print(f"Full JSON response: {data}")
 
-            if 'data' in data and 'values' in data['data']['result']:
+            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in data['data']['result'][0]:
                 values = data['data']['result'][0]['values']
-
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 self.lost_gpu_time = str(timedelta(seconds=self.job_gpu_nodes.count() * self.real_time * (1 - self.gpu_eff)))
