@@ -178,7 +178,7 @@ class GetStats:
                 td = pd.to_timedelta(used_time_str)
                 print(td)
                 # Create a DataFrame with the timedelta object
-                df = pd.DataFrame({'td': [td]})
+                df = pd.DataFrame({'td': td})
 
                 # Remove the days component from the timedelta
                 df['td'] = df['td'] - pd.to_timedelta(df['td'].dt.days, unit='d')
