@@ -352,7 +352,7 @@ class GetStats:
             "lost_gpu_time": self.lost_gpu_time,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
-            "job_cpu_time_s": (self.job_elapsed_s / 3600),
+            "job_cpu_time_s": self.job_elapsed_s,
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
@@ -401,7 +401,7 @@ class CreateFigures:
                     FROM reportdata
                     ORDER BY job_cpu_time_s ASC;""", self.con)
 
-        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
+        fig = px.scatter(df, x=str("job_cpu_time_s"/3600), y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
         st.plotly_chart(fig, theme=None)
 
