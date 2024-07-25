@@ -168,7 +168,6 @@ class GetStats:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
 
         self.total_cpu_time_sum = round(sum(self.dict_steps.values()) / 1000)
-        print(self.total_cpu_time_sum)
         #  Calculate used time and booked time
         if self.job_elapsed_s:
             self.used_time = str(timedelta(seconds=self.total_cpu_time_sum))
@@ -224,7 +223,7 @@ class GetStats:
                 end_time = end_time.isoformat('T', 'auto')
                 try:
                     if end_time is not None and end_time > self.latest_end:
-                        print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
+                     #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
                         data = stats.to_dict()
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
@@ -238,8 +237,8 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'],data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
-                        print(f"nodes: {data['gpu_nodes']}")
-                        print(f"nodes: {data['gpu_efficiency']}")
+                    #    print(f"nodes: {data['gpu_nodes']}")
+                    #    print(f"nodes: {data['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
@@ -287,12 +286,12 @@ class GetStats:
                         (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
 
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-            print(self.intervall)
+            # print(self.intervall)
             cur.connection.commit()
 
         # Sleep for 2 seconds to avoid excessive querying
-        print('sleep')
-        time.sleep(2)
+        # print('sleep')
+        # time.sleep(2)
         return
 
     def get_gpu_data(self):
