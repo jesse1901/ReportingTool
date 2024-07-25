@@ -313,7 +313,7 @@ class GetStats:
             # Debug: Print the full JSON response
             #print(f"Full JSON response: {data}")
 
-            if 'data' in data and 'result' in data['data']:
+            if 'data' in data and 'values' in data['data']['result']:
                 values = data['data']['result'][0]['values']
 
                 int_values = [float(value[1]) for value in values]
