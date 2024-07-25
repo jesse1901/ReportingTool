@@ -158,7 +158,7 @@ class GetStats:
         self.job_nodes = ([node for node in self.job_hostlist if node in set_nodes]) if self.job_hostlist else None
 
         if self.job_nodes is not None:
-            self.join_nodes = '|'.join([f"{node}.desy.de" for node in self.job_nodes])
+            self.join_nodes = '|'.join([node for node in self.job_nodes])
             self.job_nodes_string = self.job_nodes if self.job_nodes is str else ' | '.join(self.job_nodes)
 
         # Calculate total CPU time used for job steps
