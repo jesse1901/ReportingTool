@@ -174,8 +174,9 @@ class GetStats:
             td = pd.to_timedelta(used_time_str)
             df = pd.DataFrame({'td': [td]})
             df['td'] = df['td'].astype(str).str.extract('days (.*?)\.')
-            self.used_time = df['td']
+            self.used_time = df['td'][0]
             print(self.used_time)
+            self.real_time = str(timedelta(seconds=self.job_elapsed_s))
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
             self.job_elapsed_cpu_time = str(timedelta(seconds=self.job_elapsed_s * self.cores))
             self.lost_cpu_time = str(timedelta(seconds=(self.job_elapsed_s * self.cores) - self.total_cpu_time_sum))
