@@ -172,7 +172,7 @@ class GetStats:
         if self.job_elapsed_s:
             used_time_str = str(timedelta(seconds=self.total_cpu_time_sum))
             td = pd.to_timedelta(used_time_str)
-            df = pd.DataFrame({'td': td})
+            df = pd.DataFrame({'td': [td]})
             df['td'] = df['td'].astype(str).str.extract('days (.*?)\.')
             self.used_time = df['td']
             print(self.used_time)
