@@ -26,6 +26,20 @@ def count_keys_under_steps(d):
     return []
 
 
+def seconds_to_timestring(total_seconds):
+    # Create a timedelta object from the total seconds
+    td = timedelta(seconds=total_seconds)
+
+    # Extract days, hours, minutes, and seconds from timedelta
+    days = td.days
+    hours, remainder = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    # Format the result as a string
+    timestring = f"{days} {hours}:{minutes}:{seconds}"
+    return timestring
+
+
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
@@ -170,16 +184,10 @@ class GetStats:
         self.total_cpu_time_sum = round(sum(self.dict_steps.values()) / 1000)
         #  Calculate used time and booked time
         if self.job_elapsed_s:
-            used_time_str = str(timedelta(seconds=self.total_cpu_time_sum))
-            td = pd.to_timedelta(used_time_str)
-            df = pd.DataFrame({'td': [td]})
-            df['td'] = df['td'].astype(str).str.extract('days (.*?)\.')
-            self.used_time = df['td'][0]
-            print(self.used_time)
-            self.real_time = str(timedelta(seconds=self.job_elapsed_s))
-            self.real_time = str(timedelta(seconds=self.job_elapsed_s))
-            self.job_elapsed_cpu_time = str(timedelta(seconds=self.job_elapsed_s * self.cores))
-            self.lost_cpu_time = str(timedelta(seconds=(self.job_elapsed_s * self.cores) - self.total_cpu_time_sum))
+            self.used_time = seconds_to_timestring(self.total_cpu_time_sum)
+            self.real_time = seconds_to_timestring(self.job_elapsed_s)
+            self.job_elapsed_cpu_time = seconds_to_timestring(self.job_elapsed_s * self.cores)
+            self.lost_cpu_time = seconds_to_timestring((self.job_elapsed_s * self.cores) - self.total_cpu_time_sum)
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
