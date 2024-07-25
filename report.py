@@ -397,7 +397,7 @@ class CreateFigures:
     def scatter_chart_data(self):
         df = pd.read_sql_query("SELECT jobID, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time FROM reportdata ORDER BY lost_cpu_time ASC",
                                self.con)
-        fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color="cpu_efficiency" if "gpu_efficiency" == None else "gpu_efficiency" , size_max=1)
+        fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color="gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
 
 if __name__ == "__main__":
