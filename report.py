@@ -401,7 +401,7 @@ class CreateFigures:
                     FROM reportdata
                     ORDER BY job_cpu_time_s ASC;""", self.con)
 
-        df['job_cpu_time_s'] = int(df['job_cpu_time_s']).apply(seconds_to_timestring)
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
         st.plotly_chart(fig, theme=None)
@@ -422,7 +422,7 @@ if __name__ == "__main__":
                   lost_gpu_time TEXT,
                   real_time TEXT,
                   job_cpu_time TEXT,
-                  job_cpu_time_s TEXT,
+                  job_cpu_time_s REAL,
                   state TEXT,
                   cores INT,
                   gpu_nodes TEXT,
