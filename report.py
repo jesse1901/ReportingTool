@@ -171,34 +171,36 @@ class GetStats:
         #  Calculate used time and booked time
         if self.job_elapsed_s:
             if self.job_elapsed_s:
-                # Convert total CPU time to a timedelta object and then to a string
-                used_time_str = str(timedelta(seconds=self.total_cpu_time_sum))
+                used_time_td = timedelta(seconds=self.total_cpu_time_sum)
+                print("Total CPU time as timedelta:", used_time_td)
 
-                # Convert the used time string back to a timedelta object for manipulation
-                td = pd.to_timedelta(used_time_str)
-                print(td)
+                # Convert the timedelta object to a pandas Timedelta
+                td = pd.to_timedelta(used_time_td)
+                print("Pandas Timedelta:", td)
+
                 # Create a DataFrame with the timedelta object
-                df = pd.DataFrame({'td': td})
+                df = pd.DataFrame({'td': [td]})
+
+                # Debugging: Check the DataFrame
+                print("Initial DataFrame:\n", df)
 
                 # Remove the days component from the timedelta
                 df['td'] = df['td'] - pd.to_timedelta(df['td'].dt.days, unit='d')
-                print(df.head())
-                # Assign the adjusted used time to self.used_time
-                self.used_time = df['td'].iloc[0]  # Extract the single timedelta value
 
-                # Print the adjusted used time
+                # Debugging: Check the DataFrame after removing days
+                print("DataFrame after removing days:\n", df)
+
+                # Assign the adjusted used time to self.used_time
+                self.used_time = df['td'].iloc[0]
                 print("Adjusted used time:", self.used_time)
 
                 # Calculate and convert real time to a string
                 self.real_time = str(timedelta(seconds=self.job_elapsed_s))
+                print("Real time:", self.real_time)
 
                 # Calculate and convert job elapsed CPU time to a string
                 self.job_elapsed_cpu_time = str(timedelta(seconds=self.job_elapsed_s * self.cores))
-
-                # Print the real time and job elapsed CPU time
-                print("Real time:", self.real_time)
                 print("Job elapsed CPU time:", self.job_elapsed_cpu_time)
-            self.lost_cpu_time = str(timedelta(seconds=(self.job_elapsed_s * self.cores) - self.total_cpu_time_sum))
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
