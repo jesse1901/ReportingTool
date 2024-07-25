@@ -395,17 +395,45 @@ class CreateFigures:
         """, self.con)
         st.line_chart(df.set_index('period'))
 
-    def scatter_chart_data(self):
-        df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-                    FROM reportdata
-                    ORDER BY job_cpu_time_s ASC;""", self.con)
+    # def scatter_chart_data(self):
+    #     df = pd.read_sql_query("""
+    #         SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+    #                 FROM reportdata
+    #                 ORDER BY job_cpu_time_s ASC;""", self.con)
+    #
+    #     df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+    #     fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="reds", size_max=1,
+    #                      hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+    #     st.plotly_chart(fig, theme=None)
+def scatter_chart_data(self):
+    df = pd.read_sql_query("""
+        SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+        FROM reportdata
+        ORDER BY job_cpu_time_s ASC;""", self.con)
 
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="reds", size_max=1,
+    df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+
+    # Create a new column to determine the color based on the presence of GPU efficiency
+    df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
+
+    # Separate the data into two based on the new column
+    df_cpu = df[df['color_scale'] == 'cpu']
+    df_gpu = df[df['color_scale'] == 'gpu']
+
+    # Create scatter plots for both datasets
+    fig = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
+                     color_continuous_scale="blues", size_max=1,
+                     hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+
+    fig_gpu = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
+                         color_continuous_scale="reds", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-        st.plotly_chart(fig, theme=None)
 
+    # Update fig with fig_gpu traces
+    for trace in fig_gpu['data']:
+        fig.add_trace(trace)
+
+    st.plotly_chart(fig, theme=None)
 if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
