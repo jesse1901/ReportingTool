@@ -153,7 +153,6 @@ class GetStats:
         self.nodelist = self.job_data.nodelist
         self.job_hostlist = hostlist.expand_hostlist(self.nodelist)
         set_nodes = set(self.all_nodes)
-        print(set_nodes)
         self.job_nodes = [node for node in self.job_hostlist if node in set_nodes]
         self.join_nodes = '|'.join([f"{node}.desy.de" for node in self.job_nodes])
         self.job_nodes_string = self.job_hostlist if self.job_hostlist is str else ' | '.join(self.job_hostlist)
@@ -233,6 +232,7 @@ class GetStats:
                             data['used'], data['booked'], data['real_time'], data['state'], data['gpu_nodes'],
                             data['gpu_efficiency'], data['cores'], data['start'], data['end']
                         ))
+                        print(data)
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
