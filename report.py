@@ -400,7 +400,7 @@ class CreateFigures:
                                     ORDER BY
                                         EXTRACT(EPOCH FROM (
                                             CAST(SPLIT_PART(job_cpu_time, 'T', 2) AS INTERVAL
-                                                HOUR TO SECOND))) ASC
+                                                HOUR TO SECOND))) ASC;
                                         """, self.con)
         fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color= "gpu_efficiency" if "gpu_efficiency" else "cpu_efficiency", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores"])
