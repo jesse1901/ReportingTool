@@ -170,7 +170,12 @@ class GetStats:
         self.total_cpu_time_sum = round(sum(self.dict_steps.values()) / 1000)
         #  Calculate used time and booked time
         if self.job_elapsed_s:
-            self.used_time = str(timedelta(seconds=self.total_cpu_time_sum))
+            used_time_str = str(timedelta(seconds=self.total_cpu_time_sum))
+            td = pd.to_timedelta(used_time_str)
+            df = pd.DataFrame({'td': td})
+            df['td'] = df['td'] - pd.to_timedelta(df['td'].dt.days, unit='d')
+            self.used_time = df['td']
+            print(self.used_time)
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
             self.job_elapsed_cpu_time = str(timedelta(seconds=self.job_elapsed_s * self.cores))
             self.lost_cpu_time = str(timedelta(seconds=(self.job_elapsed_s * self.cores) - self.total_cpu_time_sum))
@@ -383,7 +388,7 @@ class CreateFigures:
     def scatter_chart_data(self):
         df = pd.read_sql_query("SELECT jobID, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time FROM reportdata ORDER BY lost_cpu_time ASC",
                                self.con)
-        fig = px.scatter(df, x="lost_cpu_time", y="cpu_efficiency", color="gpu_efficiency", size_max=1)
+        fig = px.scatter(df, x="job_cpu_time", y="cpu_efficiency", color="gpu_efficiency", size_max=1)
         st.plotly_chart(fig, theme=None)
 
 if __name__ == "__main__":
