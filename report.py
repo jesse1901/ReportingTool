@@ -36,7 +36,7 @@ def seconds_to_timestring(total_seconds):
     minutes, seconds = divmod(remainder, 60)
 
     # Format the result as a string
-    timestring = f"{days} {hours}:{minutes}:{seconds}"
+    timestring = f"{days}T{hours}:{minutes}:{seconds}"
     return timestring
 
 
