@@ -371,7 +371,7 @@ class CreateFigures:
         Displays all job data from the reportdata table in the Streamlit app.
         """
         df = pd.read_sql_query("SELECT * FROM reportdata", self.con)
-        st.write(df)
+        st.write(df, width=500)
 
     def frame_group_by_user(self) -> None:
         """
