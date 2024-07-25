@@ -176,13 +176,13 @@ class GetStats:
 
                 # Convert the used time string back to a timedelta object for manipulation
                 td = pd.to_timedelta(used_time_str)
-
+                print(td)
                 # Create a DataFrame with the timedelta object
                 df = pd.DataFrame({'td': [td]})
 
                 # Remove the days component from the timedelta
                 df['td'] = df['td'] - pd.to_timedelta(df['td'].dt.days, unit='d')
-
+                print(df.head())
                 # Assign the adjusted used time to self.used_time
                 self.used_time = df['td'].iloc[0]  # Extract the single timedelta value
 
