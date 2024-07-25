@@ -48,14 +48,14 @@ class GetStats:
         self.used_time = ''
         self.job_eff = 0
         self.job_steps = {}
-        self.job_elapsed = None
+        self.job_elapsed_cpu_time = None
         self.start = None
         self.end = None
         self.job_data = {}
         self.job_cpu = {}
         self.job_all = {}
         self.job_elapsed_s = 0
-        self.total_cpu_sum = 0
+        self.total_cpu_time_sum = 0
         self.dict_steps = {}
         self.min_start = ''
         self.max_end = ''
@@ -167,14 +167,14 @@ class GetStats:
         for step in self.job_steps:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
 
-        self.total_cpu_sum = round(sum(self.dict_steps.values()) / 1000, 1)
+        self.total_cpu_time_sum = (sum(self.dict_steps.values()) / 1000, 1)
 
         #  Calculate used time and booked time
         if self.job_elapsed_s:
-            self.used_time = str(timedelta(seconds=self.total_cpu_sum))
+            self.used_time = str(timedelta(seconds=self.total_cpu_time_sum))
             self.real_time = str(timedelta(seconds=self.job_elapsed_s))
-            self.job_elapsed = str(timedelta(seconds=self.job_elapsed_s * self.cores))
-            self.lost_cpu_time = str(timedelta(seconds=self.job_elapsed_s - self.total_cpu_sum))
+            self.job_elapsed_cpu_time = str(timedelta(seconds=self.job_elapsed_s * self.cores))
+            self.lost_cpu_time = str(timedelta(seconds=(self.job_elapsed_s * self.cores) - self.total_cpu_time_sum))
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
@@ -189,7 +189,7 @@ class GetStats:
         Calculates the job efficiency as a percentage based on CPU time and elapsed time.
         """
         if self.cores > 0 and self.job_elapsed_s > 0:
-            self.job_eff = round((self.total_cpu_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
+            self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
         else:
             self.job_eff = 0
 
