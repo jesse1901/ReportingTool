@@ -370,7 +370,7 @@ class CreateFigures:
             tickvals=[np.log1p(10 ** i) for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)],
             ticktext=[10 ** i for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)]
         ))
-        fig.update_traces(marker=dict(size=12))
+        fig.update_traces(marker=dict(size=1))
 
         st.plotly_chart(fig, theme=None)
 
