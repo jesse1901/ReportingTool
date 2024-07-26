@@ -1,5 +1,5 @@
-
 def hostlist_gpu():
+
                 gpu_nodes = ['exflong03.desy.de', 'exflong04.desy.de', 'exflong05.desy.de', 'exflong06.desy.de',
                           'max-cfelg007.desy.de', 'max-cfelg007.desy.de', 'max-cmsg001.desy.de', 'max-cmsg002.desy.de',
                           'max-cmsg005.desy.de', 'max-cmsg006.desy.de', 'max-cmsg007.desy.de', 'max-cmsg008.desy.de',
