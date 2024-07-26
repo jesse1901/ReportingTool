@@ -336,6 +336,7 @@ class CreateFigures:
         """, self.con)
         st.line_chart(df.set_index('period'))
 
+
     def scatter_chart_data_color_lost_cpu(self):
         df = pd.read_sql_query("""
             SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
