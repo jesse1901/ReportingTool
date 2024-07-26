@@ -417,6 +417,7 @@ if __name__ == "__main__":
     create.frame_group_by_user()
     #    create.chart_cpu_utilization()
     create.scatter_chart_data_cpu_gpu_eff()
+    create.scatter_chart_data_color_lost_cpu()
 
     # Main loop to continuously fetch job data.py and update average efficiency
     while True:
