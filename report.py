@@ -380,7 +380,7 @@ class CreateFigures:
         Displays average efficiency and job count grouped by username in the Streamlit app.
         """
         df = pd.read_sql_query("""
-            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID), AVG(real_time) AS anzahl_jobs 
+            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(real_time), 
             FROM reportdata 
             GROUP BY username""", self.con)
         st.write(df)
