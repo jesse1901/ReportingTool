@@ -253,9 +253,10 @@ class GetStats:
                 values = data['data']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
-                lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
-                self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
-                #print(f"gpu-usage: {self.gpu_eff}"))
+                if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
+                    lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
+                    self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
+                    #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
         except requests.exceptions.RequestException as e:
@@ -347,6 +348,7 @@ class CreateFigures:
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        df['gpu_efficiency'] = df['gpu_efficiency'].total_seconds()
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="blues", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
         st.plotly_chart(fig, theme=None)
