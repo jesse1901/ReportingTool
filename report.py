@@ -356,7 +356,8 @@ class CreateFigures:
 
         fig = px.scatter(
             df,
-            x="job_cpu_time_s",
+            x="job_cpu_time_s" ,
+            x_label="real_job_time",
             y="cpu_efficiency",
             color="log_lost_cpu_time",
             color_continuous_scale="blues",
