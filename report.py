@@ -394,7 +394,7 @@ class CreateFigures:
             x="job_cpu_time_s",
             y="cpu_efficiency",
             color="gpu_efficiency",
-            color_continuous_scale="sunsetdark",
+            color_continuous_scale="greens",
             size_max=1,
             hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
             labels={"job_cpu_time_s": "real_job_time"}
