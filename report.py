@@ -372,7 +372,9 @@ class CreateFigures:
         """
         Displays all job data from the reportdata table in the Streamlit app.
         """
-        df = pd.read_sql_query("SELECT * FROM reportdata", self.con)
+        df = pd.read_sql_query("""
+        SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
+        job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end FROM reportdata""", self.con)
         st.write(df)
 
     def frame_group_by_user(self) -> None:
@@ -380,7 +382,7 @@ class CreateFigures:
         Displays average efficiency and job count grouped by username in the Streamlit app.
         """
         df = pd.read_sql_query("""
-            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, SUM(lost_cpu_time_s)/3600 as lost_cpu_hours
+            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
             FROM reportdata 
             GROUP BY username""", self.con)
         st.write(df)
