@@ -27,6 +27,12 @@ def count_keys_under_steps(d):
     return []
 
 
+def timestring_to_seconds(timestring):
+    t = datetime.datetime.strptime(timestring, "%dT %H:%M:%S")
+    total_seconds = t.day * 86400 + t.hour * 3600 + t.minute * 60 + t.second
+    return total_seconds
+
+
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
 
@@ -339,18 +345,24 @@ class CreateFigures:
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
         st.plotly_chart(fig, theme=None)
 
-    def scatter_chart_data_cpu_gpu_eff(self):
+    def scatter_chart_data_color_lost_cpu(self):
         df = pd.read_sql_query("""
             SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-                    FROM reportdata
-                    ORDER BY job_cpu_time_s ASC;""", self.con)
+            FROM reportdata
+            ORDER BY job_cpu_time_s ASC;""", self.con)
 
         df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="blues", size_max=1,
-                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+
+        # Convert lost_cpu_time to seconds
+        df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
+
+        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color="lost_cpu_time",
+                         color_continuous_scale="blues", size_max=1,
+                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores",
+                                     "state"])
         st.plotly_chart(fig, theme=None)
 
 
