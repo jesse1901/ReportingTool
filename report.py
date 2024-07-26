@@ -7,6 +7,8 @@ import sqlite3
 import plotly.express as px
 import requests
 import hostlist
+import data
+from SlurmReportingTool import data
 import json
 
 
@@ -78,87 +80,11 @@ class GetStats:
         self.avg_eff = 0
         self.intervall = ''
         self.nodelist = []
-        self.all_nodes = ['exflong03.desy.de', 'exflong04.desy.de', 'exflong05.desy.de', 'exflong06.desy.de',
-                          'max-cfelg007.desy.de', 'max-cfelg007.desy.de', 'max-cmsg001.desy.de', 'max-cmsg002.desy.de',
-                          'max-cmsg005.desy.de', 'max-cmsg006.desy.de', 'max-cmsg007.desy.de', 'max-cmsg008.desy.de',
-                          'max-cmsg009.desy.de', 'max-cmsg010.desy.de', 'max-cssbg002.desy.de', 'max-cssbg002.desy.de',
-                          'max-cssbg003.desy.de', 'max-cssbg003.desy.de', 'max-cssbg004.desy.de',
-                          'max-cssbg004.desy.de', 'max-cssbg005.desy.de', 'max-cssbg005.desy.de',
-                          'max-cssbg012.desy.de', 'max-cssbg012.desy.de', 'max-cssbg012.desy.de',
-                          'max-cssbg012.desy.de', 'max-cssbg018.desy.de', 'max-cssbg018.desy.de',
-                          'max-cssbg018.desy.de', 'max-cssbg018.desy.de', 'max-display001.desy.de',
-                          'max-display001.desy.de', 'max-display001.desy.de', 'max-display001.desy.de',
-                          'max-display002.desy.de', 'max-display002.desy.de', 'max-display002.desy.de',
-                          'max-display002.desy.de', 'max-display003.desy.de', 'max-display003.desy.de',
-                          'max-display003.desy.de', 'max-display003.desy.de', 'max-display004.desy.de',
-                          'max-display004.desy.de', 'max-display004.desy.de', 'max-display004.desy.de',
-                          'max-display005.desy.de', 'max-display005.desy.de', 'max-display005.desy.de',
-                          'max-display005.desy.de', 'max-display007.desy.de', 'max-display007.desy.de',
-                          'max-display008.desy.de', 'max-display008.desy.de', 'max-display009.desy.de',
-                          'max-display009.desy.de', 'max-display010.desy.de', 'max-display010.desy.de',
-                          'max-exfl-display001.desy.de', 'max-exfl-display001.desy.de', 'max-exfl-display002.desy.de',
-                          'max-exfl-display002.desy.de', 'max-exfl-display003.desy.de', 'max-exfl-display003.desy.de',
-                          'max-exfl-display004.desy.de', 'max-exfl-display004.desy.de', 'max-exflg005.desy.de',
-                          'max-exflg005.desy.de', 'max-exflg006.desy.de', 'max-exflg007.desy.de',
-                          'max-exflg009.desy.de', 'max-exflg010.desy.de', 'max-exflg011.desy.de',
-                          'max-exflg012.desy.de', 'max-exflg013.desy.de', 'max-exflg014.desy.de',
-                          'max-exflg015.desy.de', 'max-exflg016.desy.de', 'max-exflg017.desy.de',
-                          'max-exflg018.desy.de', 'max-exflg019.desy.de', 'max-exflg020.desy.de',
-                          'max-exflg021.desy.de', 'max-exflg022.desy.de', 'max-exflg023.desy.de',
-                          'max-exflg024.desy.de', 'max-exflg025.desy.de', 'max-exflg026.desy.de',
-                          'max-exflg027.desy.de', 'max-exflg028.desy.de', 'max-exflg028.desy.de',
-                          'max-exflg029.desy.de',
-                          'max-exflg029.desy.de', 'max-exflg030.desy.de', 'max-exflg030.desy.de',
-                          'max-exflg031.desy.de', 'max-exflg031.desy.de', 'max-exflg032.desy.de',
-                          'max-exflg033.desy.de', 'max-exflg034.desy.de', 'max-exflg035.desy.de',
-                          'max-fs-display001.desy.de', 'max-fs-display001.desy.de', 'max-fs-display002.desy.de',
-                          'max-fs-display002.desy.de', 'max-fs-display003.desy.de', 'max-fs-display003.desy.de',
-                          'max-fs-display004.desy.de', 'max-fs-display004.desy.de', 'max-fs-display005.desy.de',
-                          'max-fs-display005.desy.de', 'max-fs-display006.desy.de', 'max-fs-display006.desy.de',
-                          'max-hzgg001.desy.de', 'max-hzgg001.desy.de', 'max-hzgg003.desy.de', 'max-hzgg003.desy.de',
-                          'max-hzgg004.desy.de', 'max-hzgg004.desy.de', 'max-hzgg007.desy.de', 'max-hzgg007.desy.de',
-                          'max-hzgg008.desy.de', 'max-hzgg008.desy.de', 'max-hzgg009.desy.de', 'max-hzgg009.desy.de',
-                          'max-hzgg010.desy.de', 'max-hzgg010.desy.de', 'max-nova001.desy.de', 'max-nova001.desy.de',
-                          'max-nova002.desy.de', 'max-nova002.desy.de', 'max-p3ag004.desy.de', 'max-p3ag005.desy.de',
-                          'max-p3ag007.desy.de', 'max-p3ag008.desy.de', 'max-p3ag010.desy.de', 'max-p3ag011.desy.de',
-                          'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag011.desy.de', 'max-p3ag012.desy.de',
-                          'max-p3ag014.desy.de', 'max-p3ag015.desy.de', 'max-p3ag016.desy.de', 'max-p3ag017.desy.de',
-                          'max-p3ag018.desy.de', 'max-p3ag019.desy.de', 'max-p3ag020.desy.de', 'max-p3ag021.desy.de',
-                          'max-p3ag022.desy.de', 'max-p3ag023.desy.de', 'max-p3ag024.desy.de', 'max-p3ag025.desy.de',
-                          'max-p3ag026.desy.de', 'max-p3ag027.desy.de', 'max-p3ag028.desy.de', 'max-p3ag029.desy.de',
-                          'max-p3ag030.desy.de', 'max-p3ag031.desy.de', 'max-uhhg001.desy.de', 'max-uhhg001.desy.de',
-                          'max-uhhg001.desy.de', 'max-uhhg001.desy.de', 'max-uhhg002.desy.de', 'max-uhhg002.desy.de',
-                          'max-uhhg002.desy.de', 'max-uhhg002.desy.de', 'max-uhhg003.desy.de', 'max-uhhg003.desy.de',
-                          'max-uhhg003.desy.de', 'max-uhhg003.desy.de', 'max-uhhg004.desy.de', 'max-uhhg004.desy.de',
-                          'max-uhhg004.desy.de', 'max-uhhg004.desy.de', 'max-uhhg005.desy.de', 'max-uhhg005.desy.de',
-                          'max-uhhg005.desy.de', 'max-uhhg005.desy.de', 'max-uhhg006.desy.de', 'max-uhhg006.desy.de',
-                          'max-uhhg006.desy.de', 'max-uhhg006.desy.de', 'max-uhhg007.desy.de', 'max-uhhg007.desy.de',
-                          'max-uhhg007.desy.de', 'max-uhhg007.desy.de', 'max-uhhg008.desy.de', 'max-uhhg008.desy.de',
-                          'max-uhhg008.desy.de', 'max-uhhg008.desy.de', 'max-uhhg009.desy.de', 'max-uhhg009.desy.de',
-                          'max-uhhg009.desy.de', 'max-uhhg009.desy.de', 'max-uhhg010.desy.de', 'max-uhhg010.desy.de',
-                          'max-uhhg010.desy.de', 'max-uhhg010.desy.de', 'max-uhhg011.desy.de', 'max-uhhg011.desy.de',
-                          'max-uhhg011.desy.de', 'max-uhhg011.desy.de', 'max-uhhg012.desy.de', 'max-uhhg012.desy.de',
-                          'max-uhhg012.desy.de', 'max-uhhg012.desy.de', 'max-uhhg013.desy.de', 'max-uhhg013.desy.de',
-                          'max-uhhg013.desy.de', 'max-uhhg013.desy.de', 'max-wng002.desy.de', 'max-wng002.desy.de',
-                          'max-wng004.desy.de', 'max-wng005.desy.de', 'max-wng006.desy.de', 'max-wng007.desy.de',
-                          'max-wng008.desy.de', 'max-wng008.desy.de', 'max-wng009.desy.de', 'max-wng009.desy.de',
-                          'max-wng010.desy.de', 'max-wng012.desy.de', 'max-wng013.desy.de', 'max-wng014.desy.de',
-                          'max-wng015.desy.de', 'max-wng016.desy.de', 'max-wng017.desy.de', 'max-wng018.desy.de',
-                          'max-wng019.desy.de', 'max-wng020.desy.de', 'max-wng020.desy.de', 'max-wng021.desy.de',
-                          'max-wng021.desy.de', 'max-wng022.desy.de', 'max-wng023.desy.de', 'max-wng037.desy.de',
-                          'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng037.desy.de', 'max-wng038.desy.de',
-                          'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng038.desy.de', 'max-wng039.desy.de',
-                          'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng039.desy.de', 'max-wng040.desy.de',
-                          'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng040.desy.de', 'max-wng041.desy.de',
-                          'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng041.desy.de', 'max-wng042.desy.de',
-                          'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng042.desy.de', 'max-wng061.desy.de',
-                          'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng061.desy.de', 'max-wng062.desy.de',
-                          'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng062.desy.de', 'max-wng063.desy.de',
-                          'max-wng064.desy.de']
+        self.all_nodes = []
 
     def job_stats(self, job_id: int) -> None:
         """
-        Loads job data and calculates job statistics.
+        Loads job data.py and calculates job statistics.
         """
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
@@ -167,7 +93,7 @@ class GetStats:
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
-
+        self.all_nodes = data.hostlist_gpu()
         self.nodelist = self.job_data.nodelist
         self.hostlist = hostlist.expand_hostlist(self.nodelist)
         self.job_hostlist = [host + '.desy.de' for host in self.hostlist]
@@ -230,7 +156,7 @@ class GetStats:
 
             if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
                 #print(f"GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
-                #print("get gpu data")
+                #print("get gpu data.py")
                 stats.get_gpu_data()
                 #print(self.job_hostlist)
 
@@ -253,8 +179,8 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
-                    #    print(f"nodes: {data['gpu_nodes']}")
-                    #    print(f"nodes: {data['gpu_efficiency']}")
+                    #    print(f"nodes: {data.py['gpu_nodes']}")
+                    #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
@@ -322,10 +248,10 @@ class GetStats:
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
             data = response.json()
             # Debug: Print the full JSON response
-            #print(f"Full JSON response: {data}")
+            #print(f"Full JSON response: {data.py}")
 
-            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in data['data']['result'][0]:
-                values = data['data']['result'][0]['values']
+            if 'data.py' in data and 'result' in data['data.py'] and len(data['data.py']['result']) > 0 and 'values' in data['data.py']['result'][0]:
+                values = data['data.py']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
@@ -369,7 +295,7 @@ class CreateFigures:
 
     def frame_user_all(self) -> None:
         """
-        Displays all job data from the reportdata table in the Streamlit app.
+        Displays all job data.py from the reportdata table in the Streamlit app.
         """
         df = pd.read_sql_query("""
         SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
@@ -425,7 +351,7 @@ class CreateFigures:
     #     # Create a new column to determine the color based on the presence of GPU efficiency
     #     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
     #
-    #     # Separate the data into two based on the new column
+    #     # Separate the data.py into two based on the new column
     #     df_cpu = df[df['color_scale'] == 'cpu']
     #     df_gpu = df[df['color_scale'] == 'gpu']
     #
@@ -439,7 +365,7 @@ class CreateFigures:
     #                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
     #
     #     # Update fig with fig_gpu traces
-    #     for trace in fig_gpu['data']:
+    #     for trace in fig_gpu['data.py']:
     #         fig.add_trace(trace)
     #
     #     st.plotly_chart(fig, theme=None)
@@ -479,7 +405,7 @@ if __name__ == "__main__":
     #    create.chart_cpu_utilization()
     create.scatter_chart_data()
 
-    # Main loop to continuously fetch job data and update average efficiency
+    # Main loop to continuously fetch job data.py and update average efficiency
     while True:
         x = 29
         get = GetStats()
