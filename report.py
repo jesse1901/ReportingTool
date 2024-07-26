@@ -196,13 +196,14 @@ class GetStats:
             self.end = datetime.utcfromtimestamp(self.job_data.end_time).strftime('%Y-%m-%dT%H:%M:%S')
 
         # Calculate job efficiency
+
         self.calculate_efficiency()
 
     def calculate_efficiency(self) -> None:
         """
         Calculates the job efficiency as a percentage based on CPU time and elapsed time.
         """
-        if self.cores > 0 and self.job_elapsed_s > 0:
+        if self.cores is not None and self.job_elapsed_s is not None and self.cores > 0 and self.job_elapsed_s > 0:
             self.job_eff = round((self.total_cpu_time_sum / (self.cores * self.job_elapsed_s)) * 100, 1)
         else:
             self.job_eff = 0
