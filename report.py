@@ -306,8 +306,7 @@ class GetStats:
             cur.connection.commit()
 
         # Sleep for 2 seconds to avoid excessive querying
-        # print('sleep')
-        # time.sleep(2)
+
         return
 
     def get_gpu_data(self):
