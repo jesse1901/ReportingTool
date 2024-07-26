@@ -349,10 +349,23 @@ class CreateFigures:
         # Convert lost_cpu_time to seconds
         df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
 
-        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color="lost_cpu_time",
-                         color_continuous_scale="blues", size_max=1,
-                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores",
-                                     "state"])
+        fig = px.scatter(
+            df,
+            x="job_cpu_time_s",
+            y="cpu_efficiency",
+            color="lost_cpu_time",
+            color_continuous_scale="blues",
+            size_max=1,
+            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
+            log_x=False,
+            log_y=False,
+            range_color=[1, df['lost_cpu_time'].max()]  # ensure the color range starts at a positive value
+        )
+        fig.update_layout(coloraxis_colorbar=dict(title="Lost CPU Time (log scale)"))
+        fig.update_coloraxes(
+            colorbar=dict(tickvals=[10 ** i for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)]))
+        fig.update_traces(marker=dict(size=12))
+
         st.plotly_chart(fig, theme=None)
 
     def scatter_chart_data_cpu_gpu_eff(self):
