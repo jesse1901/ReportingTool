@@ -28,8 +28,13 @@ def count_keys_under_steps(d):
 
 
 def timestring_to_seconds(timestring):
-    t = datetime.strptime(timestring, "%dT %H:%M:%S")
-    total_seconds = t.day * 86400 + t.hour * 3600 + t.minute * 60 + t.second
+    parts = timestring.split('T')
+    days = int(parts[0])
+    hms = parts[1].split(':')
+    hours = int(hms[0])
+    minutes = int(hms[1])
+    seconds = int(hms[2])
+    total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
     return total_seconds
 
 
