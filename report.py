@@ -356,15 +356,17 @@ class CreateFigures:
 
         fig = px.scatter(
             df,
-            x="job_cpu_time_s" ,
-            x_label="real_job_time",
+            x="job_cpu_time_s",
             y="cpu_efficiency",
             color="log_lost_cpu_time",
             color_continuous_scale="blues",
             size_max=1,
             hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
             log_x=False,
-            log_y=False
+            log_y=False,
+            labels={
+                "job_cpu_time_s": "real_job_time"
+            }
         )
         fig.update_layout(coloraxis_colorbar=dict(title="Log Lost CPU Time (log scale)"))
         fig.update_coloraxes(colorbar=dict(
