@@ -379,7 +379,7 @@ class CreateFigures:
 
     def scatter_chart_data_cpu_gpu_eff(self):
         df = pd.read_sql_query("""
-            SELECT jobID, username, IFNULL(gpu_efficiency,0), cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+            SELECT jobID, username, gpu_efficiency, IFNULL(gpu_efficiency,0), cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
                     FROM reportdata
                     ORDER BY job_cpu_time_s ASC;""", self.con)
 
@@ -387,7 +387,7 @@ class CreateFigures:
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="plotly3", size_max=1,
+        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency", color_continuous_scale="plotly3", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
                          labels={
                              "job_cpu_time_s": "real_job_time"
