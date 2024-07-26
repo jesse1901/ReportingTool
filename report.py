@@ -8,7 +8,6 @@ import plotly.express as px
 import requests
 import hostlist
 import data
-from SlurmReportingTool import data
 import json
 
 
