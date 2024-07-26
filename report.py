@@ -334,6 +334,7 @@ class CreateFigures:
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        df['lost_cpu_time'] = df['lost_cpu_time'].datetime.total_seconds()
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "lost_cpu_time", color_continuous_scale="blues", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
         st.plotly_chart(fig, theme=None)
@@ -348,7 +349,6 @@ class CreateFigures:
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-        df['gpu_efficiency'] = df['gpu_efficiency'].total_seconds()
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="blues", size_max=1,
                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
         st.plotly_chart(fig, theme=None)
