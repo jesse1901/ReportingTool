@@ -400,7 +400,7 @@ class CreateFigures:
             labels={"job_cpu_time_s": "real_job_time"}
         )
 
-        fig.update_traces(marker=dict(size=5))
+        fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
     # Beispiel wie die Funktion aufgerufen werden könnte
