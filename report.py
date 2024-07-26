@@ -7,7 +7,7 @@ import sqlite3
 import plotly.express as px
 import requests
 import hostlist
-import data
+import gpu_node_data
 import json
 
 
@@ -83,7 +83,7 @@ class GetStats:
 
     def job_stats(self, job_id: int) -> None:
         """
-        Loads job data.py and calculates job statistics.
+        Loads job gpu_node_data.py and calculates job statistics.
         """
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
@@ -92,7 +92,7 @@ class GetStats:
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.job_steps = count_keys_under_steps(self.job_all)
-        self.all_nodes = data.hostlist_gpu()
+        self.all_nodes = gpu_node_data.hostlist_gpu()
         self.nodelist = self.job_data.nodelist
         self.hostlist = hostlist.expand_hostlist(self.nodelist)
         self.job_hostlist = [host + '.desy.de' for host in self.hostlist]
@@ -155,7 +155,7 @@ class GetStats:
 
             if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
                 #print(f"GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
-                #print("get gpu data.py")
+                #print("get gpu gpu_node_data.py")
                 stats.get_gpu_data()
                 #print(self.job_hostlist)
 
@@ -178,8 +178,8 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
-                    #    print(f"nodes: {data.py['gpu_nodes']}")
-                    #    print(f"nodes: {data.py['gpu_efficiency']}")
+                    #    print(f"nodes: {gpu_node_data.py['gpu_nodes']}")
+                    #    print(f"nodes: {gpu_node_data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
@@ -247,10 +247,10 @@ class GetStats:
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
             data = response.json()
             # Debug: Print the full JSON response
-            #print(f"Full JSON response: {data.py}")
+            #print(f"Full JSON response: {gpu_node_data.py}")
 
-            if 'data.py' in data and 'result' in data['data.py'] and len(data['data.py']['result']) > 0 and 'values' in data['data.py']['result'][0]:
-                values = data['data.py']['result'][0]['values']
+            if 'gpu_node_data.py' in data and 'result' in data['gpu_node_data.py'] and len(data['gpu_node_data.py']['result']) > 0 and 'values' in data['gpu_node_data.py']['result'][0]:
+                values = data['gpu_node_data.py']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
@@ -294,7 +294,7 @@ class CreateFigures:
 
     def frame_user_all(self) -> None:
         """
-        Displays all job data.py from the reportdata table in the Streamlit app.
+        Displays all job gpu_node_data.py from the reportdata table in the Streamlit app.
         """
         df = pd.read_sql_query("""
         SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
@@ -350,7 +350,7 @@ class CreateFigures:
     #     # Create a new column to determine the color based on the presence of GPU efficiency
     #     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
     #
-    #     # Separate the data.py into two based on the new column
+    #     # Separate the gpu_node_data.py into two based on the new column
     #     df_cpu = df[df['color_scale'] == 'cpu']
     #     df_gpu = df[df['color_scale'] == 'gpu']
     #
@@ -364,7 +364,7 @@ class CreateFigures:
     #                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
     #
     #     # Update fig with fig_gpu traces
-    #     for trace in fig_gpu['data.py']:
+    #     for trace in fig_gpu['gpu_node_data.py']:
     #         fig.add_trace(trace)
     #
     #     st.plotly_chart(fig, theme=None)
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     #    create.chart_cpu_utilization()
     create.scatter_chart_data()
 
-    # Main loop to continuously fetch job data.py and update average efficiency
+    # Main loop to continuously fetch job gpu_node_data.py and update average efficiency
     while True:
         x = 29
         get = GetStats()
