@@ -373,7 +373,7 @@ class CreateFigures:
             tickvals=[np.log1p(10 ** i) for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)],
             ticktext=[10 ** i for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)]
         ))
-        fig.update_traces(marker=dict(size=1))
+        fig.update_traces(marker=dict(size=3))
 
         st.plotly_chart(fig, theme=None)
 
@@ -388,8 +388,12 @@ class CreateFigures:
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
         fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "gpu_efficiency", color_continuous_scale="blues", size_max=1,
-                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-        fig.update_traces(marker=dict(size=1))
+                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
+                         labels={
+                             "job_cpu_time_s": "real_job_time"
+                         }
+                         )
+        fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
 
