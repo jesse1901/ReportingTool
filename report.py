@@ -323,7 +323,21 @@ class CreateFigures:
         """, self.con)
         st.line_chart(df.set_index('period'))
 
-    def scatter_chart_data(self):
+    def scatter_chart_data_color_lost_cpu(self):
+        df = pd.read_sql_query("""
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+                    FROM reportdata
+                    ORDER BY job_cpu_time_s ASC;""", self.con)
+
+        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
+        df = df.dropna(subset=['job_cpu_time_s'])
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        fig = px.scatter(df, x="job_cpu_time_s", y="cpu_efficiency", color= "lost_cpu_time", color_continuous_scale="reds", size_max=1,
+                         hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+        st.plotly_chart(fig, theme=None)
+
+    def scatter_chart_data_cpu_gpu_eff(self):
         df = pd.read_sql_query("""
             SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
                     FROM reportdata
@@ -402,7 +416,7 @@ if __name__ == "__main__":
     create.frame_user_all()
     create.frame_group_by_user()
     #    create.chart_cpu_utilization()
-    create.scatter_chart_data()
+    create.scatter_chart_data_cpu_gpu_eff()
 
     # Main loop to continuously fetch job data.py and update average efficiency
     while True:
