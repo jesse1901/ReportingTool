@@ -397,8 +397,8 @@ class CreateFigures:
             user_gpu_time[username] += lost_gpu
 
         # Add the converted time strings back to the DataFrame
-        df['lost_cpu_time'] = lost_cpu_times
-        df['lost_gpu_time'] = lost_gpu_times
+        df['lost_cpu_time'] = sum(lost_cpu_times)
+        df['lost_gpu_time'] = sum(lost_gpu_times)
         print(df)
         st.write(df)
     def frame_group_by_user_test(self) -> None:
