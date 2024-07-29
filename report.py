@@ -351,9 +351,13 @@ class CreateFigures:
             """, con)
         for i, j in zip(df['lost_cpu_time'], df['lost_gpu_time']):
             if i is not None:
-                lost_cpu = timestring_to_seconds(i)
+                lost_cpu += timestring_to_seconds(i)
             if j is not None:
-                lost_gpu = timestring_to_seconds(j)
+                lost_gpu += timestring_to_seconds(j)
+        lost_cpu = seconds_to_timestring(lost_cpu)
+        lost_gpu = seconds_to_timestring(lost_gpu)
+        df['lost_cpu_time'] = lost_cpu
+        df['lost_gpu_time'] = lost_gpu
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
