@@ -381,13 +381,24 @@ class CreateFigures:
         for index, row in df.iterrows():
             username = row['username']
 
-            # Split the combined time string into individual time strings
-            lost_cpu_times = row['lost_cpu_time'].split(', ')
-            lost_gpu_times = row['lost_gpu_time'].split(', ')
+            # Determine if the data is string or integer
+            if isinstance(row['lost_cpu_time'], str):
+                # Split the combined time string into individual time strings
+                lost_cpu_times = row['lost_cpu_time'].split(', ')
+                # Convert each time string to seconds and sum
+                lost_cpu_seconds = sum(timestring_to_seconds(time) for time in lost_cpu_times)
+            else:
+                # Handle the case where the data is already in seconds
+                lost_cpu_seconds = row['lost_cpu_time']
 
-            # Convert each time string to seconds and sum
-            lost_cpu_seconds = sum(timestring_to_seconds(time) for time in lost_cpu_times)
-            lost_gpu_seconds = sum(timestring_to_seconds(time) for time in lost_gpu_times)
+            if isinstance(row['lost_gpu_time'], str):
+                # Split the combined time string into individual time strings
+                lost_gpu_times = row['lost_gpu_time'].split(', ')
+                # Convert each time string to seconds and sum
+                lost_gpu_seconds = sum(timestring_to_seconds(time) for time in lost_gpu_times)
+            else:
+                # Handle the case where the data is already in seconds
+                lost_gpu_seconds = row['lost_gpu_time']
 
             user_cpu_time[username] = lost_cpu_seconds
             user_gpu_time[username] = lost_gpu_seconds
