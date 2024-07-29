@@ -377,7 +377,7 @@ class CreateFigures:
                 IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
                 COUNT(jobID) AS job_count
                 FROM reportdata
-                WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+                WHERE start >= '{start_date}' AND end <= '{end_date}'
                 GROUP BY username
                 """, con)
             df['lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
