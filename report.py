@@ -379,10 +379,12 @@ class CreateFigures:
 
     def scatter_chart_data_cpu_gpu_eff(self):
         df = pd.read_sql_query("""
-            SELECT jobID, username, IFNULL(gpu_efficiency, 0) AS gpu_efficiency, 
-                   cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-            FROM reportdata WHERE lost_cpu_time IS NULL lost_cpu_time = 0
-            ORDER BY job_cpu_time_s ASC;""", self.con)
+            SELECT jobID, username, 
+       IFNULL(gpu_efficiency, 0) AS gpu_efficiency, IFNULL(cpu_efficiency, 0) AS cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+        FROM reportdata 
+        WHERE lost_cpu_time IS NULL OR lost_cpu_time = 0
+        ORDER BY job_cpu_time_s ASC;
+""", self.con)
 
         df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
         df = df.dropna(subset=['job_cpu_time_s'])
