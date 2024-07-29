@@ -383,6 +383,8 @@ class CreateFigures:
             st.write(df)
             df['lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
             df['lost_gpu_time_seconds'] = df['lost_gpu_time'].apply(timestring_to_seconds)
+            st.write("DataFrame with Seconds Conversion")
+            st.write(df)
             # Calculate total lost CPU and GPU time per user and overall totals
             user_cpu_time = df.groupby('username')['lost_cpu_time'].sum().to_dict()
             user_gpu_time = df.groupby('username')['lost_gpu_time'].sum().to_dict()
