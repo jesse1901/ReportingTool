@@ -27,39 +27,34 @@ def count_keys_under_steps(d):
         return list(steps_dict.keys())
     return []
 
-def timestring_to_seconds(time_string):
-    if time_string is None or time_string == '' or time_string == 0:
+def timestring_to_seconds(timestring):
+    if pd.isna(timestring) or timestring.strip() == '0':
         return 0
 
-    # Check if the time string contains 'T' to decide the format
-    if 'T' in time_string:
-        # Split the string into date part and time part
-        try:
-            date_part, time_part = time_string.split('T')
-        except ValueError:
-            raise ValueError(f"Unexpected time format: {time_string}")
+    if isinstance(timestring, float):
+        timestring = str(int(timestring))  # Convert float to integer string
 
-        # Process the date part
-        try:
-            days = int(date_part.strip())
-        except ValueError:
-            raise ValueError(f"Invalid day value in time string: {time_string}")
+    # Ensure timestring is in string format
+    timestring = str(timestring).strip()
 
+    # Split by 'T' to separate days from time
+    if 'T' in timestring:
+        days_part, time_part = timestring.split('T')
     else:
-        # No days part, default days to 0
-        days = 0
-        time_part = time_string
+        days_part, time_part = '0', timestring
 
-    # Process the time part
-    try:
-        hours, minutes, seconds = map(int, time_part.strip().split(':'))
-    except ValueError:
-        raise ValueError(f"Invalid time value in time string: {time_string}")
+    # Convert days part
+    days = int(days_part.strip()) if days_part.strip() else 0
+
+    # Convert time part (HH:MM:SS)
+    time_parts = time_part.split(':')
+    hours = int(time_parts[0].strip()) if len(time_parts) > 0 else 0
+    minutes = int(time_parts[1].strip()) if len(time_parts) > 1 else 0
+    seconds = int(time_parts[2].strip()) if len(time_parts) > 2 else 0
 
     # Calculate total seconds
     total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
     return total_seconds
-
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
     td = timedelta(seconds=total_seconds)
