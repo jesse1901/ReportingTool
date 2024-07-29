@@ -380,6 +380,7 @@ class CreateFigures:
         print(df)
         for index, row in df.iterrows():
             username = row['username']
+            print(row('lost_cpu_time'))
             lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
             lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
 
