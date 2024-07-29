@@ -28,7 +28,7 @@ def count_keys_under_steps(d):
     return []
 
 def timestring_to_seconds(timestring):
-    if pd.isna(timestring) or timestring.strip() == '0':
+    if pd.isna(timestring) or timestring == '0' or timestring == 0:
         return 0
 
     if isinstance(timestring, float):
