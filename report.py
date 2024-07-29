@@ -349,11 +349,13 @@ class CreateFigures:
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
             """, con)
-        for i, j in zip(df['lost_cpu_time'], df['lost_gpu_time']):
+        for i in (df['lost_cpu_time']):
             if i is not None:
                 lost_cpu += timestring_to_seconds(i)
+        for j in (df['lost_gpu_time']):
             if j is not None:
                 lost_gpu += timestring_to_seconds(j)
+
         lost_cpu = seconds_to_timestring(lost_cpu)
         lost_gpu = seconds_to_timestring(lost_gpu)
         df['lost_cpu_time'] = lost_cpu
