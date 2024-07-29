@@ -388,7 +388,7 @@ class CreateFigures:
             # Calculate total lost CPU and GPU time per user and overall totals
             user_cpu_time = df.groupby('username')['lost_cpu_time'].sum().to_dict()
             user_gpu_time = df.groupby('username')['lost_gpu_time'].sum().to_dict()
-            print(user_gpu_time)
+            print(user_cpu_time)
             total_lost_cpu = df['lost_cpu_time'].sum()
             total_lost_gpu = df['lost_gpu_time'].sum()
 
