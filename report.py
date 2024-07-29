@@ -35,6 +35,7 @@ def timestring_to_seconds(timestring):
     hours = int(hms[0])
     minutes = int(hms[1])
     seconds = int(hms[2])
+    round(seconds)
     total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
     return total_seconds
 
@@ -48,7 +49,7 @@ def seconds_to_timestring(total_seconds):
         days = td.days
         hours, remainder = divmod(td.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-
+        round(seconds)
         # Format the result as a string
         timestring = f"{days}T {hours}:{minutes}:{seconds}"
         return timestring
