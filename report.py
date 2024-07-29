@@ -368,10 +368,6 @@ class CreateFigures:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
 
-            # Convert dates to string format for SQL query
-            start_date_str = start_date.strftime('%Y-%m-%d')
-            end_date_str = end_date.strftime('%Y-%m-%d')
-
             # Query to get user performance data
             df = pd.read_sql_query(f"""
                 SELECT username, 
@@ -384,7 +380,8 @@ class CreateFigures:
                 WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
                 GROUP BY username
                 """, con)
-
+            df['lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
+            df['lost_gpu_time_seconds'] = df['lost_gpu_time'].apply(timestring_to_seconds)
             # Calculate total lost CPU and GPU time per user and overall totals
             user_cpu_time = df.groupby('username')['lost_cpu_time'].sum().to_dict()
             user_gpu_time = df.groupby('username')['lost_gpu_time'].sum().to_dict()
@@ -393,7 +390,6 @@ class CreateFigures:
             total_lost_gpu = df['lost_gpu_time'].sum()
 
             # Display the aggregated DataFrame
-            st.write("Aggregated Data by User")
             st.write(df)
 
     def frame_group_by_user_test(self) -> None:
