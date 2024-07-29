@@ -262,7 +262,7 @@ class GetStats:
                     print("try")
                     step += 1
                     response = requests.get(prometheus_url, params=params)
-                    print(response.json)
+                    print(response.raise_for_status())
                     if step == 5:
                         break
             response.raise_for_status()  # Raise an HTTPError if the response was unsuccessful
