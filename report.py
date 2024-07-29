@@ -350,8 +350,10 @@ class CreateFigures:
             GROUP BY username
             """, con)
         for i, j in zip(df['lost_cpu_time'], df['lost_gpu_time']):
-            lost_cpu = timestring_to_seconds(i)
-            lost_gpu = timestring_to_seconds(j)
+            if i is not None:
+                lost_cpu = timestring_to_seconds(i)
+            if j is not None:
+                lost_gpu = timestring_to_seconds(j)
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
