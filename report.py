@@ -395,22 +395,6 @@ class CreateFigures:
             st.write("Aggregated Data by User")
             st.write(df)
 
-            # Display total lost CPU and GPU time per user
-            st.write("Total Lost CPU Time by User")
-            st.write(pd.DataFrame(list(user_cpu_time.items()), columns=['Username', 'Total Lost CPU Time (seconds)']))
-
-            st.write("Total Lost GPU Time by User")
-            st.write(pd.DataFrame(list(user_gpu_time.items()), columns=['Username', 'Total Lost GPU Time (seconds)']))
-
-            # Display overall totals
-            st.write("Overall Total Lost CPU Time")
-            st.write(f"{total_lost_cpu} seconds")
-
-            st.write("Overall Total Lost GPU Time")
-            st.write(f"{total_lost_gpu} seconds")
-
-        # Display the aggregated DataFrame
-        st.write(df)
     def frame_group_by_user_test(self) -> None:
         df = pd.read_sql_query("""
             SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
