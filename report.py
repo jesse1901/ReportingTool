@@ -347,13 +347,10 @@ class CreateFigures:
             """, self.con)
         st.write(df)
 
-    def frame_group_by_user() -> None:
+    def frame_group_by_user(self) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        # Connect to your SQLite database (update with your actual connection code)
-        con = sqlite3.connect('your_database.db')
-
         # Initialize variables
         lost_cpu = 0
         lost_gpu = 0
