@@ -380,16 +380,13 @@ class CreateFigures:
         print(df)
         for index, row in df.iterrows():
             username = row['username']
-            print(row('lost_cpu_time'))
-            lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
-            lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
 
-            if username not in user_cpu_time:
-                user_cpu_time[username] = 0
-                user_gpu_time[username] = 0
+            # Convert Series to seconds and sum
+            lost_cpu_seconds = row['lost_cpu_time'].apply(timestring_to_seconds).sum()
+            lost_gpu_seconds = row['lost_gpu_time'].apply(timestring_to_seconds).sum()
 
-            user_cpu_time[username] += lost_cpu
-            user_gpu_time[username] += lost_gpu
+            user_cpu_time[username] = lost_cpu_seconds
+            user_gpu_time[username] = lost_gpu_seconds
 
         # Prepare lists for the aggregated results
         aggregated_data = {
