@@ -71,6 +71,7 @@ def seconds_to_timestring(total_seconds):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.lost_gpu_time_seconds = None
         self.lost_gpu_time = None
         self.lost_cpu_time = None
         self.hostlist = None
@@ -212,8 +213,6 @@ class GetStats:
                         ))
                         print(f"lost gpu time: {data['lost_gpu_time']}")
                         print(f"lost gpu time: {data['lost_gpu_time_sec']}")
-
-                    #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
@@ -297,10 +296,10 @@ class GetStats:
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
-                    lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
-                    lost_gpu_time_seconds = round(lost_gpu_time_seconds)
-                    print(f'round CPU : {lost_gpu_time_seconds}')
-                    self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
+                    self.lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
+                    self.lost_gpu_time_seconds = round(self.lost_gpu_time_seconds)
+                    print(f'round CPU : {self.lost_gpu_time_seconds}')
+                    self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_seconds))
                     #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
@@ -323,7 +322,7 @@ class GetStats:
             "lost_cpu_time_sec": timestring_to_seconds(self.lost_cpu_time),
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
-            "lost_gpu_time_sec": (self.job_elapsed_s / (self.gpu_eff * 100)) if self.gpu_eff else None,
+            "lost_gpu_time_sec": self.lost_gpu_time_seconds,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
             "job_cpu_time_s": self.job_elapsed_s,
