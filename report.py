@@ -318,19 +318,36 @@ class CreateFigures:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
+        start_date, end_date = st.date_input(
+            'Start Date - End Date',
+            [datetime.date.today() - datetime.timedelta(days=30), datetime.date.today()]
+        )
+        if start_date and end_date:
+            if start_date > end_date:
+                st.error("Error: End date must fall after start date.")
+            else:
+                # Convert dates to string format for SQL query
+                start_date_str = start_date.strftime('%Y-%m-%d')
+                end_date_str = end_date.strftime('%Y-%m-%d')
         df = pd.read_sql_query("""
-        SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
-        job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end FROM reportdata""", self.con)
+            SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
+                   job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end 
+            FROM reportdata
+            WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+            """, self.con)
         st.write(df)
 
     def frame_group_by_user(self) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app.
         """
-        df = pd.read_sql_query("""
-            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
-            FROM reportdata 
-            GROUP BY username""", self.con)
+
+        df = pd.read_sql_query(f"""
+            SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
+                   job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end 
+            FROM reportdata
+            WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+            """
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
