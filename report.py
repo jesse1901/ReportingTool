@@ -28,17 +28,30 @@ def count_keys_under_steps(d):
     return []
 
 
-def timestring_to_seconds(timestring):
-    if timestring is None or timestring == '' or timestring == 0:
+def timestring_to_seconds(time_string):
+    if time_string is None or time_string.strip() == '':
         return 0
-    parts = timestring.split('T')
-    days = int(parts[0])
-    hms = parts[1].split(':')
-    hours = int(hms[0])
-    minutes = int(hms[1])
-    seconds = int(hms[2])
-    seconds = round(seconds)
-    total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
+
+    # Split the string into date part and time part
+    try:
+        date_part, time_part = time_string.split('T')
+    except ValueError:
+        raise ValueError(f"Unexpected time format: {time_string}")
+
+    # Process the date part
+    try:
+        days = int(date_part.strip())
+    except ValueError:
+        raise ValueError(f"Invalid day value in time string: {time_string}")
+
+    # Process the time part
+    try:
+        hours, minutes, seconds = map(int, time_part.strip().split(':'))
+    except ValueError:
+        raise ValueError(f"Invalid time value in time string: {time_string}")
+
+    # Calculate total seconds
+    total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
     return total_seconds
 
 
