@@ -350,7 +350,7 @@ class CreateFigures:
                 end_date_str = end_date.strftime('%Y-%m-%d')
         df = pd.read_sql_query(f"""
             SELECT username, AVG(cpu_efficiency) AS avg_cpu_efficiency, AVG(gpu_efficiency) AS avg_gpu_efficiency, 
-                   lost_cpu_time, IFNULL(lost_gpu_time, 0) AS lost_gpu_time, COUNT(jobID) AS job_count
+                   lost_cpu_time, SUM(IFNULL(lost_gpu_time, 0)) AS lost_gpu_time, COUNT(jobID) AS job_count
             FROM reportdata
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
