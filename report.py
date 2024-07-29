@@ -71,6 +71,7 @@ def seconds_to_timestring(total_seconds):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.lost_gpu_time_sec = None
         self.lost_gpu_time_seconds = None
         self.lost_gpu_time = None
         self.lost_cpu_time = None
@@ -298,6 +299,7 @@ class GetStats:
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
                     self.lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
                     self.lost_gpu_time_seconds = round(self.lost_gpu_time_seconds)
+                    self.lost_gpu_time_sec = self.lost_gpu_time_seconds
                     print(f'round CPU : {self.lost_gpu_time_seconds}')
                     self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_seconds))
                     #print(f"gpu-usage: {self.gpu_eff}"))
@@ -322,7 +324,7 @@ class GetStats:
             "lost_cpu_time_sec": timestring_to_seconds(self.lost_cpu_time),
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
-            "lost_gpu_time_sec": self.lost_gpu_time_seconds,
+            "lost_gpu_time_sec": self.lost_gpu_time_sec,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
             "job_cpu_time_s": self.job_elapsed_s,
