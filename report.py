@@ -351,6 +351,7 @@ class CreateFigures:
                                   FROM reportdata
                                   WHERE lost_cpu_time IS NULL OR lost_cpu_time = 0
                                   ORDER BY job_cpu_time_s ASC;""", self.con)
+        print(df)
 
         df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
         df = df.dropna(subset=['job_cpu_time_s'])
