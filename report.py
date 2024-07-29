@@ -351,9 +351,6 @@ class CreateFigures:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app.
         """
-        # Connect to your SQLite database (update with your actual connection code)
-        con = sqlite3.connect('your_database.db')
-
         # Get start and end dates from Streamlit date input
         start_date, end_date = st.date_input(
             'Start Date - End Date',
