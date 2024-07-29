@@ -414,7 +414,7 @@ class CreateFigures:
             x="job_cpu_time_s",
             y="cpu_efficiency",
             color="gpu_efficiency",
-            color_continuous_scale="agsunset",
+            color_continuous_scale="purpor",
             size_max=1,
             hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
             labels={"job_cpu_time_s": "real_job_time"}
@@ -422,7 +422,7 @@ class CreateFigures:
 
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
-
+#agsunset
     # Beispiel wie die Funktion aufgerufen werden könnte
     # scatter_chart_data_cpu_gpu_eff()
 
