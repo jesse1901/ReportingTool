@@ -333,6 +333,8 @@ class CreateFigures:
         """
         lost_cpu = 0
         lost_gpu = 0
+        user_cpu_time = {}
+        user_gpu_time = {}
         start_date, end_date = st.date_input(
             'Start Date - End Date',
             [datetime.today() - timedelta(days=30),  datetime.today()],
@@ -351,12 +353,17 @@ class CreateFigures:
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
             """, con)
-        for i in (df['lost_cpu_time']):
-            if i is not None:
-                lost_cpu += timestring_to_seconds(i)
-        for j in (df['lost_gpu_time']):
-            if j is not None:
-                lost_gpu += timestring_to_seconds(j)
+        for index, row in df.iterrows():
+            username = row['username']
+            lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
+            lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
+
+            if username not in user_cpu_time:
+                user_cpu_time[username] = 0
+                user_gpu_time[username] = 0
+
+            user_cpu_time[username] += lost_cpu
+            user_gpu_time[username] += lost_gpu
 
         lost_cpu = seconds_to_timestring(lost_cpu)
         lost_gpu = seconds_to_timestring(lost_gpu)
