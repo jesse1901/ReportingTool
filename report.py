@@ -201,7 +201,9 @@ class GetStats:
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
                                 gpu_nodes = excluded.gpu_nodes,
                                 lost_gpu_time = excluded.lost_gpu_time,
-                                gpu_efficiency = excluded.gpu_efficiency 
+                                gpu_efficiency = excluded.gpu_efficiency
+                                lost_gpu_time_sec = excluded.lost_gpu_time_sec
+                                lost_cpu_time_sec = excluded.lost_cpu_time_sec 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
                             data['lost_cpu_time_sec'], data['gpu_efficiency'], data['lost_gpu_time'], data['lost_gpu_time'],
