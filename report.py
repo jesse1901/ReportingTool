@@ -338,7 +338,7 @@ class CreateFigures:
 
 
     def scatter_chart_data_color_lost_cpu(self):
-        df = pd.read_sql_query(""" SELECT jobID, username, gpu_efficiency, 
+        df = pd.read_sql_query(""" SELECT jobID, username, gpu_efficiency, cpu_efficiency,
         IFNULL(lost_cpu_time, 0) AS lost_cpu_time,  lost_gpu_time, job_cpu_time_s, real_time, cores, state
         FROM reportdata 
         WHERE lost_cpu_time IS NULL OR lost_cpu_time = 0
