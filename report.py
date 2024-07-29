@@ -35,7 +35,7 @@ def timestring_to_seconds(timestring):
     hours = int(hms[0])
     minutes = int(hms[1])
     seconds = int(hms[2])
-    round(seconds)
+    seconds = round(seconds)
     total_seconds = days * 86400 + hours * 3600 + minutes * 60 + seconds
     return total_seconds
 
@@ -47,7 +47,7 @@ def seconds_to_timestring(total_seconds):
     days = td.days
     hours, remainder = divmod(td.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
-    round(seconds)
+    seconds = round(seconds)
     # Format the result as a string
     timestring = f"{days}T {hours}:{minutes}:{seconds}"
     return timestring
@@ -276,7 +276,7 @@ class GetStats:
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
                     lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
-                    round(lost_gpu_time_seconds, 0)
+                    lost_gpu_time_seconds = round(lost_gpu_time_seconds, 0)
                     print(f'round CPU : {lost_gpu_time_seconds}')
                     self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
                     #print(f"gpu-usage: {self.gpu_eff}"))
