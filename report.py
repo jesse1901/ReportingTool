@@ -361,6 +361,7 @@ class CreateFigures:
         df['lost_cpu_time'] = pd.to_numeric(df['lost_cpu_time'], errors='coerce').fillna(0)
 
         # Convert lost_cpu_time to seconds
+        df['lost_cpu_time'] = df['lost_cpu_time'].round()
         df['lost_cpu_time'] = df['lost_cpu_time'].astype(str)
         df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
 
