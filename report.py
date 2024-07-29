@@ -378,55 +378,19 @@ class CreateFigures:
             GROUP BY username
             """, con)
         print(df)
+
         for index, row in df.iterrows():
             username = row['username']
 
-            # Determine if the data is string or integer
-            if isinstance(row['lost_cpu_time'], str):
-                # Split the combined time string into individual time strings
-                lost_cpu_times = row['lost_cpu_time'].split(', ')
-                # Convert each time string to seconds and sum
-                lost_cpu_seconds = sum(timestring_to_seconds(time) for time in lost_cpu_times)
-            else:
-                # Handle the case where the data is already in seconds
-                lost_cpu_seconds = row['lost_cpu_time']
-
-            if isinstance(row['lost_gpu_time'], str):
-                # Split the combined time string into individual time strings
-                lost_gpu_times = row['lost_gpu_time'].split(', ')
-                # Convert each time string to seconds and sum
-                lost_gpu_seconds = sum(timestring_to_seconds(time) for time in lost_gpu_times)
-            else:
-                # Handle the case where the data is already in seconds
-                lost_gpu_seconds = row['lost_gpu_time']
+            # Convert Series to seconds and sum
+            lost_cpu_seconds = row['lost_cpu_time'].apply(timestring_to_seconds).sum()
+            lost_gpu_seconds = row['lost_gpu_time'].apply(timestring_to_seconds).sum()
 
             user_cpu_time[username] = lost_cpu_seconds
             user_gpu_time[username] = lost_gpu_seconds
 
-        # Prepare lists for the aggregated results
-        aggregated_data = {
-            'username': [],
-            'avg_cpu_efficiency': [],
-            'avg_gpu_efficiency': [],
-            'lost_cpu_time': [],
-            'lost_gpu_time': [],
-            'job_count': []
-        }
-
-        # Fill the aggregated data
-        for username, cpu_time in user_cpu_time.items():
-            aggregated_data['username'].append(username)
-            aggregated_data['avg_cpu_efficiency'].append(df[df['username'] == username]['avg_cpu_efficiency'].values[0])
-            aggregated_data['avg_gpu_efficiency'].append(df[df['username'] == username]['avg_gpu_efficiency'].values[0])
-            aggregated_data['lost_cpu_time'].append(seconds_to_timestring(cpu_time))
-            aggregated_data['lost_gpu_time'].append(seconds_to_timestring(user_gpu_time[username]))
-            aggregated_data['job_count'].append(df[df['username'] == username]['job_count'].values[0])
-
-        # Create a new DataFrame from the aggregated data
-        aggregated_df = pd.DataFrame(aggregated_data)
-
         # Display the aggregated DataFrame
-        st.write(aggregated_df)
+        st.write(df)
     def frame_group_by_user_test(self) -> None:
         df = pd.read_sql_query("""
             SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
