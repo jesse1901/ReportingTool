@@ -385,19 +385,12 @@ class CreateFigures:
             st.write(df)
 
             # Convert time strings to seconds
-            df['total_lost_cpu_time_seconds'] = df['total_lost_cpu_time'].apply(timestring_to_seconds)
-            df['total_lost_gpu_time_seconds'] = df['total_lost_gpu_time'].apply(timestring_to_seconds)
+            df['total_lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
+            df['total_lost_gpu_time_seconds'] = df['lost_gpu_time'].apply(timestring_to_seconds)
 
             # Check the DataFrame after conversion
             st.write("DataFrame with Seconds Conversion")
             st.write(df)
-
-            # Display total lost CPU and GPU time per user
-            st.write("Total Lost CPU Time by User")
-            st.write(df[['username', 'total_lost_cpu_time_seconds']])
-
-            st.write("Total Lost GPU Time by User")
-            st.write(df[['username', 'total_lost_gpu_time_seconds']])
 
             # Calculate overall totals
             total_lost_cpu = df['total_lost_cpu_time_seconds'].sum()
