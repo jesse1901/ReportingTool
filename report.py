@@ -356,23 +356,23 @@ class CreateFigures:
             GROUP BY username
             """, con)
         print(df)
-        for index, row in df.iterrows():
-            username = row['username']
-            lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
-
-            lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
-
-            if username not in user_cpu_time:
-                user_cpu_time[username] = 0
-                user_gpu_time[username] = 0
-
-            user_cpu_time[username] += lost_cpu
-            user_gpu_time[username] += lost_gpu
-
-        lost_cpu = seconds_to_timestring(lost_cpu)
-        lost_gpu = seconds_to_timestring(lost_gpu)
-        df['lost_cpu_time'] = lost_cpu
-        df['lost_gpu_time'] = lost_gpu
+        # for index, row in df.iterrows():
+        #     username = row['username']
+        #     lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
+        #
+        #     lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
+        #
+        #     if username not in user_cpu_time:
+        #         user_cpu_time[username] = 0
+        #         user_gpu_time[username] = 0
+        #
+        #     user_cpu_time[username] += lost_cpu
+        #     user_gpu_time[username] += lost_gpu
+        #
+        # lost_cpu = seconds_to_timestring(lost_cpu)
+        # lost_gpu = seconds_to_timestring(lost_gpu)
+        # df['lost_cpu_time'] = lost_cpu
+        # df['lost_gpu_time'] = lost_gpu
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
