@@ -190,6 +190,7 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
+                        print("inserted")
                     #    print(f"nodes: {data.py['gpu_nodes']}")
                     #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
@@ -281,7 +282,6 @@ class GetStats:
                     #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
-                print(response.raise_for_status())
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 #        response = requests.get(prometheus_url, params=params)
