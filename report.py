@@ -346,27 +346,18 @@ class CreateFigures:
         st.line_chart(df.set_index('period'))
 
     def scatter_chart_data_color_lost_cpu(self):
-        df = pd.read_sql_query("""SELECT jobID, username, gpu_efficiency, cpu_efficiency,
-                                      IFNULL(lost_cpu_time, 0) AS lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-                                  FROM reportdata
-                                  ORDER BY job_cpu_time_s ASC;""", self.con)
-        print(df)
+        df = pd.read_sql_query("""
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+            FROM reportdata
+            ORDER BY job_cpu_time_s ASC;""", self.con)
 
         df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
         df = df.dropna(subset=['job_cpu_time_s'])
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
-        # Ensure 'lost_cpu_time' is numeric and fill NaNs with 0
-        df['lost_cpu_time'] = pd.to_numeric(df['lost_cpu_time'], errors='coerce').fillna(0)
-
-        # Convert lost_cpu_time to seconds
-        df['lost_cpu_time'] = df['lost_cpu_time'].round(0)
-        df['lost_cpu_time'] = df['lost_cpu_time'].astype(str)
         df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
-
-        # Logarithmic transformation of lost CPU time for the color scale
-        df['log_lost_cpu_time'] = np.log1p(df['lost_cpu_time'])  # log1p = log(1 + x) to handle 0 values
+        df['log_lost_cpu_time'] = np.log1p(df['lost_cpu_time'])
 
         fig = px.scatter(
             df,
@@ -380,20 +371,10 @@ class CreateFigures:
             log_y=False,
             labels={"job_cpu_time_s": "real_job_time"}
         )
-        fig.update_layout(coloraxis_colorbar=dict(title="Log Lost CPU Time (log scale)"))
-
-        # Ensure max_lost_cpu_time is handled correctly
-        max_lost_cpu_time = df['lost_cpu_time'].max()
-        if max_lost_cpu_time > 0:
-            tickvals = [np.log1p(10 ** i) for i in range(0, int(np.log10(max_lost_cpu_time)) + 1)]
-            ticktext = [10 ** i for i in range(0, int(np.log10(max_lost_cpu_time)) + 1)]
-        else:
-            tickvals = [0]
-            ticktext = [0]
-
+        fig.update_layout(coloraxis_colorbar=dict(title="Log Lost CPU Time"))
         fig.update_coloraxes(colorbar=dict(
-            tickvals=tickvals,
-            ticktext=ticktext
+            tickvals=[np.log1p(10 ** i) for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)],
+            ticktext=[10 ** i for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)]
         ))
         fig.update_traces(marker=dict(size=3))
 
