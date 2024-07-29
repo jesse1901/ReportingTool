@@ -26,24 +26,29 @@ def count_keys_under_steps(d):
     if isinstance(steps_dict, dict):
         return list(steps_dict.keys())
     return []
-    return []
-
 
 def timestring_to_seconds(time_string):
     if time_string is None or time_string == '' or time_string == 0:
         return 0
 
-    # Split the string into date part and time part
-    try:
-        date_part, time_part = time_string.split('T')
-    except ValueError:
-        raise ValueError(f"Unexpected time format: {time_string}")
+    # Check if the time string contains 'T' to decide the format
+    if 'T' in time_string:
+        # Split the string into date part and time part
+        try:
+            date_part, time_part = time_string.split('T')
+        except ValueError:
+            raise ValueError(f"Unexpected time format: {time_string}")
 
-    # Process the date part
-    try:
-        days = int(date_part.strip())
-    except ValueError:
-        raise ValueError(f"Invalid day value in time string: {time_string}")
+        # Process the date part
+        try:
+            days = int(date_part.strip())
+        except ValueError:
+            raise ValueError(f"Invalid day value in time string: {time_string}")
+
+    else:
+        # No days part, default days to 0
+        days = 0
+        time_part = time_string
 
     # Process the time part
     try:
@@ -54,7 +59,6 @@ def timestring_to_seconds(time_string):
     # Calculate total seconds
     total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
     return total_seconds
-
 
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
