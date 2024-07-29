@@ -347,6 +347,8 @@ class CreateFigures:
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
             """, con)
+        df['lost_cpu_time'] = timestring_to_seconds(df['lost_cpu_time'])
+        df['lost_gpu_time'] = timestring_to_seconds(df['lost_gpu_time'])
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
