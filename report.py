@@ -327,8 +327,10 @@ class CreateFigures:
 
     def frame_group_by_user(self) -> None:
         """
-        Displays average efficiency and job count grouped by username in the Streamlit app.
+        Displays average efficiency and job count grouped by username in the Streamlit app
         """
+        lost_cpu = 0
+        lost_gpu = 0
         start_date, end_date = st.date_input(
             'Start Date - End Date',
             [datetime.today() - timedelta(days=30),  datetime.today()],
@@ -347,8 +349,9 @@ class CreateFigures:
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
             """, con)
-        df['lost_cpu_time'] = timestring_to_seconds(df['lost_cpu_time'])
-        df['lost_gpu_time'] = timestring_to_seconds(df['lost_gpu_time'])
+        for i, j in df['lost_cpu_time'], df['lost_gpu_time']:
+            lost_cpu = timestring_to_seconds(df[i])
+            lost_gpu = timestring_to_seconds(df[j])
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
