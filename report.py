@@ -352,8 +352,8 @@ class CreateFigures:
             SELECT username, 
            AVG(cpu_efficiency) AS avg_cpu_efficiency, 
            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
-           SUM(lost_cpu_time) AS lost_cpu_time, 
-           SUM(IFNULL(lost_gpu_time, 0)) AS lost_gpu_time, 
+           lost_cpu_time AS lost_cpu_time, 
+           IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
            COUNT(jobID) AS job_count
     FROM reportdata
     WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
