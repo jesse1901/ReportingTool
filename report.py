@@ -247,7 +247,7 @@ class GetStats:
         return
 
     def get_gpu_data(self):
-        step = '1'
+        step = 1
         prometheus_url = 'http://max-infra008.desy.de:9090/api/v1/query_range'
         params = {
             'query': f'nvidia_smi_utilization_gpu_ratio{{instance="{self.join_nodes}"}}',
