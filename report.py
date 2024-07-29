@@ -381,9 +381,13 @@ class CreateFigures:
         for index, row in df.iterrows():
             username = row['username']
 
-            # Convert Series to seconds and sum
-            lost_cpu_seconds = row['lost_cpu_time'].apply(timestring_to_seconds).sum()
-            lost_gpu_seconds = row['lost_gpu_time'].apply(timestring_to_seconds).sum()
+            # Split the combined time string into individual time strings
+            lost_cpu_times = row['lost_cpu_time'].split(', ')
+            lost_gpu_times = row['lost_gpu_time'].split(', ')
+
+            # Convert each time string to seconds and sum
+            lost_cpu_seconds = sum(timestring_to_seconds(time) for time in lost_cpu_times)
+            lost_gpu_seconds = sum(timestring_to_seconds(time) for time in lost_gpu_times)
 
             user_cpu_time[username] = lost_cpu_seconds
             user_gpu_time[username] = lost_gpu_seconds
