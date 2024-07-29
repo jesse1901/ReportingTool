@@ -362,7 +362,7 @@ class CreateFigures:
 
         # Convert lost_cpu_time to seconds
         df['lost_cpu_time'] = df['lost_cpu_time'].round()
-        df['lost_cpu_time'] = df['lost_cpu_time'].astype(int)
+        # df['lost_cpu_time'] = df['lost_cpu_time'].astype(int)
         df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
 
         # Logarithmic transformation of lost CPU time for the color scale
