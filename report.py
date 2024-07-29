@@ -349,6 +349,72 @@ class CreateFigures:
 
     def frame_group_by_user(self) -> None:
         """
+        Displays average efficiency and job count grouped by username in the Streamlit app.
+        """
+        # Connect to your SQLite database (update with your actual connection code)
+        con = sqlite3.connect('your_database.db')
+
+        # Get start and end dates from Streamlit date input
+        start_date, end_date = st.date_input(
+            'Start Date - End Date',
+            [datetime.today() - timedelta(days=30), datetime.today()],
+        )
+
+        if start_date and end_date:
+            if start_date > end_date:
+                st.error("Error: End date must fall after start date.")
+                return  # Exit if there's an error
+
+            # Convert dates to string format for SQL query
+            start_date_str = start_date.strftime('%Y-%m-%d')
+            end_date_str = end_date.strftime('%Y-%m-%d')
+
+            # Query to get user performance data with aggregation
+            query = f"""
+            SELECT username, 
+                   AVG(cpu_efficiency) AS avg_cpu_efficiency, 
+                   AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
+                   SUM(COALESCE(lost_cpu_time, '0')) AS total_lost_cpu_time, 
+                   SUM(COALESCE(lost_gpu_time, '0')) AS total_lost_gpu_time, 
+                   COUNT(jobID) AS job_count
+            FROM reportdata
+            WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+            GROUP BY username
+            """
+            df = pd.read_sql_query(query, con)
+
+            # Check the raw DataFrame
+            st.write("Raw DataFrame")
+            st.write(df)
+
+            # Convert time strings to seconds
+            df['total_lost_cpu_time_seconds'] = df['total_lost_cpu_time'].apply(timestring_to_seconds)
+            df['total_lost_gpu_time_seconds'] = df['total_lost_gpu_time'].apply(timestring_to_seconds)
+
+            # Check the DataFrame after conversion
+            st.write("DataFrame with Seconds Conversion")
+            st.write(df)
+
+            # Display total lost CPU and GPU time per user
+            st.write("Total Lost CPU Time by User")
+            st.write(df[['username', 'total_lost_cpu_time_seconds']])
+
+            st.write("Total Lost GPU Time by User")
+            st.write(df[['username', 'total_lost_gpu_time_seconds']])
+
+            # Calculate overall totals
+            total_lost_cpu = df['total_lost_cpu_time_seconds'].sum()
+            total_lost_gpu = df['total_lost_gpu_time_seconds'].sum()
+
+            # Display overall totals
+            st.write("Overall Total Lost CPU Time")
+            st.write(f"{total_lost_cpu} seconds")
+
+            st.write("Overall Total Lost GPU Time")
+            st.write(f"{total_lost_gpu} seconds")
+
+    def frame_group_by_user1(self) -> None:
+        """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
         # Initialize variables
