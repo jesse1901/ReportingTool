@@ -29,6 +29,8 @@ def count_keys_under_steps(d):
 
 
 def timestring_to_seconds(timestring):
+    if timestring is None or timestring == '':
+        return 0
     parts = timestring.split('T')
     days = int(parts[0])
     hms = parts[1].split(':')
@@ -357,6 +359,7 @@ class CreateFigures:
         for index, row in df.iterrows():
             username = row['username']
             lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
+
             lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
 
             if username not in user_cpu_time:
