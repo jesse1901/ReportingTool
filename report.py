@@ -333,10 +333,10 @@ class CreateFigures:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        #lost_cpu = 0
-        #lost_gpu = 0
-        #user_cpu_time = {}
-        #user_gpu_time = {}
+        lost_cpu = 0
+        lost_gpu = 0
+        user_cpu_time = {}
+        user_gpu_time = {}
         start_date, end_date = st.date_input(
             'Start Date - End Date',
             [datetime.today() - timedelta(days=30),  datetime.today()],
@@ -350,33 +350,33 @@ class CreateFigures:
                 end_date_str = end_date.strftime('%Y-%m-%d')
         df = pd.read_sql_query(f"""
             SELECT username, 
-           AVG(cpu_efficiency) AS avg_cpu_efficiency, 
-           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
-           SUM(IFNULL(lost_cpu_time, 0)) AS lost_cpu_time, 
-           IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
-           COUNT(jobID) AS job_count
-    FROM reportdata
-    WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
-    GROUP BY username
+            AVG(cpu_efficiency) AS avg_cpu_efficiency, 
+            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
+            IFNULL(lost_cpu_time, 0) AS lost_cpu_time, 
+            IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
+            COUNT(jobID) AS job_count
+            FROM reportdata
+            WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+            GROUP BY username
             """, con)
         print(df)
-        # for index, row in df.iterrows():
-        #     username = row['username']
-        #     lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
-        #
-        #     lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
-        #
-        #     if username not in user_cpu_time:
-        #         user_cpu_time[username] = 0
-        #         user_gpu_time[username] = 0
-        #
-        #     user_cpu_time[username] += lost_cpu
-        #     user_gpu_time[username] += lost_gpu
-        #
-        # lost_cpu = seconds_to_timestring(lost_cpu)
-        # lost_gpu = seconds_to_timestring(lost_gpu)
-        # df['lost_cpu_time'] = lost_cpu
-        # df['lost_gpu_time'] = lost_gpu
+        for index, row in df.iterrows():
+            username = row['username']
+            lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
+
+            lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
+
+            if username not in user_cpu_time:
+                user_cpu_time[username] = 0
+                user_gpu_time[username] = 0
+
+            user_cpu_time[username] += lost_cpu
+            user_gpu_time[username] += lost_gpu
+
+        lost_cpu = seconds_to_timestring(lost_cpu)
+        lost_gpu = seconds_to_timestring(lost_gpu)
+        df['lost_cpu_time'] = lost_cpu
+        df['lost_gpu_time'] = lost_gpu
         st.write(df)
 
     def frame_group_by_user_test(self) -> None:
