@@ -332,7 +332,7 @@ class CreateFigures:
         """
         start_date, end_date = st.date_input(
             'Start Date - End Date',
-            [datetime.date.today() - datetime.timedelta(days=30), datetime.date.today()]
+            [datetime.date,  datetime.date]
         )
         if start_date and end_date:
             if start_date > end_date:
