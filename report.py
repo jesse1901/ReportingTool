@@ -375,34 +375,8 @@ class CreateFigures:
             COUNT(jobID) AS job_count
             FROM reportdata
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
-            GROUP BY username
             """, con)
         print(df)
-
-        for index, row in df.iterrows():
-            username = row['username']
-
-            # Determine if the data is string or integer
-            if isinstance(row['lost_cpu_time'], str):
-                # Split the combined time string into individual time strings
-                lost_cpu_times = row['lost_cpu_time'].split(', ')
-                # Convert each time string to seconds and sum
-                lost_cpu_seconds = sum(timestring_to_seconds(time) for time in lost_cpu_times)
-            else:
-                # Handle the case where the data is already in seconds
-                lost_cpu_seconds = row['lost_cpu_time']
-
-            if isinstance(row['lost_gpu_time'], str):
-                # Split the combined time string into individual time strings
-                lost_gpu_times = row['lost_gpu_time'].split(', ')
-                # Convert each time string to seconds and sum
-                lost_gpu_seconds = sum(timestring_to_seconds(time) for time in lost_gpu_times)
-            else:
-                # Handle the case where the data is already in seconds
-                lost_gpu_seconds = row['lost_gpu_time']
-
-            user_cpu_time[username] = lost_cpu_seconds
-            user_gpu_time[username] = lost_gpu_seconds
 
         # Display the aggregated DataFrame
         st.write(df)
