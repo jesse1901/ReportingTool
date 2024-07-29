@@ -385,8 +385,8 @@ class CreateFigures:
             st.write(df)
 
             # Convert time strings to seconds
-            df['total_lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
-            df['total_lost_gpu_time_seconds'] = df['lost_gpu_time'].apply(timestring_to_seconds)
+            df['total_lost_cpu_time_seconds'] = df['total_lost_cpu_time'].apply(timestring_to_seconds)
+            df['total_lost_gpu_time_seconds'] = df['total_lost_gpu_time'].apply(timestring_to_seconds)
 
             # Check the DataFrame after conversion
             st.write("DataFrame with Seconds Conversion")
