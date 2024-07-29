@@ -26,10 +26,11 @@ def count_keys_under_steps(d):
     if isinstance(steps_dict, dict):
         return list(steps_dict.keys())
     return []
+    return []
 
 
 def timestring_to_seconds(time_string):
-    if time_string is None or time_string.strip() == '':
+    if time_string is None or time_string.strip() == '' or time_string == 0:
         return 0
 
     # Split the string into date part and time part
