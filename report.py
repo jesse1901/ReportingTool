@@ -351,7 +351,7 @@ class CreateFigures:
         df = pd.read_sql_query(f"""
             SELECT username, 
            AVG(cpu_efficiency) AS avg_cpu_efficiency, 
-           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
+           IFNULL(gpu_efficiency, 0) AS avg_gpu_efficiency, 
            lost_cpu_time AS lost_cpu_time, 
            IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
            COUNT(jobID) AS job_count
