@@ -353,6 +353,7 @@ class CreateFigures:
             WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             GROUP BY username
             """, con)
+        print(df)
         for index, row in df.iterrows():
             username = row['username']
             lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
