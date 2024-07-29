@@ -333,10 +333,10 @@ class CreateFigures:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        lost_cpu = 0
-        lost_gpu = 0
-        user_cpu_time = {}
-        user_gpu_time = {}
+        #lost_cpu = 0
+        #lost_gpu = 0
+        #user_cpu_time = {}
+        #user_gpu_time = {}
         start_date, end_date = st.date_input(
             'Start Date - End Date',
             [datetime.today() - timedelta(days=30),  datetime.today()],
