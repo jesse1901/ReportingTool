@@ -322,7 +322,6 @@ class CreateFigures:
             SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, gpu_efficiency, lost_gpu_time, real_time, 
                    job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end 
             FROM reportdata
-            WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
             """, self.con)
         st.write(df)
 
