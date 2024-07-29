@@ -190,7 +190,7 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
-                        #    print(f"nodes: {data.py['gpu_nodes']}")
+                        print(f"nodes: {data['lost_gpu_efficiency']}")
                         #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
