@@ -211,7 +211,9 @@ class GetStats:
                             data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                         print(f"lost gpu time: {data['lost_gpu_time']}")
-                        #    print(f"nodes: {data.py['gpu_efficiency']}")
+                        print(f"lost gpu time: {data['lost_gpu_time_sec']}")
+
+                    #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
