@@ -380,6 +380,7 @@ class CreateFigures:
                 WHERE start >= '{start_date}' AND end <= '{end_date}'
                 GROUP BY username
                 """, con)
+            st.write(df)
             df['lost_cpu_time_seconds'] = df['lost_cpu_time'].apply(timestring_to_seconds)
             df['lost_gpu_time_seconds'] = df['lost_gpu_time'].apply(timestring_to_seconds)
             # Calculate total lost CPU and GPU time per user and overall totals
