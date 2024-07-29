@@ -450,7 +450,7 @@ class CreateFigures:
     #
     #     # Create a new column to determine the color based on the presence of GPU efficiency
     #     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
-    #
+
     #     # Separate the data.py into two based on the new column
     #     df_cpu = df[df['color_scale'] == 'cpu']
     #     df_gpu = df[df['color_scale'] == 'gpu']
