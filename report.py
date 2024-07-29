@@ -29,7 +29,7 @@ def count_keys_under_steps(d):
 
 
 def timestring_to_seconds(timestring):
-    if timestring is None or timestring == '':
+    if timestring is None or timestring == '' or timestring == 0:
         return 0
     parts = timestring.split('T')
     days = int(parts[0])
