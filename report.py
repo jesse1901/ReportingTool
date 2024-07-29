@@ -360,11 +360,20 @@ class CreateFigures:
             GROUP BY username
             """, con)
         print(df)
+        lost_cpu_times = []
+        lost_gpu_times = []
         for index, row in df.iterrows():
             username = row['username']
             lost_cpu = timestring_to_seconds(row['lost_cpu_time'])
-
             lost_gpu = timestring_to_seconds(row['lost_gpu_time'])
+
+            # Convert back to time string for display
+            lost_cpu_str = seconds_to_timestring(lost_cpu)
+            lost_gpu_str = seconds_to_timestring(lost_gpu)
+
+            # Append the converted strings to the lists
+            lost_cpu_times.append(lost_cpu_str)
+            lost_gpu_times.append(lost_gpu_str)
 
             if username not in user_cpu_time:
                 user_cpu_time[username] = 0
@@ -373,12 +382,11 @@ class CreateFigures:
             user_cpu_time[username] += lost_cpu
             user_gpu_time[username] += lost_gpu
 
-        lost_cpu = seconds_to_timestring(lost_cpu)
-        lost_gpu = seconds_to_timestring(lost_gpu)
-        df['lost_cpu_time'] = lost_cpu
-        df['lost_gpu_time'] = lost_gpu
-        st.write(df)
+        # Add the converted time strings back to the DataFrame
+        df['lost_cpu_time'] = lost_cpu_times
+        df['lost_gpu_time'] = lost_gpu_times
 
+        st.write(df)
     def frame_group_by_user_test(self) -> None:
         df = pd.read_sql_query("""
             SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
