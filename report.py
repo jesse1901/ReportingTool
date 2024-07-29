@@ -192,6 +192,7 @@ class GetStats:
                     if end_time is not None and end_time > self.latest_end:
                      #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
                         data = stats.to_dict()
+
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
                                 INSERT INTO reportdata (
@@ -320,7 +321,7 @@ class GetStats:
             "lost_cpu_time_sec": timestring_to_seconds(self.lost_cpu_time),
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
-            "lost_gpu_time_sec": self.job_elapsed_s / (self.gpu_eff * 100) if self.gpu_eff else None,
+            "lost_gpu_time_sec": (self.job_elapsed_s / (self.gpu_eff * 100)) if self.gpu_eff else None,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
             "job_cpu_time_s": self.job_elapsed_s,
