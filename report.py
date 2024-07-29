@@ -30,7 +30,7 @@ def count_keys_under_steps(d):
 
 
 def timestring_to_seconds(time_string):
-    if time_string is None or time_string.strip() == '' or time_string == 0:
+    if time_string is None or time_string == '' or time_string == 0:
         return 0
 
     # Split the string into date part and time part
