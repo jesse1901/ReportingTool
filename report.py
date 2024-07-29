@@ -276,7 +276,7 @@ class GetStats:
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
                     lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
-                    lost_gpu_time_seconds = round(lost_gpu_time_seconds, 0)
+                    lost_gpu_time_seconds = round(lost_gpu_time_seconds)
                     print(f'round CPU : {lost_gpu_time_seconds}')
                     self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
                     #print(f"gpu-usage: {self.gpu_eff}"))
