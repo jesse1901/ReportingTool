@@ -190,7 +190,7 @@ class GetStats:
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'], data['gpu_efficiency'],
                             data['lost_gpu_time'], data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
-                        print(f"nodes: {data['lost_gpu_efficiency']}")
+                        print(f"nodes: {data['lost_gpu_time']}")
                         #    print(f"nodes: {data.py['gpu_efficiency']}")
                         cur.connection.commit()
                 except Exception as e:
@@ -277,7 +277,7 @@ class GetStats:
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
                     lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
                     round(lost_gpu_time_seconds)
-                    print(f'round GPU : {lost_gpu_time_seconds}')
+                    print(f'round CPU : {lost_gpu_time_seconds}')
                     self.lost_gpu_time = str(timedelta(seconds=lost_gpu_time_seconds))
                     #print(f"gpu-usage: {self.gpu_eff}"))
             else:
