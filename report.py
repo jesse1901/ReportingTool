@@ -352,7 +352,7 @@ class CreateFigures:
             SELECT username, 
            AVG(cpu_efficiency) AS avg_cpu_efficiency, 
            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency, 
-           lost_cpu_time AS lost_cpu_time, 
+           SUM(IFNULL(lost_cpu_time, 0)) AS lost_cpu_time, 
            IFNULL(lost_gpu_time, 0) AS lost_gpu_time, 
            COUNT(jobID) AS job_count
     FROM reportdata
@@ -377,6 +377,13 @@ class CreateFigures:
         # lost_gpu = seconds_to_timestring(lost_gpu)
         # df['lost_cpu_time'] = lost_cpu
         # df['lost_gpu_time'] = lost_gpu
+        st.write(df)
+
+    def frame_group_by_user_test(self) -> None:
+        df = pd.read_sql_query("""
+            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
+            FROM reportdata 
+            GROUP BY username""", self.con)
         st.write(df)
 
     def chart_cpu_utilization(self) -> None:
@@ -452,12 +459,6 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
-    def frame_group_by_user_test(self) -> None:
-        df = pd.read_sql_query("""
-            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
-            FROM reportdata 
-            GROUP BY username""", self.con)
-        st.write(df)
 #agsunset
     # Beispiel wie die Funktion aufgerufen werden könnte
     # scatter_chart_data_cpu_gpu_eff()
