@@ -42,17 +42,15 @@ def timestring_to_seconds(timestring):
 
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
-
-        td = timedelta(seconds=total_seconds)
-
-        # Extract days, hours, minutes, and seconds from timedelta
-        days = td.days
-        hours, remainder = divmod(td.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        round(seconds)
-        # Format the result as a string
-        timestring = f"{days}T {hours}:{minutes}:{seconds}"
-        return timestring
+    td = timedelta(seconds=total_seconds)
+    # Extract days, hours, minutes, and seconds from timedelta
+    days = td.days
+    hours, remainder = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    round(seconds)
+    # Format the result as a string
+    timestring = f"{days}T {hours}:{minutes}:{seconds}"
+    return timestring
 
 
 class GetStats:
@@ -283,6 +281,7 @@ class GetStats:
                     #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
+                print(response.raise_for_status())
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 #        response = requests.get(prometheus_url, params=params)
