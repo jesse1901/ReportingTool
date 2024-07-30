@@ -460,6 +460,7 @@ class CreateFigures:
         date_range_df = pd.read_sql_query(date_query, self.con)
         min_date = pd.to_datetime(date_range_df['min_date'].values[0]).date()
         max_date = pd.to_datetime(date_range_df['max_date'].values[0]).date()
+        max_date += timedelta(days=1)
 
         # Create a slider for date range selection
         start_date, end_date = st.slider(
