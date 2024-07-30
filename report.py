@@ -378,11 +378,15 @@ class CreateFigures:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
         df = pd.read_sql_query(f"""
-        SELECT username, AVG(cpu_efficiency) AS avg_cpu_efficiency, AVG(gpu_efficiency) AS avg_gpu_efficiency,
-               COUNT(jobID) AS anzahl_jobs, SUM(lost_cpu_time_sec) AS total_lost_cpu_time, SUM(lost_gpu_time_sec) AS total_lost_gpu_time
-        FROM reportdata
-        WHERE start >= '{start_date}' AND end <= '{end_date}'
-        GROUP BY username
+                        SELECT username, 
+                           AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
+                           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                           COUNT(jobID) AS anzahl_jobs, 
+                           SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                        FROM reportdata
+                        WHERE start >= '{start_date}' AND end <= '{end_date}'
+                        GROUP BY username
         """, con)
 
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
