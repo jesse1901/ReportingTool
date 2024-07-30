@@ -200,8 +200,8 @@ class GetStats:
                         data = stats.to_dict()
 
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                        lost_gpu_time_sec = int(data['lost_gpu_time_sec'])
-                        lost_cpu_time_sec = int(data['lost_cpu_time_sec'])
+                        lost_gpu_time_sec = int(data['lost_gpu_time_sec']) if data['lost_gpu_time_sec'] else None
+                        lost_cpu_time_sec = int(data['lost_cpu_time_sec']) if data['lost_cpu_time_sec'] else None
 
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
