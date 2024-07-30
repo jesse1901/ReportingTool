@@ -379,15 +379,15 @@ class CreateFigures:
         GROUP BY username
         """, con)
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
-        #df = df.dropna(subset=['lost_cpu_time_sec'])
+        df = df.dropna(subset=['total_lost_cpu_time'])
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
 
 
-        df['lost_gpu_time_sec'] = pd.to_numeric(df['lost_gpu_time_sec'], errors='coerce')
-        #df = df.dropna(subset=['lost_cpu_time_sec'])
-        df['lost_gpu_time_sec'] = df['lost_gpu_time_sec'].astype(int)
-        df['lost_gpu_time_sec'] = df['lost_gpu_time_sec'].apply(timestring_to_seconds)
+        df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
+        df = df.dropna(subset=['total_lost_gpu_time'])
+        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
+        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(timestring_to_seconds)
         st.write(df)
 
 
