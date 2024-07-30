@@ -209,11 +209,11 @@ class GetStats:
                                 lost_cpu_time_sec = excluded.lost_cpu_time_sec 
                             """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
-                            data['lost_cpu_time_sec'], data['gpu_efficiency'], data['lost_gpu_time'], data['lost_gpu_time'],
+                            data['lost_cpu_time_sec'], data['gpu_efficiency'], data['lost_gpu_time'], data['lost_gpu_time_sec'],
                             data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
                         ))
                         print(f"lost gpu time: {data['lost_gpu_time']}")
-                        print(f"lost gpu time: {data['lost_gpu_time_sec']}")
+                        print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
