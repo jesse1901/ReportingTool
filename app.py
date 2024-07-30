@@ -227,8 +227,7 @@ if __name__ == "__main__":
     create = CreateFigures(con)
     create.frame_user_all()
     create.frame_group_by_user()
-    #    create.chart_cpu_utilization()
+    # create.chart_cpu_utilization()
     create.scatter_chart_data_cpu_gpu_eff()
     create.scatter_chart_data_color_lost_cpu()
-
 
