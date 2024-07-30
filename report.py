@@ -478,60 +478,60 @@ class CreateFigures:
         st.plotly_chart(fig, theme=None)
 
 
-def scatter_chart_data_cpu_gpu_eff(self):
-    # Fetch the available date range from the database
-    date_query = """
-        SELECT MIN(start) AS min_date, MAX(end) AS max_date
-        FROM reportdata
-    """
-    date_range_df = pd.read_sql_query(date_query, self.con)
-    min_date = pd.to_datetime(date_range_df['min_date'].values[0])
-    max_date = pd.to_datetime(date_range_df['max_date'].values[0])
+    def scatter_chart_data_cpu_gpu_eff(self):
+        # Fetch the available date range from the database
+        date_query = """
+            SELECT MIN(start) AS min_date, MAX(end) AS max_date
+            FROM reportdata
+        """
+        date_range_df = pd.read_sql_query(date_query, self.con)
+        min_date = pd.to_datetime(date_range_df['min_date'].values[0])
+        max_date = pd.to_datetime(date_range_df['max_date'].values[0])
 
-    # Create a slider for date range selection
-    start_date, end_date = st.slider(
-        "Select Date Range",
-        min_value=min_date,
-        max_value=max_date,
-        value=(min_date, max_date),
-        format="YYYY-MM-DD"
-    )
+        # Create a slider for date range selection
+        start_date, end_date = st.slider(
+            "Select Date Range",
+            min_value=min_date,
+            max_value=max_date,
+            value=(min_date, max_date),
+            format="YYYY-MM-DD"
+        )
 
-    # Ensure start_date is not after end_date
-    if start_date > end_date:
-        st.error("Error: End date must be after start date.")
-        return
+        # Ensure start_date is not after end_date
+        if start_date > end_date:
+            st.error("Error: End date must be after start date.")
+            return
 
-    # Load data from database with date filtering
-    query = f"""
-        SELECT jobID, username, gpu_efficiency, 
-               cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-        FROM reportdata
-        WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
-        ORDER BY job_cpu_time_s ASC;
-    """
-    df = pd.read_sql_query(query, self.con)
+        # Load data from database with date filtering
+        query = f"""
+            SELECT jobID, username, gpu_efficiency, 
+                   cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+            FROM reportdata
+            WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
+            ORDER BY job_cpu_time_s ASC;
+        """
+        df = pd.read_sql_query(query, self.con)
 
-    # Data cleaning and transformation
-    df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
-    df = df.dropna(subset=['job_cpu_time_s'])
-    df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
-    df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        # Data cleaning and transformation
+        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
+        df = df.dropna(subset=['job_cpu_time_s'])
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
-    # Create scatter plot
-    fig = px.scatter(
-        df,
-        x="job_cpu_time_s",
-        y="cpu_efficiency",
-        color="gpu_efficiency",
-        color_continuous_scale="tealgrn",
-        size_max=1,
-        hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
-        labels={"job_cpu_time_s": "real_job_time"}
-    )
+        # Create scatter plot
+        fig = px.scatter(
+            df,
+            x="job_cpu_time_s",
+            y="cpu_efficiency",
+            color="gpu_efficiency",
+            color_continuous_scale="tealgrn",
+            size_max=1,
+            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
+            labels={"job_cpu_time_s": "real_job_time"}
+        )
 
-    fig.update_traces(marker=dict(size=3))
-    st.plotly_chart(fig, theme=None)
+        fig.update_traces(marker=dict(size=3))
+        st.plotly_chart(fig, theme=None)
 
 #agsunset
 # Beispiel wie die Funktion aufgerufen werden könnte
