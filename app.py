@@ -10,6 +10,7 @@ import requests
 import hostlist
 import gpu_node_data
 import json
+from streamlit_autorefresh import st_autorefresh
 
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0:
@@ -222,6 +223,7 @@ class CreateFigures:
         st.plotly_chart(fig, theme=None)
 
 if __name__ == "__main__":
+    st_autorefresh(intervall=10000)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
