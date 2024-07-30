@@ -451,7 +451,6 @@ class CreateFigures:
 
         st.plotly_chart(fig, theme=None)
 
-    @st.cache
     def scatter_chart_data_cpu_gpu_eff(self):
         # Fetch the available date range from the database
         date_query = """
