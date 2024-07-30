@@ -27,6 +27,7 @@ def count_keys_under_steps(d):
         return list(steps_dict.keys())
     return []
 
+
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0:
         return 0
@@ -55,6 +56,8 @@ def timestring_to_seconds(timestring):
     # Calculate total seconds
     total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
     return total_seconds
+
+
 def seconds_to_timestring(total_seconds):
     # Create a timedelta object from the total seconds
     td = timedelta(seconds=total_seconds)
@@ -140,7 +143,8 @@ class GetStats:
         if self.job_elapsed_s:
             self.used_time = seconds_to_timestring(self.total_cpu_time_sum)
             self.real_time = seconds_to_timestring(self.job_elapsed_s)
-            self.job_elapsed_cpu_time = seconds_to_timestring(self.job_elapsed_s * self.cores) if self.cores and self.job_elapsed_s else 0
+            self.job_elapsed_cpu_time = seconds_to_timestring(
+                self.job_elapsed_s * self.cores) if self.cores and self.job_elapsed_s else 0
             self.lost_cpu_time = seconds_to_timestring((self.job_elapsed_s * self.cores) - self.total_cpu_time_sum)
 
         # Format start and end times
@@ -192,25 +196,31 @@ class GetStats:
                 end_time = end_time.isoformat('T', 'auto')
                 try:
                     if end_time is not None and end_time > self.latest_end:
-                     #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
+                        #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
                         data = stats.to_dict()
 
                         # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                        lost_gpu_time_sec = int(data['lost_gpu_time_sec'])
+                        lost_cpu_time_sec = int(data['lost_cpu_time_sec'])
+
+                        # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
                         cur.execute("""
-                                INSERT INTO reportdata (
-                                    jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
-                                    gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
-                                    job_cpu_time_s, state, cores, gpu_nodes, start, end
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(jobID) DO UPDATE SET 
-                                gpu_nodes = excluded.gpu_nodes,
-                                lost_gpu_time = excluded.lost_gpu_time,
-                                gpu_efficiency = excluded.gpu_efficiency,
-                                lost_gpu_time_sec = excluded.lost_gpu_time_sec,
-                                lost_cpu_time_sec = excluded.lost_cpu_time_sec 
-                            """, (
+                                          INSERT INTO reportdata (
+                                              jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
+                                              gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
+                                              job_cpu_time_s, state, cores, gpu_nodes, start, end
+                                          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                                          ON CONFLICT(jobID) DO UPDATE SET 
+                                              gpu_nodes = excluded.gpu_nodes,
+                                              lost_gpu_time = excluded.lost_gpu_time,
+                                              gpu_efficiency = excluded.gpu_efficiency,
+                                              lost_gpu_time_sec = excluded.lost_gpu_time_sec,
+                                              lost_cpu_time_sec = excluded.lost_cpu_time_sec
+                                      """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
-                            data['lost_cpu_time_sec'], data['gpu_efficiency'], data['lost_gpu_time'], data['lost_gpu_time_sec'],
-                            data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'], data['cores'], data['gpu_nodes'],  data['start'], data['end']
+                            lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
+                            data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'],
+                            data['cores'], data['gpu_nodes'], data['start'], data['end']
                         ))
                         print(f"lost gpu time: {data['lost_gpu_time']}")
                         print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
@@ -220,7 +230,6 @@ class GetStats:
         #except Exception as err:
         #    print(f'Error endtime, job {job_id}:{err}')
         # Print an error message if job processing fails
-
 
     def calculate_avg_eff(self, cur) -> None:
         """
@@ -292,12 +301,14 @@ class GetStats:
             # Debug: Print the full JSON response
             #print(f"Full JSON response: {data.py}")
 
-            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in data['data']['result'][0]:
+            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in \
+                    data['data']['result'][0]:
                 values = data['data']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
-                    self.lost_gpu_time_seconds = int((len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)))
+                    self.lost_gpu_time_seconds = int(
+                        (len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)))
                     self.lost_gpu_time_sec = self.lost_gpu_time_seconds
                     print(f'round CPU : {self.lost_gpu_time_sec}')
                     self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_sec))
@@ -306,9 +317,10 @@ class GetStats:
                 print(f"Error: Unexpected response structure{data}")
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
-#        response = requests.get(prometheus_url, params=params)
-#        print(f"gpu-usage: {response.json()['gpu_usage']}")
-#        self.gpu_eff = response.json()['gpu_usage']
+
+    #        response = requests.get(prometheus_url, params=params)
+    #        print(f"gpu-usage: {response.json()['gpu_usage']}")
+    #        self.gpu_eff = response.json()['gpu_usage']
 
     def to_dict(self) -> dict:
         """
@@ -388,8 +400,6 @@ class CreateFigures:
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
-
-
 
     def frame_group_by_user_test(self) -> None:
         df = pd.read_sql_query("""
@@ -471,41 +481,41 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
+
 #agsunset
-    # Beispiel wie die Funktion aufgerufen werden könnte
-    # scatter_chart_data_cpu_gpu_eff()
+# Beispiel wie die Funktion aufgerufen werden könnte
+# scatter_chart_data_cpu_gpu_eff()
 
 
+# def scatter_chart_data(self):
+#     df = pd.read_sql_query("""
+#         SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+#         FROM reportdata
+#         ORDER BY job_cpu_time_s ASC;""", self.con)
+#
+#     df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+#
+#     # Create a new column to determine the color based on the presence of GPU efficiency
+#     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
 
-    # def scatter_chart_data(self):
-    #     df = pd.read_sql_query("""
-    #         SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-    #         FROM reportdata
-    #         ORDER BY job_cpu_time_s ASC;""", self.con)
-    #
-    #     df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-    #
-    #     # Create a new column to determine the color based on the presence of GPU efficiency
-    #     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
-
-    #     # Separate the data.py into two based on the new column
-    #     df_cpu = df[df['color_scale'] == 'cpu']
-    #     df_gpu = df[df['color_scale'] == 'gpu']
-    #
-    #     # Create scatter plots for both datasets
-    #     fig = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
-    #                      color_continuous_scale="blues", size_max=1,
-    #                      hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-    #
-    #     fig_gpu = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
-    #                          color_continuous_scale="reds", size_max=1,
-    #                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-    #
-    #     # Update fig with fig_gpu traces
-    #     for trace in fig_gpu['data.py']:
-    #         fig.add_trace(trace)
-    #
-    #     st.plotly_chart(fig, theme=None)
+#     # Separate the data.py into two based on the new column
+#     df_cpu = df[df['color_scale'] == 'cpu']
+#     df_gpu = df[df['color_scale'] == 'gpu']
+#
+#     # Create scatter plots for both datasets
+#     fig = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
+#                      color_continuous_scale="blues", size_max=1,
+#                      hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+#
+#     fig_gpu = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
+#                          color_continuous_scale="reds", size_max=1,
+#                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
+#
+#     # Update fig with fig_gpu traces
+#     for trace in fig_gpu['data.py']:
+#         fig.add_trace(trace)
+#
+#     st.plotly_chart(fig, theme=None)
 if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
