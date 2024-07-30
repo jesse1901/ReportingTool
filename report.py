@@ -298,10 +298,9 @@ class GetStats:
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0
                 if self.job_gpu_nodes is not None and self.job_elapsed_s is not None:
                     self.lost_gpu_time_seconds = len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)
-                    self.lost_gpu_time_seconds = round(self.lost_gpu_time_seconds)
-                    self.lost_gpu_time_sec = self.lost_gpu_time_seconds
-                    print(f'round CPU : {self.lost_gpu_time_seconds}')
-                    self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_seconds))
+                    self.lost_gpu_time_sec = round(self.lost_gpu_time_seconds)
+                    print(f'round CPU : {self.lost_gpu_time_sec}')
+                    self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_sec))
                     #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
