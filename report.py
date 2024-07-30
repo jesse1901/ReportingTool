@@ -377,7 +377,7 @@ class CreateFigures:
         FROM reportdata
         WHERE start >= '{start_date}' AND end <= '{end_date}'
         GROUP BY username
-        """)
+        """, con)
         df['lost_cpu_time_sec'] = pd.to_numeric(df['lost_cpu_time_sec'], errors='coerce')
         #df = df.dropna(subset=['lost_cpu_time_sec'])
         df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
