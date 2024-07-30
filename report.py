@@ -374,14 +374,17 @@ class CreateFigures:
         GROUP BY username
         """, con)
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
-        df = df.dropna(subset=['total_lost_cpu_time'])
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
-
-
         df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
-        df = df.dropna(subset=['total_lost_gpu_time'])
+
+        # Drop rows where the conversion failed
+        df = df.dropna(subset=['total_lost_cpu_time', 'total_lost_gpu_time'])
+
+        # Convert the columns to integers
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
+
+        # Apply the conversion functions
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
 
