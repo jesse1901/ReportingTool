@@ -371,10 +371,23 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
-        df = pd.read_sql_query(""" SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs,
-                                SUM(lost_cpu_time_sec), SUM(lost_gpu_time_sec) FROM reportdata 
-                                GROUP BY username
-                                """)
+        df = pd.read_sql_query(f"""
+        SELECT username, AVG(cpu_efficiency) AS avg_cpu_efficiency, AVG(gpu_efficiency) AS avg_gpu_efficiency,
+               COUNT(jobID) AS anzahl_jobs, SUM(lost_cpu_time_sec) AS total_lost_cpu_time, SUM(lost_gpu_time_sec) AS total_lost_gpu_time
+        FROM reportdata
+        WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+        GROUP BY username
+        """)
+        df['lost_cpu_time_sec'] = pd.to_numeric(df['lost_cpu_time_sec'], errors='coerce')
+        #df = df.dropna(subset=['lost_cpu_time_sec'])
+        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
+        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].apply(seconds_to_timestring)
+
+
+        df['lost_gpu_time_sec'] = pd.to_numeric(df['lost_gpu_time_sec'], errors='coerce')
+        #df = df.dropna(subset=['lost_cpu_time_sec'])
+        df['lost_gpu_time_sec'] = df['lost_gpu_time_sec'].astype(int)
+        df['lost_gpu_time_sec'] = df['lost_gpu_time_sec'].apply(timestring_to_seconds)
         st.write(df)
 
 
@@ -532,7 +545,6 @@ if __name__ == "__main__":
     #    create.chart_cpu_utilization()
     create.scatter_chart_data_cpu_gpu_eff()
     create.scatter_chart_data_color_lost_cpu()
-    create.frame_group_by_user_test()
 
     # Main loop to continuously fetch job data.py and update average efficiency
     while True:
