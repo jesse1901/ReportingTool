@@ -371,6 +371,11 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
+        df = pd.read_sql_query(""" SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs,
+                                SUM(lost_cpu_time_sec), SUM(lost_gpu_time_sec) FROM reportdata 
+                                GROUP BY username
+                                """)
+        st.write(df)
 
 
 
