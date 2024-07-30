@@ -222,7 +222,7 @@ class GetStats:
                             data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'],
                             data['cores'], data['gpu_nodes'], data['start'], data['end']
                         ))
-                        #print(f"lost gpu time: {data['lost_gpu_time']}")
+                        print(f"lost gpu time: {data['jobID']}")
                         #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
                         cur.connection.commit()
                 except Exception as e:
@@ -344,42 +344,6 @@ class GetStats:
             "end": self.end,
         }
 
-
-
-#agsunset
-# Beispiel wie die Funktion aufgerufen werden könnte
-# scatter_chart_data_cpu_gpu_eff()
-
-
-# def scatter_chart_data(self):
-#     df = pd.read_sql_query("""
-#         SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-#         FROM reportdata
-#         ORDER BY job_cpu_time_s ASC;""", self.con)
-#
-#     df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-#
-#     # Create a new column to determine the color based on the presence of GPU efficiency
-#     df['color_scale'] = df['gpu_efficiency'].apply(lambda x: 'cpu' if pd.isna(x) else 'gpu')
-
-#     # Separate the data.py into two based on the new column
-#     df_cpu = df[df['color_scale'] == 'cpu']
-#     df_gpu = df[df['color_scale'] == 'gpu']
-#
-#     # Create scatter plots for both datasets
-#     fig = px.scatter(df_gpu, x="job_cpu_time_s", y="cpu_efficiency", color="gpu_efficiency",
-#                      color_continuous_scale="blues", size_max=1,
-#                      hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-#
-#     fig_gpu = px.scatter(df_cpu, x="job_cpu_time_s", y="cpu_efficiency", color="cpu_efficiency",
-#                          color_continuous_scale="reds", size_max=1,
-#                          hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"])
-#
-#     # Update fig with fig_gpu traces
-#     for trace in fig_gpu['data.py']:
-#         fig.add_trace(trace)
-#
-#     st.plotly_chart(fig, theme=None)
 if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
