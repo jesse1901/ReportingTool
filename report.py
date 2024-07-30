@@ -355,11 +355,6 @@ class CreateFigures:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        # Initialize variables
-        lost_cpu = 0
-        lost_gpu = 0
-        user_cpu_time = {}
-        user_gpu_time = {}
 
         # Get start and end dates from Streamlit date input
         start_date, end_date = st.date_input(
@@ -387,7 +382,7 @@ class CreateFigures:
         df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
         df = df.dropna(subset=['total_lost_gpu_time'])
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
-        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(timestring_to_seconds)
+        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
 
 
