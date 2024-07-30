@@ -335,7 +335,7 @@ class GetStats:
             "lost_cpu_time_sec": timestring_to_seconds(self.lost_cpu_time),
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
-            "lost_gpu_time_sec": int(self.lost_gpu_time_sec),
+            "lost_gpu_time_sec": self.lost_gpu_time_sec,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
             "job_cpu_time_s": self.job_elapsed_s,
