@@ -451,33 +451,7 @@ class CreateFigures:
 
         st.plotly_chart(fig, theme=None)
 
-    def scatter_chart_data_cpu_gpu_eff1(self):
-        df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, 
-                   cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
-            FROM reportdata
-            ORDER BY job_cpu_time_s ASC;""", self.con)
-
-        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
-        df = df.dropna(subset=['job_cpu_time_s'])
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
-
-        fig = px.scatter(
-            df,
-            x="job_cpu_time_s",
-            y="cpu_efficiency",
-            color="gpu_efficiency",
-            color_continuous_scale="tealgrn",
-            size_max=1,
-            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
-            labels={"job_cpu_time_s": "real_job_time"}
-        )
-
-        fig.update_traces(marker=dict(size=3))
-        st.plotly_chart(fig, theme=None)
-
-
+    @st.cache
     def scatter_chart_data_cpu_gpu_eff(self):
         # Fetch the available date range from the database
         date_query = """
@@ -572,6 +546,7 @@ if __name__ == "__main__":
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     # # create table
+    con.execute('PRAGMA journal_mode=WAL;')
     cur.execute("""
               CREATE TABLE IF NOT EXISTS reportdata (
                   jobID INTEGER NOT NULL UNIQUE,
