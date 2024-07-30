@@ -401,13 +401,6 @@ class CreateFigures:
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
 
-    def frame_group_by_user_test(self) -> None:
-        df = pd.read_sql_query("""
-            SELECT username, AVG(cpu_efficiency) ,AVG(gpu_efficiency), COUNT(jobID) AS anzahl_jobs, AVG(job_cpu_time_s)/3600 as AVG_real_job_time_h
-            FROM reportdata 
-            GROUP BY username""", self.con)
-        st.write(df)
-
     def chart_cpu_utilization(self) -> None:
         """
         Displays a line chart of average CPU utilization by hour from the avg_eff table.
@@ -552,8 +545,8 @@ if __name__ == "__main__":
     create.frame_user_all()
     create.frame_group_by_user()
     #    create.chart_cpu_utilization()
-    #create.scatter_chart_data_cpu_gpu_eff()
-    #create.scatter_chart_data_color_lost_cpu()
+    create.scatter_chart_data_cpu_gpu_eff()
+    create.scatter_chart_data_color_lost_cpu()
 
     # Main loop to continuously fetch job data.py and update average efficiency
     while True:
