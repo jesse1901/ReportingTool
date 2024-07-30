@@ -222,8 +222,8 @@ class GetStats:
                             data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'],
                             data['cores'], data['gpu_nodes'], data['start'], data['end']
                         ))
-                        print(f"lost gpu time: {data['lost_gpu_time']}")
-                        print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
+                        #print(f"lost gpu time: {data['lost_gpu_time']}")
+                        #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
                         cur.connection.commit()
                 except Exception as e:
                     print(f"Error processing job {job_id}: {e}")
@@ -310,9 +310,7 @@ class GetStats:
                     self.lost_gpu_time_seconds = int(
                         (len(self.job_gpu_nodes) * self.job_elapsed_s * (1 - self.gpu_eff)))
                     self.lost_gpu_time_sec = self.lost_gpu_time_seconds
-                    print(f'round CPU : {self.lost_gpu_time_sec}')
                     self.lost_gpu_time = str(timedelta(seconds=self.lost_gpu_time_sec))
-                    #print(f"gpu-usage: {self.gpu_eff}"))
             else:
                 print(f"Error: Unexpected response structure{data}")
         except requests.exceptions.RequestException as e:
