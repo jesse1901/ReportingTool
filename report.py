@@ -367,9 +367,13 @@ class CreateFigures:
         """
 
         # Get start and end dates from Streamlit date input
-        start_date, end_date = st.date_input(
-            'Start Date - End Date',
-            [datetime.today() - timedelta(days=30), datetime.today()],
+        start_date = st.date_input(
+            'Start Date',
+            [datetime.today() - timedelta(days=30)],
+        )
+        end_date = st.date_input(
+            'End Date',
+            [datetime.today() + timedelta(days=1)],
         )
 
         if start_date and end_date:
