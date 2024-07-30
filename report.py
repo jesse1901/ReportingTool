@@ -375,7 +375,7 @@ class CreateFigures:
         SELECT username, AVG(cpu_efficiency) AS avg_cpu_efficiency, AVG(gpu_efficiency) AS avg_gpu_efficiency,
                COUNT(jobID) AS anzahl_jobs, SUM(lost_cpu_time_sec) AS total_lost_cpu_time, SUM(lost_gpu_time_sec) AS total_lost_gpu_time
         FROM reportdata
-        WHERE start >= '{start_date_str}' AND end <= '{end_date_str}'
+        WHERE start >= '{start_date}' AND end <= '{end_date}'
         GROUP BY username
         """)
         df['lost_cpu_time_sec'] = pd.to_numeric(df['lost_cpu_time_sec'], errors='coerce')
