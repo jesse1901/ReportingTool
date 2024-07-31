@@ -278,14 +278,13 @@ class CreateFigures:
         df = pd.read_sql_query(query, self.con)
 
         # Data cleaning and transformation
-        # Filter dataframe based on the checkbox
+        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
+        df = df.dropna(subset=['job_cpu_time_s'])
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
+        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+
         if hide_gpu_none:
             df = df[df['gpu_efficiency'].isna()]
-
-        # Check if the dataframe is empty after filtering
-        if df.empty:
-            st.write("No data available for the selected date range and filter.")
-            return
 
         # Create scatter plot
         fig = px.scatter(
