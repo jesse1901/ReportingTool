@@ -61,11 +61,10 @@ class CreateFigures:
         self.con = con
 
     def frame_user_all(self) -> None:
-        st.write('All Data')
-
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
+        st.write('All Data')
         df = pd.read_sql_query("""
             SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time, 
             lost_gpu_time_sec, real_time, job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end 
