@@ -284,8 +284,8 @@ class CreateFigures:
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
         if hide_gpu_none:
-            df2 = df.dropna(subset=['gpu_efficiency'])
-            df = df.drop(df2.index)
+            df = df[df['gpu_efficiency'].isna()]
+
         # Create scatter plot
         fig = px.scatter(
             df,
