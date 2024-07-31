@@ -177,6 +177,7 @@ class CreateFigures:
         st.dataframe(df[['username', 'formatted_lost_cpu_time']])
 
     def job_counts_by_hour(self) -> None:
+        interval_minutes = 30
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
