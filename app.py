@@ -200,7 +200,7 @@ class CreateFigures:
 
         # Resample by hourly intervals and count the number of jobs
         df.set_index('job_start', inplace=True)
-        hourly_job_counts = df.resample('H').size().reset_index(name='job_count')
+        hourly_job_counts = df.resample('h').size().reset_index(name='job_count')
 
         # Plot time series using Plotly
         fig = px.line(hourly_job_counts, x='job_start', y='job_count',
