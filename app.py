@@ -131,15 +131,15 @@ class CreateFigures:
                            AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
                            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
                            COUNT(jobID) AS anzahl_jobs, 
-                           SUM(IFNULL(lost_cpu_time_sec, 0)) , 
-                           SUM(IFNULL(lost_gpu_time_sec, 0))
+                           SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}'
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
-        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
-        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].apply(seconds_to_timestring)
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
         st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
 
 
