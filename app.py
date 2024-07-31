@@ -183,13 +183,11 @@ class CreateFigures:
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
         FROM reportdata;
         """, con)
-        df['runtime_interval'] = pd.cut(df['runtime_minutes'],
-                                        bins=range(0, int(df['runtime_minutes'].max()) + interval_minutes,
-                                                   interval_minutes),
-                                        labels=[f"{i}-{i + interval_minutes} min" for i in
-                                                range(0, int(df['runtime_minutes'].max()) + interval_minutes,
-                                                      interval_minutes)],
-                                        include_lowest=True)
+        max_runtime = int(df['runtime_minutes'].max()) + interval_minutes
+        bins = range(0, max_runtime, interval_minutes)
+        labels = [f"{i}-{i + interval_minutes} min" for i in bins[:-1]]  # Adjust labels to be one fewer than bins
+
+        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
 
