@@ -177,53 +177,20 @@ class CreateFigures:
         st.dataframe(df[['username', 'formatted_lost_cpu_time']])
 
     def job_counts_by_hour(self) -> None:
-        start_date, end_date = st.date_input(
-            'Start Date and End Date',
-            [datetime.today() - timedelta(days=30), datetime.today()],
-        )
-        end_date += timedelta(days=1)
-
-        if start_date and end_date:
-            if start_date > end_date:
-                st.error("Error: End date must fall after start date.")
-                return  # Exit if there's an error
-
-        # Query to get job data
-        df = pd.read_sql_query(f"""
-                        SELECT start AS job_start
-                        FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}'
-        """, con)
-
-        # Ensure 'job_start' is a datetime type
-        df['job_start'] = pd.to_datetime(df['job_start'])
-
-        # Resample by hourly intervals and count the number of jobs
-        df.set_index('job_start', inplace=True)
-        hourly_job_counts = df.resample('h').size().reset_index(name='job_count')
-
-        # Plot time series using Plotly
-        fig = px.line(hourly_job_counts, x='job_start', y='job_count',
-                      title='Number of Jobs per Hour',
-                      labels={'job_start': 'Time', 'job_count': 'Number of Jobs'})
-
-        # Update layout for better appearance
-        fig.update_layout(
-            xaxis_title='Time',
-            yaxis_title='Number of Jobs',
-            xaxis=dict(
-                tickformat='%Y-%m-%d %H:%M',  # Format for datetime ticks
-                dtick='3600',  # Show ticks every hour
-            ),
-            yaxis=dict(
-                title='Number of Jobs'
-            )
-        )
-
-        st.plotly_chart(fig)
-
-        # Display the DataFrame with hourly job counts
-        st.dataframe(hourly_job_counts)
+        df = pd.read_sql_query("""
+        SELECT
+            (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
+        FROM jobs;
+        """)
+        df['runtime_interval'] = pd.cut(df['runtime_minutes'],
+                                        bins=range(0, int(df['runtime_minutes'].max()) + interval_minutes,
+                                                   interval_minutes),
+                                        labels=[f"{i}-{i + interval_minutes} min" for i in
+                                                range(0, int(df['runtime_minutes'].max()) + interval_minutes,
+                                                      interval_minutes)],
+                                        include_lowest=True)
+        job_counts = df['runtime_interval'].value_counts().sort_index()
+        st.bar_chart(job_counts)
 
     def chart_cpu_utilization(self) -> None:
         """
