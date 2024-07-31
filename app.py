@@ -142,21 +142,24 @@ class CreateFigures:
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
         df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
 
-        # Sort DataFrame by total_lost_cpu_time in descending order
-        df = df.sort_values(by='total_lost_cpu_time', ascending=False)
+        # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
+        df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(20)
 
-        # Define constant tick values for the y-axis
+        # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
         tick_vals = np.linspace(0, max_lost_time, num=10)
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
-        text_labels = df['formatted_lost_cpu_time'].where(df.index < 20, "")
-
-        fig = px.bar(df, x='username', y='total_lost_cpu_time', text=text_labels,
+        # Plot vertical bar chart using Plotly
+        fig = px.bar(df, x='username', y='total_lost_cpu_time',
                      title='Total Lost CPU Time by User')
 
-        # Update y-axis to show constant tick values with formatted time
+        # Update the y-axis to display formatted time with constant tick values
         fig.update_layout(
+            xaxis=dict(
+                title='Username',
+                tickangle=-45  # Rotate x-axis labels if needed for better readability
+            ),
             yaxis=dict(
                 title='Total Lost CPU Time',
                 tickmode='array',
@@ -166,6 +169,9 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
+
+        # Display the DataFrame with formatted lost CPU time
+        st.dataframe(df[['username', 'formatted_lost_cpu_time']])
 
     def chart_cpu_utilization(self) -> None:
         """
