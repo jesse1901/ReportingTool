@@ -150,27 +150,21 @@ class CreateFigures:
         tick_vals = np.linspace(0, max_lost_time, num=10)
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
-        # Plot bar chart using Plotly
         fig = px.bar(df, x='username', y='total_lost_cpu_time', text='formatted_lost_cpu_time',
                      title='Total Lost CPU Time by User')
 
-        # Update the bars to display usernames and format the x-axis with constant tick values
-        fig.update_traces(texttemplate='%{y}', textposition='inside')
+        # Update y-axis to show constant tick values with formatted time
+        fig.update_traces(textposition='inside')
         fig.update_layout(
-            xaxis=dict(
+            yaxis=dict(
                 title='Total Lost CPU Time',
                 tickmode='array',
                 tickvals=tick_vals,
                 ticktext=tick_text
-            ),
-            yaxis=dict(
-                title='Username'
             )
         )
 
         st.plotly_chart(fig)
-
-
 
     def chart_cpu_utilization(self) -> None:
         """
