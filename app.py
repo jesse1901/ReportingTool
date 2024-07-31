@@ -151,7 +151,7 @@ class CreateFigures:
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
         # Plot bar chart using Plotly
-        fig = px.bar(df, y='username', x='total_lost_cpu_time', text='formatted_lost_cpu_time',
+        fig = px.bar(df, x='username', y='total_lost_cpu_time', text='formatted_lost_cpu_time',
                      title='Total Lost CPU Time by User')
 
         # Update the bars to display usernames and format the x-axis with constant tick values
