@@ -154,7 +154,7 @@ class CreateFigures:
                      title='Total Lost CPU Time by User')
 
         # Update y-axis to show constant tick values with formatted time
-        fig.update_traces(textposition='inside')
+        fig.update_traces(textposition='inside', text='username')
         fig.update_layout(
             yaxis=dict(
                 title='Total Lost CPU Time',
