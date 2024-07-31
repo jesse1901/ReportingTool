@@ -97,7 +97,6 @@ class CreateFigures:
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}'
                         GROUP BY username
-                        ORDER BY lost_cpu_time_sec DESC
         """, con)
 
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
@@ -114,7 +113,37 @@ class CreateFigures:
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
+
+    def bar_char_by_user(self) -> None:
+
+        start_date, end_date = st.date_input(
+            'Start Date - End Date',
+            [datetime.today() - timedelta(days=30), datetime.today()],
+        )
+        end_date += timedelta(days=1)
+
+        if start_date and end_date:
+            if start_date > end_date:
+                st.error("Error: End date must fall after start date.")
+                return  # Exit if there's an error
+        df = pd.read_sql_query(f"""
+                        SELECT username, 
+                           AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
+                           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                           COUNT(jobID) AS anzahl_jobs, 
+                           SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                        FROM reportdata
+                        WHERE start >= '{start_date}' AND end <= '{end_date}'
+                        GROUP BY username
+                        ORDER BY lost_cpu_time_sec DESC
+        """, con)
+        df['lost_cpu_time_sec'] = df['ost_cpu_time_sec'].astype(int)
+        df['lost_cpu_time_sec'] = df['ost_cpu_time_sec'].apply(seconds_to_timestring)
         st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
+
+
+
 
     def chart_cpu_utilization(self) -> None:
         """
@@ -234,6 +263,7 @@ if __name__ == "__main__":
     create.frame_user_all()
     create.frame_group_by_user()
     # create.chart_cpu_utilization()
+    create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
     create.scatter_chart_data_color_lost_cpu()
 
