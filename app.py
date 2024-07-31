@@ -138,8 +138,8 @@ class CreateFigures:
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
-        df['lost_cpu_time_sec'] = df['ost_cpu_time_sec'].astype(int)
-        df['lost_cpu_time_sec'] = df['ost_cpu_time_sec'].apply(seconds_to_timestring)
+        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
+        df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].apply(seconds_to_timestring)
         st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
 
 
