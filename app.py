@@ -150,7 +150,9 @@ class CreateFigures:
         tick_vals = np.linspace(0, max_lost_time, num=10)
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
-        fig = px.bar(df, x='username', y='total_lost_cpu_time', text='formatted_lost_cpu_time',
+        text_labels = df['formatted_lost_cpu_time'].where(df.index < 20, "")
+
+        fig = px.bar(df, x='username', y='total_lost_cpu_time', text=text_labels,
                      title='Total Lost CPU Time by User')
 
         # Update y-axis to show constant tick values with formatted time
