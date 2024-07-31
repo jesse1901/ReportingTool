@@ -259,9 +259,6 @@ class CreateFigures:
         )
         hide_gpu_none = st.checkbox("Hide GPU Jobs")
 
-        # Filter dataframe based on the checkbox
-
-
         # Ensure start_date is not after end_date
         if start_date > end_date:
             st.error("Error: End date must be after start date.")
@@ -283,6 +280,10 @@ class CreateFigures:
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
+        # Filter dataframe based on the checkbox
+        row_var = ['gpu_efficiency']
+        if hide_gpu_none:
+            df = df[~df[row_var].isnull()]
 
             #df = df.dropna(subset=['gpu_efficiency'])
         # Create scatter plot
