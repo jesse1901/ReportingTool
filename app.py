@@ -284,7 +284,7 @@ class CreateFigures:
         row_var = ['gpu_efficiency']
         if hide_gpu_none:
             df2 = df.dropna(subset=row_var)
-            df1 = df.drop(df2.index)
+            df = df.drop(df2.index)
 
             #df = df.dropna(subset=['gpu_efficiency'])
         # Create scatter plot
