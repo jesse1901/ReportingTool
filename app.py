@@ -116,14 +116,14 @@ class CreateFigures:
 
     def bar_char_by_user(self) -> None:
 
-        start_date1, end_date1 = st.date_input(
-            'Start Date - End Date',
+        start_date, end_date = st.date_input(
+            'Start Date und End Date',
             [datetime.today() - timedelta(days=30), datetime.today()],
         )
-        end_date1 += timedelta(days=1)
+        end_date += timedelta(days=1)
 
-        if start_date1 and end_date1:
-            if start_date1 > end_date1:
+        if start_date and end_date:
+            if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
         df = pd.read_sql_query(f"""
