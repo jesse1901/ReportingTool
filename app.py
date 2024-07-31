@@ -145,6 +145,11 @@ class CreateFigures:
         # Sort DataFrame by total_lost_cpu_time in descending order
         df = df.sort_values(by='total_lost_cpu_time', ascending=False)
 
+        # Define constant tick values for the y-axis
+        max_lost_time = df['total_lost_cpu_time'].max()
+        tick_vals = np.linspace(0, max_lost_time, num=10)
+        tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
+
         # Plot bar chart using Plotly
         fig = px.bar(df, x='username', y='total_lost_cpu_time', text='formatted_lost_cpu_time',
                      title='Total Lost CPU Time by User')
@@ -155,8 +160,8 @@ class CreateFigures:
             yaxis=dict(
                 title='Total Lost CPU Time',
                 tickmode='array',
-                #tickvals=df['total_lost_cpu_time'],
-                ticktext=df['formatted_lost_cpu_time']
+                tickvals=tick_vals,
+                ticktext=tick_text
             )
         )
 
