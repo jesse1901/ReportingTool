@@ -202,11 +202,11 @@ class CreateFigures:
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
-        hide_gpu_none = st.checkbox("Hide rows where GPU Jobs")
+        hide_gpu_none = st.checkbox("Hide GPU Jobs")
 
         # Filter dataframe based on the checkbox
         if hide_gpu_none:
-            df = df[df['gpu_efficiency'].isna()]
+            df['gpu_efficiency'] = df['gpu_efficiency'].isna()
         # Create scatter plot
         fig = px.scatter(
             df,
