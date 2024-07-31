@@ -152,11 +152,10 @@ class CreateFigures:
 
         # Plot bar chart using Plotly
         fig = px.bar(df, y='username', x='total_lost_cpu_time', text='formatted_lost_cpu_time',
-                     orientation='h',
                      title='Total Lost CPU Time by User')
 
         # Update the bars to display usernames and format the x-axis with constant tick values
-        fig.update_traces(texttemplate='%{text}', textposition='inside')
+        fig.update_traces(texttemplate='%{y}', textposition='inside')
         fig.update_layout(
             xaxis=dict(
                 title='Total Lost CPU Time',
