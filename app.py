@@ -62,6 +62,7 @@ class CreateFigures:
 
     def frame_user_all(self) -> None:
         st.write('All Data')
+
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
@@ -74,6 +75,7 @@ class CreateFigures:
 
     def frame_group_by_user(self) -> None:
         st.write('Data grouped by user')
+
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
@@ -118,6 +120,7 @@ class CreateFigures:
 
     def bar_char_by_user(self) -> None:
         st.write('Total Lost CPU-Time per User')
+
         start_date, end_date = st.date_input(
             'Start Date und End Date',
             [datetime.today() - timedelta(days=30), datetime.today()],
@@ -237,6 +240,7 @@ class CreateFigures:
 
     def scatter_chart_data_cpu_gpu_eff(self):
         st.write('CPU Efficiency by Job duration')
+
         # Fetch the available date range from the database
         date_query = """
             SELECT MIN(start) AS min_date, MAX(end) AS max_date
