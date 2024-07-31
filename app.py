@@ -182,7 +182,7 @@ class CreateFigures:
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
         FROM jobs;
-        """)
+        """, con)
         df['runtime_interval'] = pd.cut(df['runtime_minutes'],
                                         bins=range(0, int(df['runtime_minutes'].max()) + interval_minutes,
                                                    interval_minutes),
