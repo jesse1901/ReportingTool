@@ -74,12 +74,10 @@ class CreateFigures:
         st.write(df)
 
     def frame_group_by_user(self) -> None:
-        st.write('Data grouped by user')
-
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-
+        st.write('Data grouped by user')
         # Get start and end dates from Streamlit date input
         start_date, end_date = st.date_input(
             'Start Date - End Date',
