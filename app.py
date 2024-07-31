@@ -206,8 +206,7 @@ class CreateFigures:
 
         # Filter dataframe based on the checkbox
         if hide_gpu_none:
-            df = df[df['gpu_efficiency'].isnull()]
-
+            df = df.loc[df['gpu_efficiency'].isnull()]
             #df = df.dropna(subset=['gpu_efficiency'])
         # Create scatter plot
         fig = px.scatter(
