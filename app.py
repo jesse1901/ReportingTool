@@ -61,6 +61,7 @@ class CreateFigures:
         self.con = con
 
     def frame_user_all(self) -> None:
+        st.write('All Data')
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
@@ -72,6 +73,7 @@ class CreateFigures:
         st.write(df)
 
     def frame_group_by_user(self) -> None:
+        st.write('Data grouped by user')
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
@@ -115,7 +117,7 @@ class CreateFigures:
         st.write(df)
 
     def bar_char_by_user(self) -> None:
-
+        st.write('Total Lost CPU-Time per User')
         start_date, end_date = st.date_input(
             'Start Date und End Date',
             [datetime.today() - timedelta(days=30), datetime.today()],
@@ -154,8 +156,7 @@ class CreateFigures:
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
         # Plot vertical bar chart using Plotly
-        fig = px.bar(df, x='username', y='total_lost_cpu_time',
-                     title='Total Lost CPU Time by User')
+        fig = px.bar(df, x='username', y='total_lost_cpu_time')
 
         # Update the y-axis to display formatted time with constant tick values
         fig.update_layout(
@@ -173,6 +174,7 @@ class CreateFigures:
 
         st.plotly_chart(fig)
     def job_counts_by_hour(self) -> None:
+        st.write('Job count by spent time')
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
@@ -234,6 +236,7 @@ class CreateFigures:
         st.plotly_chart(fig, theme=None)
 
     def scatter_chart_data_cpu_gpu_eff(self):
+        st.write('CPU Efficiency by Job duration')
         # Fetch the available date range from the database
         date_query = """
             SELECT MIN(start) AS min_date, MAX(end) AS max_date
@@ -307,5 +310,5 @@ if __name__ == "__main__":
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
-    create.scatter_chart_data_color_lost_cpu()
+ #   create.scatter_chart_data_color_lost_cpu()
 
