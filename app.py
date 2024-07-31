@@ -155,7 +155,7 @@ class CreateFigures:
             yaxis=dict(
                 title='Total Lost CPU Time',
                 tickmode='array',
-                tickvals=df['total_lost_cpu_time'],
+                #tickvals=df['total_lost_cpu_time'],
                 ticktext=df['formatted_lost_cpu_time']
             )
         )
