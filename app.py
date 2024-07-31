@@ -122,7 +122,7 @@ class CreateFigures:
         )
         end_date += timedelta(days=1)
         display_user = st.number_input(
-            'Anzahl User', value=50,
+            'Anzahl User', value=20,
         )
 
         if start_date and end_date:
