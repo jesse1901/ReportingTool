@@ -145,7 +145,7 @@ class CreateFigures:
         df = df.sort_values(by='total_lost_cpu_time', ascending=True)
 
         # Create the bar chart with usernames and formatted lost CPU time
-        st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
+        st.bar_chart(df[['username', 'formatted_lost_cpu_time']].set_index('username'))
 
         # Display the DataFrame with formatted lost CPU time
         st.dataframe(df[['username', 'formatted_lost_cpu_time']])
