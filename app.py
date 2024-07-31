@@ -178,7 +178,7 @@ class CreateFigures:
 
     def job_counts_by_hour(self) -> None:
         start_date, end_date = st.date_input(
-            'Start Date und End Date',
+            'Start Date and End Date',
             [datetime.today() - timedelta(days=30), datetime.today()],
         )
         end_date += timedelta(days=1)
