@@ -123,6 +123,7 @@ class CreateFigures:
             [datetime.today() - timedelta(days=30), datetime.today()],
         )
         end_date += timedelta(days=1)
+
         display_user = st.number_input(
             'Anzahl User', value=20,
         )
@@ -256,6 +257,10 @@ class CreateFigures:
             value=(min_date, max_date),
             format="YYYY-MM-DD"
         )
+        hide_gpu_none = st.checkbox("Hide GPU Jobs")
+
+        # Filter dataframe based on the checkbox
+
 
         # Ensure start_date is not after end_date
         if start_date > end_date:
@@ -278,9 +283,6 @@ class CreateFigures:
         df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
         df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
 
-        hide_gpu_none = st.checkbox("Hide GPU Jobs")
-
-        # Filter dataframe based on the checkbox
         row_var = ['gpu_efficiency']
         if hide_gpu_none:
             df = df[~df[row_var].isnull()]
