@@ -114,10 +114,7 @@ class CreateFigures:
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
         st.write(df)
-        st.bar_chart(df,
-                     x="username",
-                     y="total_lost_cpu_time",
-                     )
+        st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
 
     def chart_cpu_utilization(self) -> None:
         """
