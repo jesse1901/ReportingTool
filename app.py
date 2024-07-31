@@ -121,6 +121,9 @@ class CreateFigures:
             [datetime.today() - timedelta(days=30), datetime.today()],
         )
         end_date += timedelta(days=1)
+        display_user = st.number_input(
+            'Anzahl User', value=50,
+        )
 
         if start_date and end_date:
             if start_date > end_date:
@@ -143,7 +146,7 @@ class CreateFigures:
         df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
 
         # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
-        df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(20)
+        df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
 
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
