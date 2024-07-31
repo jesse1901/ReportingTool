@@ -172,10 +172,6 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
-
-        # Display the DataFrame with formatted lost CPU time
-        st.dataframe(df[['username', 'formatted_lost_cpu_time']])
-
     def job_counts_by_hour(self) -> None:
         df = pd.read_sql_query("""
         SELECT
