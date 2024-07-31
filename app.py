@@ -138,6 +138,7 @@ class CreateFigures:
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
+        # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
         df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
 
@@ -147,12 +148,19 @@ class CreateFigures:
         # Plot bar chart using Plotly
         fig = px.bar(df, x='username', y='total_lost_cpu_time', text='formatted_lost_cpu_time',
                      title='Total Lost CPU Time by User')
+
+        # Update y-axis to show formatted time
         fig.update_traces(textposition='outside')
+        fig.update_layout(
+            yaxis=dict(
+                title='Total Lost CPU Time',
+                tickmode='array',
+                tickvals=df['total_lost_cpu_time'],
+                ticktext=df['formatted_lost_cpu_time']
+            )
+        )
+
         st.plotly_chart(fig)
-
-        # Display the DataFrame with formatted lost CPU time
-        st.dataframe(df[['username', 'formatted_lost_cpu_time']])
-
 
 
 
