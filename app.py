@@ -136,11 +136,19 @@ class CreateFigures:
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}'
                         GROUP BY username
-                        ORDER BY lost_cpu_time_sec DESC
+                        ORDER BY lost_cpu_time_sec ASC
         """, con)
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
+        df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
+
+        # Sort DataFrame by total_lost_cpu_time
+        df = df.sort_values(by='total_lost_cpu_time', ascending=True)
+
+        # Create the bar chart with usernames and formatted lost CPU time
         st.bar_chart(df[['username', 'total_lost_cpu_time']].set_index('username'))
+
+        # Display the DataFrame with formatted lost CPU time
+        st.dataframe(df[['username', 'formatted_lost_cpu_time']])
 
 
 
