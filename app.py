@@ -185,9 +185,9 @@ class CreateFigures:
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
         FROM reportdata;
         """, con)
-        max_runtime = int(df['runtime_minutes'].max()) + interval_minutes
-        bins = range(0, max_runtime, interval_minutes)
-        labels = [f"{i}-{i + interval_minutes} min" for i in bins[:-1]]  # Adjust labels to be one fewer than bins
+        max_runtime = df['runtime_minutes'].max()
+        bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
+        labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
 
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
         job_counts = df['runtime_interval'].value_counts().sort_index()
