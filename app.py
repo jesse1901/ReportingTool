@@ -176,6 +176,55 @@ class CreateFigures:
         # Display the DataFrame with formatted lost CPU time
         st.dataframe(df[['username', 'formatted_lost_cpu_time']])
 
+    def job_counts_by_hour(self) -> None:
+        start_date, end_date = st.date_input(
+            'Start Date und End Date',
+            [datetime.today() - timedelta(days=30), datetime.today()],
+        )
+        end_date += timedelta(days=1)
+
+        if start_date and end_date:
+            if start_date > end_date:
+                st.error("Error: End date must fall after start date.")
+                return  # Exit if there's an error
+
+        # Query to get job data
+        df = pd.read_sql_query(f"""
+                        SELECT start AS job_start
+                        FROM reportdata
+                        WHERE start >= '{start_date}' AND end <= '{end_date}'
+        """, con)
+
+        # Ensure 'job_start' is a datetime type
+        df['job_start'] = pd.to_datetime(df['job_start'])
+
+        # Resample by hourly intervals and count the number of jobs
+        df.set_index('job_start', inplace=True)
+        hourly_job_counts = df.resample('H').size().reset_index(name='job_count')
+
+        # Plot time series using Plotly
+        fig = px.line(hourly_job_counts, x='job_start', y='job_count',
+                      title='Number of Jobs per Hour',
+                      labels={'job_start': 'Time', 'job_count': 'Number of Jobs'})
+
+        # Update layout for better appearance
+        fig.update_layout(
+            xaxis_title='Time',
+            yaxis_title='Number of Jobs',
+            xaxis=dict(
+                tickformat='%Y-%m-%d %H:%M',  # Format for datetime ticks
+                dtick='3600',  # Show ticks every hour
+            ),
+            yaxis=dict(
+                title='Number of Jobs'
+            )
+        )
+
+        st.plotly_chart(fig)
+
+        # Display the DataFrame with hourly job counts
+        st.dataframe(hourly_job_counts)
+
     def chart_cpu_utilization(self) -> None:
         """
         Displays a line chart of average CPU utilization by hour from the avg_eff table.
@@ -293,6 +342,7 @@ if __name__ == "__main__":
     create = CreateFigures(con)
     create.frame_user_all()
     create.frame_group_by_user()
+    create.job_counts_by_hour()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
