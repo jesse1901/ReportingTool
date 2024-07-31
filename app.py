@@ -97,6 +97,7 @@ class CreateFigures:
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}'
                         GROUP BY username
+                        ORDER BY lost_cpu_time_sec DESC
         """, con)
 
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
