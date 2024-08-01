@@ -195,7 +195,7 @@ def main():
     st.set_page_config(page_title="Cluster Dashboard", layout="wide")
     st_autorefresh(interval=60 * 60)  # Auto-refresh every hour
 
-    conn = sqlite3.connect("cluster_data.db")
+    conn = sqlite3.connect("reports.db")
     dashboard = Dashboard(conn)
 
     st.title("Cluster Data Dashboard")
