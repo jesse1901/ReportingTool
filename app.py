@@ -262,15 +262,18 @@ class CreateFigures:
 
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
-        color_sequence = ['red' if category == 'Interactive' else 'blue' for category in aggregated_df['category']]
-        # Create the pie chart
+        color_map = {
+            'Interactive': 'red',
+            'Batch': 'blue',
+            'None': 'gray'  # You can remove this if 'None' is hidden
+        }        # Create the pie chart
         fig = px.pie(
             aggregated_df,
             names='category',
             values='lost_cpu_time_sec',
             title="Lost CPU Time by Job Category",
             color='category',
-            color_discrete_map={name: color for name, color in zip(aggregated_df['category'], color_sequence)}
+            color_discrete_map=color_map
         )
 
         # Display the pie chart
