@@ -265,7 +265,7 @@ class CreateFigures:
         color_map = {
             'Interactive': 'red',
             'Batch': 'darkcyan',
-            'None': 'darkslateblue'  # You can remove this if 'None' is hidden
+            'None': 'grey'  # You can remove this if 'None' is hidden
         }        # Create the pie chart
         fig = px.pie(
             aggregated_df,
