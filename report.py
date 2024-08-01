@@ -373,7 +373,7 @@ if __name__ == "__main__":
                   gpu_nodes TEXT,
                   start TEXT,
                   end TEXT,
-                  job_name TEXT,
+                  job_name TEXT
               )
               """)
 
