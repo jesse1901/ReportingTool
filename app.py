@@ -373,13 +373,13 @@ class CreateFigures:
             value=(min_date, max_date),
             format="YYYY-MM-DD"
         )
-        hide_gpu_none = st.checkbox("Hide GPU Jobs")
+#        hide_gpu_none = st.checkbox("Hide GPU Jobs")
 
         # Manage the button state using Streamlit session state
         if 'scale_efficiency' not in st.session_state:
             st.session_state.scale_efficiency = False
 
-        scale_efficiency = st.button("Scale CPU Efficiency to 100%")
+        scale_efficiency = st.checkbox("Scale CPU Efficiency to 100%")
 
         # Update session state based on button click
         if scale_efficiency:
