@@ -216,7 +216,7 @@ class CreateFigures:
 
         # Calculate total CPU time booked
         if 'job_cpu_time' in df:
-            df['job_cpu_time'] = df['job_cpu_time'].apply(timedelta(minutes=df['job_cpu_time']))
+            df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
         else:
             df['job_cpu_time'] = 0
 
@@ -232,7 +232,6 @@ class CreateFigures:
 
         # Aggregate total CPU time by runtime interval
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)['total_cpu_time_booked'].sum().reset_index()
-        cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].apply(seconds_to_timestring)
 
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
