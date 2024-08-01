@@ -189,7 +189,7 @@ class CreateFigures:
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
 
-    def pie_chart_job_count(self) -> None:
+    def pie_chart_job_count() -> None:
         st.write('Job Count by Job Time and CPU Time')
 
         # Query to get runtime in minutes and CPU time
