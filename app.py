@@ -209,11 +209,18 @@ class CreateFigures:
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
 
         # Aggregate total CPU time by runtime interval
-        cpu_time_by_interval = df.groupby('runtime_interval')['total_cpu_time_booked'].sum()
+        cpu_time_by_interval = df.groupby('runtime_interval')['total_cpu_time_booked'].sum().reset_index()
 
-        # Plot pie chart
+        # Create pie chart with Plotly
+        fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
+                     title='Total CPU Time by Job Runtime Interval')
+
+        # Plot pie chart in Streamlit
         st.write('Total CPU Time by Job Runtime Interval')
-        st.pie_chart(cpu_time_by_interval)
+        st.plotly_chart(fig)
+
+    # Assuming con is your database connection object and you are calling this within a Streamlit app context
+    pie_chart_job_count()
 
     def chart_cpu_utilization(self) -> None:
         """
