@@ -373,7 +373,7 @@ class CreateFigures:
             value=(min_date, max_date),
             format="YYYY-MM-DD"
         )
-#        hide_gpu_none = st.checkbox("Hide GPU Jobs")
+        hide_gpu_none = st.checkbox("Hide GPU Jobs")
 
         # Manage the button state using Streamlit session state
         if 'scale_efficiency' not in st.session_state:
