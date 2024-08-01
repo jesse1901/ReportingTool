@@ -500,7 +500,7 @@ class CreateFigures:
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
         query = f"""
-            SELECT state AS category, COUNT(job_id) AS Job_count
+            SELECT state AS category, COUNT(jobID) AS Job_count
             FROM reportdata
             GROUP BY state
         """
