@@ -239,6 +239,13 @@ class CreateFigures:
 
         st.plotly_chart(fig)
         # Plot pie chart in Streamlit
+
+    def pie_chart_batch_inter(self) -> None:
+        df = pd.read_sql_query("""
+            SELECT lost_cpu_time_sec, job_name FROM reportdata
+        """)
+        fig = px.pie(df, names='job_name', values='lost_cpu_time_sec')
+        st.plotly_chart(fig)
     def chart_cpu_utilization(self) -> None:
         """
         Displays a line chart of average CPU utilization by hour from the avg_eff table.
