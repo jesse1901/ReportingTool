@@ -190,7 +190,6 @@ class CreateFigures:
         st.bar_chart(job_counts)
 
     def pie_chart_job_count(self) -> None:
-        st.write('Job Count by Job Time and CPU Time')
 
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
@@ -214,7 +213,7 @@ class CreateFigures:
 
         # Aggregate total CPU time by runtime interval
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)[
-            'total_cpu_time_booked'].sum()
+            'total_cpu_time_booked'].sum().reset_index()
 
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
