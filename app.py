@@ -474,7 +474,7 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
-    def create_pie_chart_by_session_state(self):
+    def pie_chart_by_session_state(self):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
@@ -495,7 +495,7 @@ class CreateFigures:
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
-    def create_pie_chart_by_session_state(self):
+    def pie_chart_by_job_count(self):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
@@ -529,7 +529,8 @@ if __name__ == "__main__":
     create.job_counts_by_log2()
     create.pie_chart_job_count()
     create.pie_chart_batch_inter()
-    create.create_pie_chart_by_session_state()
+    create.pie_chart_by_session_state()
+    create.pie_chart_by_job_count()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
