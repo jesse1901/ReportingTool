@@ -495,6 +495,28 @@ class CreateFigures:
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
+    def create_pie_chart_by_session_state(self):
+        # Prüfen, ob die Gruppierung im Session-State gesetzt ist
+
+        # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
+        query = f"""
+            SELECT state AS category, COUNT(job_id) AS Job_count
+            FROM reportdata
+            GROUP BY state
+        """
+        df = pd.read_sql_query(query, con)
+
+        # Erstellen des Pie-Charts mit Plotly
+        fig = px.pie(
+            df,
+            names='category',
+            values='total_lost_cpu_time',
+            title=f"Job Count by state"
+        )
+
+        # Pie-Chart in Streamlit anzeigen
+        st.plotly_chart(fig)
+
 
 
 if __name__ == "__main__":
