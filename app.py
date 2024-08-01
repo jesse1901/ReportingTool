@@ -240,7 +240,7 @@ class CreateFigures:
         st.plotly_chart(fig)
         # Plot pie chart in Streamlit
 
-    def pie_chart_batch_inter(self) -> None:
+    def pie_chart_batch_inter(con) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
             SELECT lost_cpu_time_sec, job_name FROM reportdata
@@ -248,7 +248,9 @@ class CreateFigures:
 
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df['job_name'].apply(
-            lambda x: 'Interactive' if x and x.lower() == 'interactive' else 'Batch'
+            lambda x: 'Interactive' if x and x.lower() == 'interactive'
+            else 'Batch' if x and x.lower() != ''
+            else 'None'
         )
 
         # Aggregate the data by category
