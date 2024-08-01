@@ -247,7 +247,9 @@ class CreateFigures:
         """, con)
 
         # Create a new column to categorize jobs
-        df['category'] = df['job_name'].apply(lambda x: 'Interactive' if x.lower() == 'interactive' else 'Batch')
+        if df['job_name']:
+            df['category'] = df['job_name'].apply(lambda x: 'Interactive' if x.lower() == 'interactive' else 'Batch')
+
 
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
