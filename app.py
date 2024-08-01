@@ -195,13 +195,14 @@ class CreateFigures:
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
-            lost_cpu_time,
+            lost_cpu_time_sec,
             job_cpu_time
         FROM reportdata;
         """, con)
 
         # Calculate total CPU time booked
-        df['total_cpu_time_booked'] = df['lost_cpu_time'] + df['job_cpu_time']
+        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+        df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
 
         # Calculate bins for logarithmic intervals
         max_runtime = df['runtime_minutes'].max()
