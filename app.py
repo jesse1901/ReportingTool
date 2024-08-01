@@ -286,7 +286,7 @@ class CreateFigures:
 
         st.plotly_chart(fig, theme=None)
 
-    def scatter_chart_data_cpu_gpu_eff(self):
+    def scatter_chart_data_cpu_gpu_eff1(self):
         st.write('CPU Efficiency by Job duration')
 
         # Fetch the available date range from the database
@@ -351,6 +351,82 @@ class CreateFigures:
 
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
+
+    def scatter_chart_data_cpu_gpu_eff(self):
+        st.write('CPU Efficiency by Job duration')
+
+        # Fetch the available date range from the database
+        date_query = """
+            SELECT MIN(start) AS min_date, MAX(end) AS max_date
+            FROM reportdata
+        """
+        date_range_df = pd.read_sql_query(date_query, self.con)
+        min_date = pd.to_datetime(date_range_df['min_date'].values[0]).date()
+        max_date = pd.to_datetime(date_range_df['max_date'].values[0]).date()
+        max_date += timedelta(days=1)
+
+        # Create a slider for date range selection
+        start_date, end_date = st.slider(
+            "Select Date Range",
+            min_value=min_date,
+            max_value=max_date,
+            value=(min_date, max_date),
+            format="YYYY-MM-DD"
+        )
+        hide_gpu_none = st.checkbox("Hide GPU Jobs")
+        scale_efficiency = st.button("Scale CPU Efficiency to 100%")
+
+        # Ensure start_date is not after end_date
+        if start_date > end_date:
+            st.error("Error: End date must be after start date.")
+            return
+
+        # Load data from database with date filtering
+        query = f"""
+            SELECT jobID, username, gpu_efficiency, 
+                   cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
+            FROM reportdata
+            WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
+            ORDER BY real_time_sec ASC;
+        """
+        df = pd.read_sql_query(query, self.con)
+
+        # Data cleaning and transformation
+        df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
+        df = df.dropna(subset=['real_time_sec'])
+        df['real_time_sec'] = df['real_time_sec'].astype(int)
+        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
+
+        # Filter dataframe based on the checkbox
+        row_var = ['gpu_efficiency']
+        if hide_gpu_none:
+            df2 = df.dropna(subset=row_var)
+            df = df.drop(df2.index)
+
+        # Scale CPU efficiency if the button is clicked
+        if scale_efficiency:
+            df['cpu_efficiency'] = df['cpu_efficiency'] * 2  # Adjust scaling factor as needed
+
+        # Create scatter plot
+        fig = px.scatter(
+            df,
+            x="real_time_sec",
+            y="cpu_efficiency",
+            color="gpu_efficiency",
+            color_continuous_scale="tealgrn",
+            size_max=1,
+            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
+            labels={"real_time_sec": "real_job_time"}
+        )
+
+        fig.update_traces(marker=dict(size=3))
+        st.plotly_chart(fig, theme=None)
+
+    # Helper function to convert seconds to a timestring
+    def seconds_to_timestring(seconds):
+        minutes, seconds = divmod(seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 if __name__ == "__main__":
     st_autorefresh(interval=10000)
