@@ -196,7 +196,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
-            cpu_time
+            total_cpu_time_booked
         FROM reportdata;
         """, con)
 
@@ -209,7 +209,7 @@ class CreateFigures:
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
 
         # Aggregate total CPU time by runtime interval
-        cpu_time_by_interval = df.groupby('runtime_interval')['cpu_time'].sum()
+        cpu_time_by_interval = df.groupby('runtime_interval')['total_cpu_time_booked'].sum()
 
         # Plot pie chart
         st.write('Total CPU Time by Job Runtime Interval')
@@ -336,6 +336,7 @@ if __name__ == "__main__":
     create.frame_user_all()
     create.frame_group_by_user()
     create.job_counts_by_log2()
+    create.pie_chart_job_count()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
