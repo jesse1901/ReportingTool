@@ -74,6 +74,7 @@ def count_keys_under_steps(d):
 class GetStats:
     def __init__(self):
         # Initialize attributes for storing job statistics and calculations
+        self.name = None
         self.lost_gpu_time_sec = None
         self.lost_gpu_time_seconds = None
         self.lost_gpu_time = None
@@ -122,6 +123,7 @@ class GetStats:
         self.job_all = self.job_data.to_dict()
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
+        self.name = self.job_data.name
         self.job_steps = count_keys_under_steps(self.job_all)
         self.all_nodes = gpu_node_data.hostlist_gpu()
         self.nodelist = self.job_data.nodelist
@@ -208,19 +210,20 @@ class GetStats:
                                           INSERT INTO reportdata (
                                               jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
                                               gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
-                                              job_cpu_time_s, state, cores, gpu_nodes, start, end
+                                              real_time_sec, state, cores, gpu_nodes, start, end, job_name
                                           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                                           ON CONFLICT(jobID) DO UPDATE SET 
                                               gpu_nodes = excluded.gpu_nodes,
                                               lost_gpu_time = excluded.lost_gpu_time,
                                               gpu_efficiency = excluded.gpu_efficiency,
                                               lost_gpu_time_sec = excluded.lost_gpu_time_sec,
-                                              lost_cpu_time_sec = excluded.lost_cpu_time_sec
+                                              lost_cpu_time_sec = excluded.lost_cpu_time_sec,
+                                              job_name = excluded.job_name
                                       """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
                             lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
-                            data['real_time'], data['job_cpu_time'], data['job_cpu_time_s'], data['state'],
-                            data['cores'], data['gpu_nodes'], data['start'], data['end']
+                            data['real_time'], data['job_cpu_time'], data['real_time_sec'], data['state'],
+                            data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name']
                         ))
                         #print(f"lost gpu time: {data['job_id']}")
                         #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
@@ -336,12 +339,13 @@ class GetStats:
             "lost_gpu_time_sec": self.lost_gpu_time_sec,
             "real_time": self.real_time,
             "job_cpu_time": self.used_time,
-            "job_cpu_time_s": self.job_elapsed_s,
+            "real_time_sec": self.job_elapsed_s,
             "state": self.job_data.state,
             "cores": self.cores,
             "gpu_nodes": self.job_nodes_string if self.job_nodes_string else None,
             "start": self.start,
             "end": self.end,
+            "job_name": self.name,
         }
 
 if __name__ == "__main__":
@@ -363,12 +367,13 @@ if __name__ == "__main__":
                   lost_gpu_time_sec INT,
                   real_time TEXT,
                   job_cpu_time TEXT,
-                  job_cpu_time_s REAL,
+                  real_time_sec REAL,
                   state TEXT,
                   cores INT,
                   gpu_nodes TEXT,
                   start TEXT,
-                  end TEXT
+                  end TEXT,
+                  job_name TEXT,
               )
               """)
 

@@ -67,7 +67,7 @@ class CreateFigures:
         st.write('All Data')
         df = pd.read_sql_query("""
             SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time, 
-            lost_gpu_time_sec, real_time, job_cpu_time, job_cpu_time_s AS realtime_in_s, state, cores, gpu_nodes, start, end 
+            lost_gpu_time_sec, real_time, job_cpu_time, real_time_sec, state, cores, gpu_nodes, start, end 
             FROM reportdata
             """, self.con)
         st.write(df)
@@ -175,7 +175,7 @@ class CreateFigures:
 
         st.plotly_chart(fig)
     def job_counts_by_hour(self) -> None:
-        st.write('Job count by spent time')
+        st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
@@ -203,21 +203,21 @@ class CreateFigures:
 
     def scatter_chart_data_color_lost_cpu(self):
         df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
             FROM reportdata
-            ORDER BY job_cpu_time_s ASC;""", self.con)
+            ORDER BY real_time_sec ASC;""", self.con)
 
-        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
-        df = df.dropna(subset=['job_cpu_time_s'])
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
+        df = df.dropna(subset=['real_time_sec'])
+        df['real_time_sec'] = df['real_time_sec'].astype(int)
+        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
 
         df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
         df['log_lost_cpu_time'] = np.log1p(df['lost_cpu_time'])
 
         fig = px.scatter(
             df,
-            x="job_cpu_time_s",
+            x="real_time_sec",
             y="cpu_efficiency",
             color="log_lost_cpu_time",
             color_continuous_scale="blues",
@@ -225,7 +225,7 @@ class CreateFigures:
             hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
             log_x=False,
             log_y=False,
-            labels={"job_cpu_time_s": "real_job_time"}
+            labels={"real_time_sec": "real_job_time"}
         )
         fig.update_layout(coloraxis_colorbar=dict(title="Log Lost CPU Time"))
         fig.update_coloraxes(colorbar=dict(
@@ -267,18 +267,18 @@ class CreateFigures:
         # Load data from database with date filtering
         query = f"""
             SELECT jobID, username, gpu_efficiency, 
-                   cpu_efficiency, lost_cpu_time, lost_gpu_time, job_cpu_time_s, real_time, cores, state
+                   cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
             FROM reportdata
             WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
-            ORDER BY job_cpu_time_s ASC;
+            ORDER BY real_time_sec ASC;
         """
         df = pd.read_sql_query(query, self.con)
 
         # Data cleaning and transformation
-        df['job_cpu_time_s'] = pd.to_numeric(df['job_cpu_time_s'], errors='coerce')
-        df = df.dropna(subset=['job_cpu_time_s'])
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].astype(int)
-        df['job_cpu_time_s'] = df['job_cpu_time_s'].apply(seconds_to_timestring)
+        df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
+        df = df.dropna(subset=['real_time_sec'])
+        df['real_time_sec'] = df['real_time_sec'].astype(int)
+        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
 
         # Filter dataframe based on the checkbox
         row_var = ['gpu_efficiency']
@@ -290,13 +290,13 @@ class CreateFigures:
         # Create scatter plot
         fig = px.scatter(
             df,
-            x="job_cpu_time_s",
+            x="real_time_sec",
             y="cpu_efficiency",
             color="gpu_efficiency",
             color_continuous_scale="tealgrn",
             size_max=1,
             hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
-            labels={"job_cpu_time_s": "real_job_time"}
+            labels={"real_time_sec": "real_job_time"}
         )
 
         fig.update_traces(marker=dict(size=3))
