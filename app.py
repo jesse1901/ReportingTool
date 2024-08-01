@@ -379,7 +379,7 @@ class CreateFigures:
         if 'scale_efficiency' not in st.session_state:
             st.session_state.scale_efficiency = False
 
-        scale_efficiency = st.button("Scale CPU Efficiency to 100%")
+        scale_efficiency = st.checkbox("Hyperthreading")
 
         # Update session state based on button click
         if scale_efficiency:
