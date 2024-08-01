@@ -524,7 +524,6 @@ if __name__ == "__main__":
     st_autorefresh(interval=60000)
 
     # Definieren der Spalten für die Zeilen
-    row1 = st.columns(2)
     row2 = st.columns(2)
     row3 = st.columns(2)
     row4 = st.columns(2)
@@ -533,9 +532,6 @@ if __name__ == "__main__":
     create = CreateFigures(con)
 
     with st.spinner("Lade Daten..."):
-        # Erste Zeile
-        row1[0].plotly_chart(create.frame_user_all(), use_container_width=True)
-        row1[1].plotly_chart(create.frame_group_by_user(), use_container_width=True)
 
         # Zweite Zeile
         row2[0].plotly_chart(create.job_counts_by_log2(), use_container_width=True)
