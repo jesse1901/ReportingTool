@@ -374,6 +374,8 @@ class CreateFigures:
             format="YYYY-MM-DD"
         )
         hide_gpu_none = st.checkbox("Hide GPU Jobs")
+        scale_efficiency = st.checkbox("Scale CPU Efficiency to 100%")
+
 
         # Manage the button state using Streamlit session state
         if 'scale_efficiency' not in st.session_state:
@@ -436,7 +438,7 @@ class CreateFigures:
 
 
 if __name__ == "__main__":
-    st_autorefresh(interval=10000)
+    st_autorefresh(interval=30000)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
