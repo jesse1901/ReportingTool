@@ -192,13 +192,17 @@ class CreateFigures:
     def pie_chart_job_count(self) -> None:
         st.write('Job Count by Job Time and CPU Time')
 
-        # Query to get runtime in minutes and CPU time
+        # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
-            total_cpu_time_booked
+            lost_cpu_time,
+            job_cpu_time
         FROM reportdata;
         """, con)
+
+        # Calculate total CPU time booked
+        df['total_cpu_time_booked'] = df['lost_cpu_time'] + df['job_cpu_time']
 
         # Calculate bins for logarithmic intervals
         max_runtime = df['runtime_minutes'].max()
