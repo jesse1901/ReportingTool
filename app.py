@@ -374,7 +374,16 @@ class CreateFigures:
             format="YYYY-MM-DD"
         )
         hide_gpu_none = st.checkbox("Hide GPU Jobs")
+
+        # Manage the button state using Streamlit session state
+        if 'scale_efficiency' not in st.session_state:
+            st.session_state.scale_efficiency = False
+
         scale_efficiency = st.button("Scale CPU Efficiency to 100%")
+
+        # Update session state based on button click
+        if scale_efficiency:
+            st.session_state.scale_efficiency = not st.session_state.scale_efficiency
 
         # Ensure start_date is not after end_date
         if start_date > end_date:
@@ -403,9 +412,9 @@ class CreateFigures:
             df2 = df.dropna(subset=row_var)
             df = df.drop(df2.index)
 
-        # Scale CPU efficiency if the button is clicked
-        if scale_efficiency:
-            df['cpu_efficiency'] = df['cpu_efficiency'] * 2  # Adjust scaling factor as needed
+        # Scale CPU efficiency if the button is toggled
+        if st.session_state.scale_efficiency:
+            df['cpu_efficiency'] = df['cpu_efficiency'].clip(upper=100)  # Cap values at 100%
 
         # Create scatter plot
         fig = px.scatter(
@@ -421,12 +430,6 @@ class CreateFigures:
 
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
-
-    # Helper function to convert seconds to a timestring
-    def seconds_to_timestring(seconds):
-        minutes, seconds = divmod(seconds, 60)
-        hours, minutes = divmod(minutes, 60)
-        return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 if __name__ == "__main__":
     st_autorefresh(interval=10000)
