@@ -253,6 +253,13 @@ class CreateFigures:
             else 'None'
         )
 
+        # Add a checkbox to allow users to hide the 'None' category
+        hide_none = st.checkbox("Hide 'None' Category", value=False)
+
+        # Filter out 'None' category if the checkbox is selected
+        if hide_none:
+            df = df[df['category'] != 'None']
+
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
 
