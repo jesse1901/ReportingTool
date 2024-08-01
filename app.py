@@ -218,10 +218,6 @@ class CreateFigures:
         # Plot pie chart in Streamlit
         st.write('Total CPU Time by Job Runtime Interval')
         st.plotly_chart(fig)
-
-    # Assuming con is your database connection object and you are calling this within a Streamlit app context
-    pie_chart_job_count()
-
     def chart_cpu_utilization(self) -> None:
         """
         Displays a line chart of average CPU utilization by hour from the avg_eff table.
