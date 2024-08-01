@@ -243,7 +243,7 @@ class CreateFigures:
     def pie_chart_batch_inter(self) -> None:
         df = pd.read_sql_query("""
             SELECT lost_cpu_time_sec, job_name FROM reportdata
-        """)
+        """, con)
         fig = px.pie(df, names='job_name', values='lost_cpu_time_sec')
         st.plotly_chart(fig)
     def chart_cpu_utilization(self) -> None:
