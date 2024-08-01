@@ -189,7 +189,8 @@ class CreateFigures:
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
 
-    def pie_chart_job_count(self) -> None:
+    def pie_chart_job_count() -> None:
+        st.write('Job Count by Job Time and CPU Time')
 
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
@@ -201,7 +202,7 @@ class CreateFigures:
         """, con)
 
         # Calculate total CPU time booked
-        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds) if df['job_cpu_time'] else 0
+        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds) if 'job_cpu_time' in df else 0
         df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
 
         # Calculate bins for logarithmic intervals
@@ -221,7 +222,6 @@ class CreateFigures:
                      title='Total CPU Time by Job Runtime Interval')
 
         # Plot pie chart in Streamlit
-        st.write('Total CPU Time by Job Runtime Interval')
         st.plotly_chart(fig)
     def chart_cpu_utilization(self) -> None:
         """
