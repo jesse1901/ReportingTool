@@ -13,7 +13,7 @@ import json
 from streamlit_autorefresh import st_autorefresh
 
 def timestring_to_seconds(timestring):
-    if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring == '':
+    if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring == ' ':
         return 0
 
     if isinstance(timestring, float):
@@ -225,6 +225,7 @@ class CreateFigures:
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
                      title='Total CPU Time by Job Runtime Interval')
 
+        st.plotly_chart(fig)
         # Plot pie chart in Streamlit
     def chart_cpu_utilization(self) -> None:
         """
