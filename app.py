@@ -510,7 +510,7 @@ class CreateFigures:
         fig = px.pie(
             df,
             names='category',
-            values='total_lost_cpu_time',
+            values='Job_count',
             title=f"Job Count by state"
         )
 
