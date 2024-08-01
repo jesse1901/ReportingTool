@@ -13,7 +13,7 @@ import json
 from streamlit_autorefresh import st_autorefresh
 
 def timestring_to_seconds(timestring):
-    if pd.isna(timestring) or timestring == '0' or timestring == 0:
+    if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring == '':
         return 0
 
     if isinstance(timestring, float):
