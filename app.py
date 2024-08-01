@@ -379,7 +379,7 @@ class CreateFigures:
         if 'scale_efficiency' not in st.session_state:
             st.session_state.scale_efficiency = False
 
-        scale_efficiency = st.checkbox("Hyperthreading")
+        scale_efficiency = st.button("Scale CPU Efficiency to 100%")
 
         # Update session state based on button click
         if scale_efficiency:
@@ -414,7 +414,10 @@ class CreateFigures:
 
         # Scale CPU efficiency if the button is toggled
         if st.session_state.scale_efficiency:
-            df['cpu_efficiency'] = df['cpu_efficiency'].clip(upper=100)  # Cap values at 100%
+            # Calculate scaling factor based on cores, assuming hyperthreading
+            df['cpu_efficiency'] = df.apply(
+                lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row[
+                    'cpu_efficiency'], axis=1)
 
         # Create scatter plot
         fig = px.scatter(
@@ -430,6 +433,7 @@ class CreateFigures:
 
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
+
 
 if __name__ == "__main__":
     st_autorefresh(interval=10000)
