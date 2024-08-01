@@ -201,7 +201,7 @@ class CreateFigures:
         """, con)
 
         # Calculate total CPU time booked
-        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds) if df['job_cpu_time'] else 0
         df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
 
         # Calculate bins for logarithmic intervals
