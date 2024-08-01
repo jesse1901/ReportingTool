@@ -174,7 +174,7 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
-    def job_counts_by_hour(self) -> None:
+    def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
         SELECT
@@ -188,6 +188,32 @@ class CreateFigures:
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
+
+    def job_counts_by_log2(self) -> None:
+        st.write('Job Count by Job Time and CPU Time')
+
+        # Query to get runtime in minutes and CPU time
+        df = pd.read_sql_query("""
+        SELECT
+            (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
+            cpu_time
+        FROM reportdata;
+        """, con)
+
+        # Calculate bins for logarithmic intervals
+        max_runtime = df['runtime_minutes'].max()
+        bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
+        labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
+
+        # Assign each job to a runtime interval
+        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
+
+        # Aggregate total CPU time by runtime interval
+        cpu_time_by_interval = df.groupby('runtime_interval')['cpu_time'].sum()
+
+        # Plot pie chart
+        st.write('Total CPU Time by Job Runtime Interval')
+        st.pie_chart(cpu_time_by_interval)
 
     def chart_cpu_utilization(self) -> None:
         """
@@ -309,7 +335,7 @@ if __name__ == "__main__":
     create = CreateFigures(con)
     create.frame_user_all()
     create.frame_group_by_user()
-    create.job_counts_by_hour()
+    create.job_counts_by_log2()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()

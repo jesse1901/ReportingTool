@@ -210,20 +210,22 @@ class GetStats:
                                           INSERT INTO reportdata (
                                               jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
                                               gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
-                                              real_time_sec, state, cores, gpu_nodes, start, end, job_name
-                                          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                                              real_time_sec, state, cores, gpu_nodes, start, end, job_name, total_cpu_time_booked
+                                          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
                                           ON CONFLICT(jobID) DO UPDATE SET 
                                               gpu_nodes = excluded.gpu_nodes,
                                               lost_gpu_time = excluded.lost_gpu_time,
                                               gpu_efficiency = excluded.gpu_efficiency,
                                               lost_gpu_time_sec = excluded.lost_gpu_time_sec,
                                               lost_cpu_time_sec = excluded.lost_cpu_time_sec,
-                                              job_name = excluded.job_name
+                                              job_name = excluded.job_name,
+                                              total_cpu_time_booked = excluded.total_cpu_time_booked
                                       """, (
                             data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
                             lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
                             data['real_time'], data['job_cpu_time'], data['real_time_sec'], data['state'],
-                            data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name']
+                            data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
+                            data['total_cpu_time_booked']
                         ))
                         #print(f"lost gpu time: {data['job_id']}")
                         #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
@@ -346,6 +348,7 @@ class GetStats:
             "start": self.start,
             "end": self.end,
             "job_name": self.name,
+            "total_cpu_time_booked": self.job_elapsed_cpu_time
         }
 
 if __name__ == "__main__":
@@ -373,7 +376,8 @@ if __name__ == "__main__":
                   gpu_nodes TEXT,
                   start TEXT,
                   end TEXT,
-                  job_name TEXT
+                  job_name TEXT,
+                  total_cpu_time_booked TEXT
               )
               """)
 
