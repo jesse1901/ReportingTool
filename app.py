@@ -202,7 +202,11 @@ class CreateFigures:
         """, con)
 
         # Calculate total CPU time booked
-        df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds) if 'job_cpu_time' in df else 0
+        if 'job_cpu_time' in df:
+            df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+        else:
+            df['job_cpu_time'] = 0
+
         df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
 
         # Calculate bins for logarithmic intervals
@@ -222,7 +226,6 @@ class CreateFigures:
                      title='Total CPU Time by Job Runtime Interval')
 
         # Plot pie chart in Streamlit
-        st.plotly_chart(fig)
     def chart_cpu_utilization(self) -> None:
         """
         Displays a line chart of average CPU utilization by hour from the avg_eff table.
