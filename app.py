@@ -240,7 +240,7 @@ class CreateFigures:
         st.plotly_chart(fig)
         # Plot pie chart in Streamlit
 
-    def pie_chart_batch_inter(con) -> None:
+    def pie_chart_batch_inter(self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
             SELECT lost_cpu_time_sec, job_name FROM reportdata
