@@ -216,7 +216,7 @@ class CreateFigures:
 
         # Calculate total CPU time booked
         if 'job_cpu_time' in df:
-            df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+            df['job_cpu_time'] = df['job_cpu_time'].apply(timedelta(minutes=df['job_cpu_time']))
         else:
             df['job_cpu_time'] = 0
 
