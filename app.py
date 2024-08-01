@@ -262,7 +262,7 @@ class CreateFigures:
 
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
-        color_sequence = ['red' if category == 'Interactive' else 'lightblue' for category in aggregated_df['category']]
+        color_sequence = ['red' if category == 'Interactive' else 'blue' for category in aggregated_df['category']]
         # Create the pie chart
         fig = px.pie(
             aggregated_df,
