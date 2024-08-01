@@ -451,6 +451,7 @@ if __name__ == "__main__":
     create.frame_group_by_user()
     create.job_counts_by_log2()
     create.pie_chart_job_count()
+    create.pie_chart_batch_inter()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
