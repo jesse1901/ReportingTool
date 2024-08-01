@@ -12,8 +12,9 @@ import gpu_node_data
 import json
 from streamlit_autorefresh import st_autorefresh
 
+
 def timestring_to_seconds(timestring):
-    if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring == ' ':
+    if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
         return 0
 
     if isinstance(timestring, float):
@@ -29,13 +30,25 @@ def timestring_to_seconds(timestring):
         days_part, time_part = '0', timestring
 
     # Convert days part
-    days = int(days_part.strip()) if days_part.strip() else 0
+    try:
+        days = int(days_part.strip()) if days_part.strip() else 0
+    except ValueError:
+        days = 0
 
     # Convert time part (HH:MM:SS)
     time_parts = time_part.split(':')
-    hours = int(time_parts[0].strip()) if len(time_parts) > 0 else 0
-    minutes = int(time_parts[1].strip()) if len(time_parts) > 1 else 0
-    seconds = int(time_parts[2].strip()) if len(time_parts) > 2 else 0
+    try:
+        hours = int(time_parts[0].strip()) if len(time_parts) > 0 and time_parts[0].strip() else 0
+    except ValueError:
+        hours = 0
+    try:
+        minutes = int(time_parts[1].strip()) if len(time_parts) > 1 and time_parts[1].strip() else 0
+    except ValueError:
+        minutes = 0
+    try:
+        seconds = int(time_parts[2].strip()) if len(time_parts) > 2 and time_parts[2].strip() else 0
+    except ValueError:
+        seconds = 0
 
     # Calculate total seconds
     total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
