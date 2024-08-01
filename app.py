@@ -11,6 +11,7 @@ import hostlist
 import gpu_node_data
 import json
 from streamlit_autorefresh import st_autorefresh
+from streamlit_elements import dashboard
 
 
 def timestring_to_seconds(timestring):
@@ -254,7 +255,7 @@ class CreateFigures:
         )
 
         # Add a checkbox to allow users to hide the 'None' category
-        hide_none = st.checkbox("Hide 'None' Category", value=False)
+        hide_none = st.checkbox("Hide None", value=False)
 
         # Filter out 'None' category if the checkbox is selected
         if hide_none:
@@ -520,6 +521,7 @@ class CreateFigures:
 
 
 if __name__ == "__main__":
+    st.set_page_config(layout="wide")
     st_autorefresh(interval=60000)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
