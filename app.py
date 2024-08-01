@@ -476,17 +476,12 @@ class CreateFigures:
 
     def create_pie_chart_by_session_state(self):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
-        if 'grouping' not in st.session_state or not st.session_state.grouping:
-            st.error("No grouping specified in session state.")
-            return
-
-        grouping = st.session_state.grouping
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
         query = f"""
-            SELECT {grouping} AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
+            SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
-            GROUP BY {grouping}
+            GROUP BY state
         """
         df = pd.read_sql_query(query, con)
 
@@ -495,7 +490,7 @@ class CreateFigures:
             df,
             names='category',
             values='total_lost_cpu_time',
-            title=f"Lost CPU Time by {grouping.capitalize()}"
+            title=f"Lost CPU Time by state"
         )
 
         # Pie-Chart in Streamlit anzeigen
