@@ -474,6 +474,33 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
+    def create_pie_chart_by_session_state(self):
+        # Prüfen, ob die Gruppierung im Session-State gesetzt ist
+        if 'grouping' not in st.session_state or not st.session_state.grouping:
+            st.error("No grouping specified in session state.")
+            return
+
+        grouping = st.session_state.grouping
+
+        # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
+        query = f"""
+            SELECT {grouping} AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
+            FROM reportdata
+            GROUP BY {grouping}
+        """
+        df = pd.read_sql_query(query, con)
+
+        # Erstellen des Pie-Charts mit Plotly
+        fig = px.pie(
+            df,
+            names='category',
+            values='total_lost_cpu_time',
+            title=f"Lost CPU Time by {grouping.capitalize()}"
+        )
+
+        # Pie-Chart in Streamlit anzeigen
+        st.plotly_chart(fig)
+
 
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
@@ -485,6 +512,7 @@ if __name__ == "__main__":
     create.job_counts_by_log2()
     create.pie_chart_job_count()
     create.pie_chart_batch_inter()
+    create.create_pie_chart_by_session_state()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
