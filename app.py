@@ -214,7 +214,7 @@ class CreateFigures:
 
         # Aggregate total CPU time by runtime interval
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)[
-            'total_cpu_time_booked'].sum().reset_index()
+            'total_cpu_time_booked'].sum()
 
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
