@@ -687,13 +687,11 @@ class CreateFigures:
             name='Efficiency Range'
         ))
 
-        # Update layout to set axis ranges
+        # Update layout
         fig.update_layout(
             title='Distribution of Jobs and CPU Efficiency Percentiles',
             xaxis_title='Efficiency Percentile',
             yaxis_title='Number of Jobs / CPU Efficiency',
-            xaxis=dict(range=[-0.5, 9.5]),  # Adjust x-axis range as needed
-            yaxis=dict(range=[0, percentile_df['Total Jobs'].max() * 1.1]),  # Adjust y-axis range to fit the data
             template='plotly_white'
         )
 
