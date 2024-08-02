@@ -714,7 +714,7 @@ class CreateFigures:
         # Aggregate the number of jobs by percentile
         percentile_df = df.groupby('percentile').agg(
             mean_efficiency=('cpu_efficiency', 'mean'),
-            total_jobs=('jobID', 'sum')
+            total_jobs=('jobID', 'count')
         ).reset_index()
 
         # Rename columns for better readability
