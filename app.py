@@ -562,9 +562,8 @@ class CreateFigures:
     def efficiency_percentile_chart3(self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   SELECT cpu_efficiency, jobID
                    FROM reportdata
-                   GROUP BY cpu_efficiency
                """, self.con)
 
         # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
