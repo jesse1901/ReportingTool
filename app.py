@@ -483,7 +483,7 @@ class CreateFigures:
             values='total_lost_cpu_time',
             title=f"Lost CPU Time by state",
             color='category',
-            color_discrete_sequence=color_sequence  # Apply the chosen color sequence        )
+            color_discrete_sequence=color_sequence ) # Apply the chosen color sequence        )
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
@@ -505,7 +505,7 @@ class CreateFigures:
             values='Job_count',
             title=f"Job Count by state",
             color='category',
-            color_discrete_sequence=color_sequence  # Apply the chosen color sequence        )
+            color_discrete_sequence=color_sequence  )# Apply the chosen color sequence        )
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
