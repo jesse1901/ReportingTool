@@ -670,6 +670,30 @@ class CreateFigures:
         # Display the chart in Streamlit
         st.plotly_chart(fig)
 
+    def jobs_vs_efficiency_curve(self):
+        # Fetch the data from the database
+        df = pd.read_sql_query("""
+                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   FROM reportdata
+                   GROUP BY cpu_efficiency
+                   ORDER BY cpu_efficiency
+               """, self.con)
+
+        # Ensure the data is sorted by CPU efficiency
+        df = df.sort_values(by='cpu_efficiency')
+
+        # Create the curve chart using Plotly
+        fig = px.line(
+            df,
+            x='cpu_efficiency',
+            y='job_count',
+            title='Jobs vs. CPU Efficiency',
+            labels={'cpu_efficiency': 'CPU Efficiency', 'job_count': 'Number of Jobs'}
+        )
+
+        # Display the chart in Streamlit
+        st.plotly_chart(fig)
+
 
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
@@ -687,6 +711,7 @@ if __name__ == "__main__":
     create.efficiency_percentile_chart()
     create.efficiency_percentile_chart2()
     create.efficiency_percentile_chart3()
+    create.jobs_vs_efficiency_curve()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
