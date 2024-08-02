@@ -521,7 +521,7 @@ class CreateFigures:
     def efficiency_percentile_chart(self):
         # Perzentile der Anzahl der Jobs berechnen
         df = pd.read_sql_query("""
-            SELECT cpu_efficiency, COUNT(jobID) AS Job_count
+            SELECT cpu_efficiency, COUNT(jobID) AS job_count
             FROM reportdata
         """, con)
         df['job_percentile'] = pd.qcut(df['job_count'], 10, labels=False)
