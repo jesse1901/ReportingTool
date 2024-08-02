@@ -15,6 +15,14 @@ from streamlit_autorefresh import st_autorefresh
 from streamlit_elements import dashboard
 from streamlit_elements import elements, mui, html
 
+color_map = {
+    'CANCELLED': 'rgba(255,0,0,0.6)',  # Red
+    'COMPLETED': 'rgba(0,255,0,0.6)',  # Green
+    'TIMEOUT': 'rgba(255,165,0,0.6)',  # Orange
+    'FAILED': 'rgba(128,0,128,0.6)',   # Purple
+    'PREEMPTED': 'rgba(0,0,255,0.6)'   # Blue
+}
+
 
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
@@ -479,7 +487,9 @@ class CreateFigures:
             df,
             names='category',
             values='total_lost_cpu_time',
-            title=f"Lost CPU Time by state"
+            title=f"Lost CPU Time by state",
+            color='category',
+            color_discrete_map=color_map
         )
 
         # Pie-Chart in Streamlit anzeigen
@@ -500,7 +510,9 @@ class CreateFigures:
             df,
             names='category',
             values='Job_count',
-            title=f"Job Count by state"
+            title=f"Job Count by state",
+            color='category',
+            color_discrete_map=color_map
         )
 
         # Pie-Chart in Streamlit anzeigen
