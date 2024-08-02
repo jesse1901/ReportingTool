@@ -523,7 +523,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
             SELECT cpu_efficiency, COUNT(jobID) AS Job_count
             FROM reportdata
-        """)
+        """, con)
         df['job_percentile'] = pd.qcut(df['job_count'], 10, labels=False)
 
         # Mittlere Effizienz für jede Perzentilgruppe berechnen
