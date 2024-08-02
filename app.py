@@ -660,12 +660,15 @@ class CreateFigures:
 
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
-
+    col1, col2 = st.columns(2)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
-    create.frame_user_all()
-    create.frame_group_by_user()
+
+    with col1:
+        create.frame_user_all()
+    with col2:
+        create.frame_group_by_user()
     create.job_counts_by_log2()
     create.pie_chart_job_count()
     create.pie_chart_batch_inter()
