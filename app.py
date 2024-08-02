@@ -664,7 +664,7 @@ if __name__ == "__main__":
     st_autorefresh(interval=60000)
     col1, col2 = st.columns([3, 1])
     col3, col4, col5, col6 = st.columns(4)
-    col6, col7, col8, col9 = st.columns(4)
+    col7, col8, col9, col10 = st.columns(4)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
