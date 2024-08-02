@@ -523,50 +523,18 @@ class CreateFigures:
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
 
-    # Definieren der Spalten für die Zeilen
-    row2 = st.columns(2)
-    row3 = st.columns(2)
-    row4 = st.columns(2)
-
     con = sqlite3.connect('reports.db')
+    cur = con.cursor()
     create = CreateFigures(con)
-
-    with st.spinner("Lade Daten..."):
-
-        # Zweite Zeile
-        row2[0].plotly_chart(create.job_counts_by_log2(), use_container_width=True)
-        row2[1].plotly_chart(create.pie_chart_job_count(), use_container_width=True)
-
-        # Dritte Zeile
-        row3[0].plotly_chart(create.pie_chart_batch_inter(), use_container_width=True)
-        row3[1].plotly_chart(create.pie_chart_by_session_state(), use_container_width=True)
-
-        # Vierte Zeile
-        row4[0].plotly_chart(create.pie_chart_by_job_count(), use_container_width=True)
-        row4[1].plotly_chart(create.bar_char_by_user(), use_container_width=True)
-
-        # Optional: Scatter Chart, falls benötigt
-        # row4[2].plotly_chart(create.scatter_chart_data_cpu_gpu_eff(), use_container_width=True)
-
-    # st_autorefresh(interval=60000)
-    # row1 = st.columns(2)
-    # row2 = st.columns(2)
-    # row3 = st.columns(2)
-    # row4 = st.columns(2)
-    # for col in row1 + row2:
-    #     tile = col.container(height=200)
-    # con = sqlite3.connect('reports.db')
-    # cur = con.cursor()
-    # create = CreateFigures(con)
-    # create.frame_user_all()
-    # create.frame_group_by_user()
-    # create.job_counts_by_log2()
-    # create.pie_chart_job_count()
-    # create.pie_chart_batch_inter()
-    # create.pie_chart_by_session_state()
-    # create.pie_chart_by_job_count()
-    # # create.chart_cpu_utilization()
-    # create.bar_char_by_user()
-    # create.scatter_chart_data_cpu_gpu_eff()
- #   create.scatter_chart_data_color_lost_cpu()
+    create.frame_user_all()
+    create.frame_group_by_user()
+    create.job_counts_by_log2()
+    create.pie_chart_job_count()
+    create.pie_chart_batch_inter()
+    create.pie_chart_by_session_state()
+    create.pie_chart_by_job_count()
+    # create.chart_cpu_utilization()
+    create.bar_char_by_user()
+    create.scatter_chart_data_cpu_gpu_eff()
+   # create.scatter_chart_data_color_lost_cpu()
 
