@@ -518,6 +518,20 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
+    def efficiency_percentile_chart(con):
+        df = pd.read_sql_query("""
+            SELECT cpu_efficiency, gpu_efficiency 
+            FROM reportdata
+            """, con)
+
+        # Box-Plot für CPU-Effizienz
+        fig_cpu = px.box(df, y="cpu_efficiency", title="CPU Efficiency Percentiles")
+
+        # Box-Plot für GPU-Effizienz
+        #fig_gpu = px.box(df, y="gpu_efficiency", title="GPU Efficiency Percentiles")
+
+        st.plotly_chart(fig_cpu)
+
 
 
 if __name__ == "__main__":
@@ -533,6 +547,7 @@ if __name__ == "__main__":
     create.pie_chart_batch_inter()
     create.pie_chart_by_session_state()
     create.pie_chart_by_job_count()
+    create.efficiency_percentile_chart()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
