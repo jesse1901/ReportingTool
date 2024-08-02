@@ -518,7 +518,7 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def efficiency_percentile_chart(con):
+    def efficiency_percentile_chart(self):
         df = pd.read_sql_query("""
             SELECT cpu_efficiency, gpu_efficiency 
             FROM reportdata
