@@ -519,12 +519,19 @@ class CreateFigures:
         st.plotly_chart(fig)
 
     def efficiency_percentile_chart(self):
-        # Perzentile der Anzahl der Jobs berechnen
         df = pd.read_sql_query("""
-            SELECT cpu_efficiency, COUNT(jobID) AS job_count
-            FROM reportdata
-        """, con)
-        df['job_percentile'] = pd.qcut(df['job_count'], 10, labels=False)
+                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   FROM reportdata
+                   GROUP BY cpu_efficiency
+               """, self.con)
+
+        # Überprüfen, ob es genügend einzigartige Werte gibt, um Perzentile zu berechnen
+        if df['job_count'].nunique() < 10:
+            st.error("Nicht genügend einzigartige job_count-Werte, um Perzentile zu berechnen.")
+            return
+
+        # Perzentile der Anzahl der Jobs berechnen
+        df['job_percentile'] = pd.qcut(df['job_count'], 10, duplicates='drop')
 
         # Mittlere Effizienz für jede Perzentilgruppe berechnen
         percentile_df = df.groupby('job_percentile').agg(
