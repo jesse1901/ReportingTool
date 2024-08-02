@@ -533,7 +533,7 @@ class CreateFigures:
             return
 
         # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False)
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
