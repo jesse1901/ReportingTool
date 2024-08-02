@@ -519,19 +519,31 @@ class CreateFigures:
         st.plotly_chart(fig)
 
     def efficiency_percentile_chart(self):
+        # Perzentile der Anzahl der Jobs berechnen
         df = pd.read_sql_query("""
-            SELECT cpu_efficiency, gpu_efficiency 
+            SELECT cpu_efficiency, COUNT(jobID) AS Job_count
             FROM reportdata
-            """, con)
+        """)
+        df['job_percentile'] = pd.qcut(df['job_count'], 10, labels=False)
 
-        # Box-Plot für CPU-Effizienz
-        fig_cpu = px.box(df, y="cpu_efficiency", title="CPU Efficiency Percentiles")
+        # Mittlere Effizienz für jede Perzentilgruppe berechnen
+        percentile_df = df.groupby('job_percentile').agg(
+            {'cpu_efficiency': ['mean', 'median', 'min', 'max', 'std']}
+        ).reset_index()
 
-        # Box-Plot für GPU-Effizienz
-        #fig_gpu = px.box(df, y="gpu_efficiency", title="GPU Efficiency Percentiles")
+        # Spalten umbenennen
+        percentile_df.columns = ['job_percentile', 'mean', 'median', 'min', 'max', 'std']
 
-        st.plotly_chart(fig_cpu)
-
+        # Diagramm erstellen
+        fig = px.bar(
+            percentile_df,
+            x='job_percentile',
+            y='mean',
+            error_y='std',
+            title='Percentile cpu_efficiency',
+            labels={'job_percentile': 'Job Percentile', 'mean': 'Mean cpu_efficiency'}
+        )
+        st.plotly_chart(fig)
 
 
 if __name__ == "__main__":
