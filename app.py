@@ -660,6 +660,7 @@ class CreateFigures:
 
 
 if __name__ == "__main__":
+    st.set_page_config(layout="wide")
     st_autorefresh(interval=60000)
     col1, col2 = st.columns(2)
     con = sqlite3.connect('reports.db')
@@ -680,7 +681,8 @@ if __name__ == "__main__":
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     #create.scatter_chart_data_cpu_gpu_eff()
-    with elements("new_element"):
+    with elements("dashboard"):
+
         mui.Typography(create.scatter_chart_data_cpu_gpu_eff())
 
 
