@@ -520,37 +520,44 @@ class CreateFigures:
 
     def efficiency_percentile_chart(self):
         df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
-                   FROM reportdata
-                   GROUP BY cpu_efficiency
-               """, self.con)
+               SELECT cpu_efficiency, COUNT(jobID) AS job_count
+               FROM reportdata
+               GROUP BY cpu_efficiency
+           """, con)
 
-        # Überprüfen, ob es genügend einzigartige Werte gibt, um Perzentile zu berechnen
-        if df['job_count'].nunique() < 10:
-            st.error("Nicht genügend einzigartige job_count-Werte, um Perzentile zu berechnen.")
+        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
+        if df['cpu_efficiency'].nunique() < 10:
+            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
             return
 
-        # Perzentile der Anzahl der Jobs berechnen
-        df['job_percentile'] = pd.qcut(df['job_count'], 10, duplicates='drop')
+        # Calculate percentiles for 'cpu_efficiency'
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
 
-        # Mittlere Effizienz für jede Perzentilgruppe berechnen
-        percentile_df = df.groupby('job_percentile').agg(
-            {'cpu_efficiency': ['mean', 'median', 'min', 'max', 'std']}
+        # Aggregate the data by these percentiles
+        percentile_df = df.groupby('efficiency_percentile').agg(
+            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
+            median_cpu_efficiency=('cpu_efficiency', 'median'),
+            min_cpu_efficiency=('cpu_efficiency', 'min'),
+            max_cpu_efficiency=('cpu_efficiency', 'max'),
+            std_cpu_efficiency=('cpu_efficiency', 'std')
         ).reset_index()
 
-        # Spalten umbenennen
-        percentile_df.columns = ['job_percentile', 'mean', 'median', 'min', 'max', 'std']
+        # Rename columns for better readability
+        percentile_df.columns = ['Efficiency Percentile', 'Mean', 'Median', 'Min', 'Max', 'Std']
 
-        # Diagramm erstellen
+        # Create a bar chart using Plotly
         fig = px.bar(
             percentile_df,
-            x='job_percentile',
-            y='mean',
-            error_y='std',
-            title='Percentile cpu_efficiency',
-            labels={'job_percentile': 'Job Percentile', 'mean': 'Mean cpu_efficiency'}
+            x='Efficiency Percentile',
+            y='Mean',
+            error_y='Std',
+            title='CPU Efficiency Percentile',
+            labels={'Efficiency Percentile': 'Efficiency Percentile', 'Mean': 'Mean CPU Efficiency'}
         )
+
+        # Display the chart in Streamlit
         st.plotly_chart(fig)
+
 
 
 if __name__ == "__main__":
