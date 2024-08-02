@@ -703,7 +703,6 @@ class CreateFigures:
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
                    FROM reportdata
-                   GROUP BY cpu_efficiency
                """, self.con)
 
         # Filter out rows where cpu_efficiency is 0
