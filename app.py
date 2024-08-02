@@ -16,11 +16,11 @@ from streamlit_elements import dashboard
 from streamlit_elements import elements, mui, html
 
 color_map = {
-    'CANCELLED': 'rgba(173,216,230,0.6)', # Light Blue
-    'COMPLETED': 'rgba(0,0,255,0.6)',     # Blue
-    'TIMEOUT': 'rgba(255,0,0,0.6)',    # Red
-    'FAILED': 'rgba(255,192,203,0.6)',   # Pink (Rosa)
-    'PREEMPTED': 'rgba(0,255,0,0.6)'    # Green
+    'CANCELLED': 'lightblue',    # Light Blue
+    'COMPLETED': 'blue',         # Blue
+    'TIMEOUT': 'red',            # Red
+    'FAILED': 'pink',            # Pink (Rosa)
+    'PREEMPTED': 'green'         # Green
 }
 
 
