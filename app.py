@@ -6,6 +6,7 @@ from datetime import timedelta, datetime
 import numpy as np
 import sqlite3
 import plotly.express as px
+import plotly.graph_objects as go
 import requests
 import hostlist
 import gpu_node_data
@@ -603,6 +604,72 @@ class CreateFigures:
         # Display the chart in Streamlit
         st.plotly_chart(fig)
 
+    def efficiency_percentile_chart3(self):
+        # Fetch the data from the database
+        df = pd.read_sql_query("""
+                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   FROM reportdata
+                   GROUP BY cpu_efficiency
+               """, self.con)
+
+        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
+        if df['cpu_efficiency'].nunique() < 10:
+            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
+            return
+
+        # Calculate percentiles for 'cpu_efficiency'
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
+
+        # Aggregate the data by these percentiles
+        percentile_df = df.groupby('efficiency_percentile').agg(
+            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
+            std_cpu_efficiency=('cpu_efficiency', 'std')
+        ).reset_index()
+
+        # Rename columns for better readability
+        percentile_df.columns = ['Efficiency Percentile', 'Mean', 'Std']
+
+        # Create the figure
+        fig = go.Figure()
+
+        # Add mean line
+        fig.add_trace(go.Scatter(
+            x=percentile_df['Efficiency Percentile'],
+            y=percentile_df['Mean'],
+            mode='lines',
+            name='Mean CPU Efficiency'
+        ))
+
+        # Add fill between the mean +/- std
+        fig.add_trace(go.Scatter(
+            x=percentile_df['Efficiency Percentile'],
+            y=percentile_df['Mean'] + percentile_df['Std'],
+            mode='lines',
+            line=dict(width=0),
+            showlegend=False
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=percentile_df['Efficiency Percentile'],
+            y=percentile_df['Mean'] - percentile_df['Std'],
+            mode='lines',
+            line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(0,100,80,0.2)',
+            name='±1 Std Dev'
+        ))
+
+        # Update layout
+        fig.update_layout(
+            title='CPU Efficiency Percentile with Standard Deviation',
+            xaxis_title='Efficiency Percentile',
+            yaxis_title='CPU Efficiency',
+            template='plotly_white'
+        )
+
+        # Display the chart in Streamlit
+        st.plotly_chart(fig)
+
 
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
@@ -619,9 +686,11 @@ if __name__ == "__main__":
     create.pie_chart_by_job_count()
     create.efficiency_percentile_chart()
     create.efficiency_percentile_chart2()
+    create.efficiency_percentile_chart3()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
+
 
    # create.scatter_chart_data_color_lost_cpu()
 
