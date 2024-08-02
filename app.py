@@ -528,9 +528,8 @@ class CreateFigures:
                """, self.con)
 
         # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
-        if df['cpu_efficiency'].nunique() < 10:
-            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
-            return
+        df = df[df['cpu_efficiency'] != 0]
+
 
         # Calculate percentiles for 'cpu_efficiency'
         df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
