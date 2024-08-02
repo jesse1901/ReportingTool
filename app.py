@@ -676,24 +676,34 @@ class CreateFigures:
                    SELECT cpu_efficiency, COUNT(jobID) AS job_count
                    FROM reportdata
                    GROUP BY cpu_efficiency
-                   ORDER BY cpu_efficiency
                """, self.con)
 
-        # Ensure the data is sorted by CPU efficiency
-        df = df.sort_values(by='cpu_efficiency')
+        # Filter out rows where cpu_efficiency is 0
+        df = df[df['cpu_efficiency'] != 0]
+
+        # Calculate percentiles
+        df['percentile'] = pd.qcut(df['cpu_efficiency'], 20, labels=False, duplicates='drop')
+
+        # Aggregate the number of jobs by percentile
+        percentile_df = df.groupby('percentile').agg(
+            mean_efficiency=('cpu_efficiency', 'mean'),
+            total_jobs=('job_count', 'sum')
+        ).reset_index()
+
+        # Rename columns for better readability
+        percentile_df.columns = ['Percentile', 'Mean CPU Efficiency', 'Total Number of Jobs']
 
         # Create the curve chart using Plotly
         fig = px.line(
-            df,
-            x='cpu_efficiency',
-            y='job_count',
-            title='Jobs vs. CPU Efficiency',
-            labels={'cpu_efficiency': 'CPU Efficiency', 'job_count': 'Number of Jobs'}
+            percentile_df,
+            x='Mean CPU Efficiency',
+            y='Total Number of Jobs',
+            title='Number of Jobs vs. CPU Efficiency Percentiles',
+            labels={'Mean CPU Efficiency': 'Mean CPU Efficiency', 'Total Number of Jobs': 'Total Number of Jobs'}
         )
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
-
 
 if __name__ == "__main__":
     st_autorefresh(interval=60000)
