@@ -558,6 +558,50 @@ class CreateFigures:
         # Display the chart in Streamlit
         st.plotly_chart(fig)
 
+    import pandas as pd
+    import streamlit as st
+    import plotly.express as px
+
+    def efficiency_percentile_chart2(self):
+        # Fetch the data from the database
+        df = pd.read_sql_query("""
+                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   FROM reportdata
+                   GROUP BY cpu_efficiency
+               """, self.con)
+
+        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
+        if df['cpu_efficiency'].nunique() < 10:
+            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
+            return
+
+        # Calculate percentiles for 'cpu_efficiency'
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
+
+        # Aggregate the data by these percentiles
+        percentile_df = df.groupby('efficiency_percentile').agg(
+            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
+            median_cpu_efficiency=('cpu_efficiency', 'median'),
+            min_cpu_efficiency=('cpu_efficiency', 'min'),
+            max_cpu_efficiency=('cpu_efficiency', 'max'),
+            std_cpu_efficiency=('cpu_efficiency', 'std')
+        ).reset_index()
+
+        # Rename columns for better readability
+        percentile_df.columns = ['Efficiency Percentile', 'Mean', 'Median', 'Min', 'Max', 'Std']
+
+        # Create a line chart using Plotly
+        fig = px.line(
+            percentile_df,
+            x='Efficiency Percentile',
+            y='Mean',
+            error_y='Std',
+            title='CPU Efficiency Percentile',
+            labels={'Efficiency Percentile': 'Efficiency Percentile', 'Mean': 'Mean CPU Efficiency'}
+        )
+
+        # Display the chart in Streamlit
+        st.plotly_chart(fig)
 
 
 if __name__ == "__main__":
@@ -574,8 +618,10 @@ if __name__ == "__main__":
     create.pie_chart_by_session_state()
     create.pie_chart_by_job_count()
     create.efficiency_percentile_chart()
+    create.efficiency_percentile_chart2()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
+
    # create.scatter_chart_data_color_lost_cpu()
 
