@@ -519,56 +519,12 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def efficiency_percentile_chart(self):
-        df = pd.read_sql_query("""
-               SELECT cpu_efficiency, COUNT(jobID) AS job_count
-               FROM reportdata
-               GROUP BY cpu_efficiency
-           """, con)
-
-        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
-        if df['cpu_efficiency'].nunique() < 10:
-            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
-            return
-
-        # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
-
-        # Aggregate the data by these percentiles
-        percentile_df = df.groupby('efficiency_percentile').agg(
-            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
-            median_cpu_efficiency=('cpu_efficiency', 'median'),
-            min_cpu_efficiency=('cpu_efficiency', 'min'),
-            max_cpu_efficiency=('cpu_efficiency', 'max'),
-            std_cpu_efficiency=('cpu_efficiency', 'std')
-        ).reset_index()
-
-        # Rename columns for better readability
-        percentile_df.columns = ['Efficiency Percentile', 'Mean', 'Median', 'Min', 'Max', 'Std']
-
-        # Create a bar chart using Plotly
-        fig = px.bar(
-            percentile_df,
-            x='Efficiency Percentile',
-            y='Mean',
-            error_y='Std',
-            title='CPU Efficiency Percentile',
-            labels={'Efficiency Percentile': 'Efficiency Percentile', 'Mean': 'Mean CPU Efficiency'}
-        )
-
-        # Display the chart in Streamlit
-        st.plotly_chart(fig)
-
-    import pandas as pd
-    import streamlit as st
-    import plotly.express as px
 
     def efficiency_percentile_chart2(self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   SELECT cpu_efficiency, jobID
                    FROM reportdata
-                   GROUP BY cpu_efficiency
                """, self.con)
 
         # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
@@ -577,7 +533,7 @@ class CreateFigures:
             return
 
         # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False)
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
@@ -673,7 +629,7 @@ class CreateFigures:
     def jobs_vs_efficiency_curve(self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, COUNT(jobID) AS job_count
+                   SELECT cpu_efficiency, jobID
                    FROM reportdata
                    GROUP BY cpu_efficiency
                """, self.con)
@@ -687,7 +643,7 @@ class CreateFigures:
         # Aggregate the number of jobs by percentile
         percentile_df = df.groupby('percentile').agg(
             mean_efficiency=('cpu_efficiency', 'mean'),
-            total_jobs=('job_count', 'sum')
+            total_jobs=('jobID', 'sum')
         ).reset_index()
 
         # Rename columns for better readability
