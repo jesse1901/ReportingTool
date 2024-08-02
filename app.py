@@ -682,7 +682,7 @@ class CreateFigures:
         df = df[df['cpu_efficiency'] != 0]
 
         # Calculate percentiles
-        df['percentile'] = pd.qcut(df['cpu_efficiency'], 20, labels=False, duplicates='drop')
+        df['percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False)
 
         # Aggregate the number of jobs by percentile
         percentile_df = df.groupby('percentile').agg(
