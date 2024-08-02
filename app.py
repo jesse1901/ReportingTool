@@ -406,7 +406,6 @@ class CreateFigures:
             value=(min_date, max_date),
             format="YYYY-MM-DD"
         )
-        hide_gpu_none = st.checkbox("Hide GPU Jobs")
         scale_efficiency = st.checkbox("Hyperthreading")
 
         # Manage the button state using Streamlit session state
@@ -441,9 +440,6 @@ class CreateFigures:
 
         # Filter dataframe based on the checkbox
         row_var = ['gpu_efficiency']
-        if hide_gpu_none:
-            df2 = df.dropna(subset=row_var)
-            df = df.drop(df2.index)
 
         # Scale CPU efficiency if the button is toggled
         if st.session_state.scale_efficiency:
