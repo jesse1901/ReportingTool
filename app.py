@@ -15,7 +15,13 @@ from streamlit_autorefresh import st_autorefresh
 from streamlit_elements import dashboard
 from streamlit_elements import elements, mui, html
 
-color_sequence = px.colors.qualitative.Plotly
+color_map = {
+    'CANCELLED': '#1f77b4 ',    # Light Blue
+    'COMPLETED': '#17becf ',    # Light Sky Blue
+    'TIMEOUT': '#d62728 ',     # red
+    'FAILED': '#e377c2',      # Pink
+    'PREEMPTED': '#2ca02c'     # Light Green
+}
 
 
 def timestring_to_seconds(timestring):
@@ -483,7 +489,8 @@ class CreateFigures:
             values='total_lost_cpu_time',
             title=f"Lost CPU Time by state",
             color='category',
-            color_discrete_sequence=color_sequence ) # Apply the chosen color sequence        )
+            color_discrete_map=color_map
+        )
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
@@ -505,7 +512,8 @@ class CreateFigures:
             values='Job_count',
             title=f"Job Count by state",
             color='category',
-            color_discrete_sequence=color_sequence  )# Apply the chosen color sequence        )
+            color_discrete_map=color_map
+        )
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
