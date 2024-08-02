@@ -662,7 +662,8 @@ class CreateFigures:
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     st_autorefresh(interval=60000)
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(3, 1)
+    col3, col4 = st.columns(2)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
@@ -671,8 +672,10 @@ if __name__ == "__main__":
         create.frame_user_all()
     with col2:
         create.frame_group_by_user()
-    create.job_counts_by_log2()
-    create.pie_chart_job_count()
+    with col3:
+        create.job_counts_by_log2()
+    with col4:
+        create.pie_chart_job_count()
     create.pie_chart_batch_inter()
     create.pie_chart_by_session_state()
     create.pie_chart_by_job_count()
