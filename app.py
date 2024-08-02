@@ -704,7 +704,6 @@ if __name__ == "__main__":
     create.pie_chart_batch_inter()
     create.pie_chart_by_session_state()
     create.pie_chart_by_job_count()
-    create.efficiency_percentile_chart2()
     create.efficiency_percentile_chart3()
     create.efficiency_percentile_chart4()
     create.jobs_vs_efficiency_curve()
