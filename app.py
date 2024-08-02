@@ -256,13 +256,6 @@ class CreateFigures:
             else 'None'
         )
 
-        # Add a checkbox to allow users to hide the 'None' category
-        hide_none = st.checkbox("Hide None", value=False)
-
-        # Filter out 'None' category if the checkbox is selected
-        if hide_none:
-            df = df[df['category'] != 'None']
-
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
         color_map = {
@@ -350,7 +343,6 @@ class CreateFigures:
             value=(min_date, max_date),
             format="YYYY-MM-DD"
         )
-        hide_gpu_none = st.checkbox("Hide GPU Jobs")
 
         # Ensure start_date is not after end_date
         if start_date > end_date:
@@ -375,9 +367,7 @@ class CreateFigures:
 
         # Filter dataframe based on the checkbox
         row_var = ['gpu_efficiency']
-        if hide_gpu_none:
-            df2 = df.dropna(subset=row_var)
-            df = df.drop(df2.index)
+
 
             #df = df.dropna(subset=['gpu_efficiency'])
         # Create scatter plot
