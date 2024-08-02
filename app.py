@@ -664,7 +664,7 @@ if __name__ == "__main__":
     st_autorefresh(interval=60000)
     col1, col2 = st.columns([3, 1])
     col3, col4, col5 = st.columns(3)
-    col6, col7 = st.columns(2)
+    col6, col7, col8,col9 = st.columns(4)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
     create = CreateFigures(con)
@@ -681,19 +681,17 @@ if __name__ == "__main__":
         create.pie_chart_batch_inter()
     with col5:
         create.pie_chart_by_session_state()
-    create.pie_chart_by_job_count()
-    #create.efficiency_percentile_chart3()
-    create.efficiency_percentile_chart4()
-    # create.chart_cpu_utilization()
-    create.bar_char_by_user()
-    create.scatter_chart_data_cpu_gpu_eff()
-    #create.scatter_chart_data_cpu_gpu_eff()
-    with elements("dashboard"):
-
-        mui.Typography(
-
-        )
-
+    with col6:
+        create.pie_chart_by_job_count()
+        #create.efficiency_percentile_chart3()
+    with col7:
+        create.efficiency_percentile_chart4()
+        # create.chart_cpu_utilization()
+    with col8:
+        create.bar_char_by_user()
+    with col9:
+        create.scatter_chart_data_cpu_gpu_eff()
+        #create.scatter_chart_data_cpu_gpu_eff()
 
 # create.scatter_chart_data_color_lost_cpu()
 
