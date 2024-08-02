@@ -13,6 +13,7 @@ import gpu_node_data
 import json
 from streamlit_autorefresh import st_autorefresh
 from streamlit_elements import dashboard
+from streamlit_elements import elements, mui, html
 
 
 def timestring_to_seconds(timestring):
@@ -679,7 +680,9 @@ if __name__ == "__main__":
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
     create.scatter_chart_data_cpu_gpu_eff()
+    with elements("new_element"):
+        mui.Typography("Helloworld)
 
 
-   # create.scatter_chart_data_color_lost_cpu()
+# create.scatter_chart_data_color_lost_cpu()
 
