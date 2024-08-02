@@ -662,7 +662,7 @@ class CreateFigures:
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     st_autorefresh(interval=60000)
-    col1, col2 = st.columns(3, 1)
+    col1, col2 = st.columns([3, 1])
     col3, col4 = st.columns(2)
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
