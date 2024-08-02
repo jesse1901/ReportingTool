@@ -679,7 +679,7 @@ if __name__ == "__main__":
     create.efficiency_percentile_chart4()
     # create.chart_cpu_utilization()
     create.bar_char_by_user()
-    create.scatter_chart_data_cpu_gpu_eff()
+    #create.scatter_chart_data_cpu_gpu_eff()
     with elements("new_element"):
         mui.Typography(create.scatter_chart_data_cpu_gpu_eff())
 
