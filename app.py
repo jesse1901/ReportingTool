@@ -175,6 +175,24 @@ class CreateFigures:
         # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
         df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
 
+        scale_efficiency = st.checkbox("Hyperthreading Aus")
+
+        # Manage the button state using Streamlit session state
+        if 'scale_efficiency' not in st.session_state:
+            st.session_state.scale_efficiency = False
+
+
+        # Update session state based on button click
+        if scale_efficiency:
+            st.session_state.scale_efficiency = not st.session_state.scale_efficiency
+
+        if st.session_state.scale_efficiency:
+            # Calculate scaling factor based on cores, assuming hyperthreading
+            df['cpu_efficiency'] = df.apply(
+                lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row[
+                    'cpu_efficiency'], axis=1)
+
+
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
         tick_vals = np.linspace(0, max_lost_time, num=10)
@@ -330,68 +348,6 @@ class CreateFigures:
 
         st.plotly_chart(fig, theme=None)
 
-    def scatter_chart_data_cpu_gpu_eff1(self):
-        st.write('CPU Efficiency by Job duration')
-
-        # Fetch the available date range from the database
-        date_query = """
-            SELECT MIN(start) AS min_date, MAX(end) AS max_date
-            FROM reportdata
-        """
-        date_range_df = pd.read_sql_query(date_query, self.con)
-        min_date = pd.to_datetime(date_range_df['min_date'].values[0]).date()
-        max_date = pd.to_datetime(date_range_df['max_date'].values[0]).date()
-        max_date += timedelta(days=1)
-
-        # Create a slider for date range selection
-        start_date, end_date = st.slider(
-            "Select Date Range",
-            min_value=min_date,
-            max_value=max_date,
-            value=(min_date, max_date),
-            format="YYYY-MM-DD"
-        )
-
-        # Ensure start_date is not after end_date
-        if start_date > end_date:
-            st.error("Error: End date must be after start date.")
-            return
-
-        # Load data from database with date filtering
-        query = f"""
-            SELECT jobID, username, gpu_efficiency, 
-                   cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
-            FROM reportdata
-            WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
-            ORDER BY real_time_sec ASC;
-        """
-        df = pd.read_sql_query(query, self.con)
-
-        # Data cleaning and transformation
-        df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
-        df = df.dropna(subset=['real_time_sec'])
-        df['real_time_sec'] = df['real_time_sec'].astype(int)
-        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
-
-        # Filter dataframe based on the checkbox
-        row_var = ['gpu_efficiency']
-
-
-            #df = df.dropna(subset=['gpu_efficiency'])
-        # Create scatter plot
-        fig = px.scatter(
-            df,
-            x="real_time_sec",
-            y="cpu_efficiency",
-            color="gpu_efficiency",
-            color_continuous_scale="tealgrn",
-            size_max=1,
-            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
-            labels={"real_time_sec": "real_job_time"}
-        )
-
-        fig.update_traces(marker=dict(size=3))
-        st.plotly_chart(fig, theme=None)
 
     def scatter_chart_data_cpu_gpu_eff(self):
         st.write('CPU Efficiency by Job duration')
@@ -518,148 +474,6 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-
-    def efficiency_percentile_chart3(self):
-        # Fetch the data from the database
-        df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, jobID
-                   FROM reportdata
-               """, self.con)
-
-        df = df[df['cpu_efficiency'] != 0]
-
-
-        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
-        if df['cpu_efficiency'].nunique() < 10:
-            st.error("Nicht genügend einzigartige cpu_efficiency-Werte, um Perzentile zu berechnen.")
-            return
-
-        # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
-
-        # Aggregate the data by these percentiles
-        percentile_df = df.groupby('efficiency_percentile').agg(
-            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
-            std_cpu_efficiency=('cpu_efficiency', 'std')
-        ).reset_index()
-
-        # Rename columns for better readability
-        percentile_df.columns = ['Efficiency Percentile', 'Mean', 'Std']
-
-        # Create the figure
-        fig = go.Figure()
-
-        # Add mean line
-        fig.add_trace(go.Scatter(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Mean'],
-            mode='lines',
-            name='Mean CPU Efficiency'
-        ))
-
-        # Add fill between the mean +/- std
-        fig.add_trace(go.Scatter(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Mean'] + percentile_df['Std'],
-            mode='lines',
-            line=dict(width=0),
-            showlegend=False
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Mean'] - percentile_df['Std'],
-            mode='lines',
-            line=dict(width=0),
-            fill='tonexty',
-            fillcolor='rgba(0,100,80,0.2)',
-            name='±1 Std Dev'
-        ))
-
-        # Update layout
-        fig.update_layout(
-            title='CPU Efficiency Percentile with Standard Deviation',
-            xaxis_title='Efficiency Percentile',
-            yaxis_title='CPU Efficiency',
-            template='plotly_white'
-        )
-
-        # Display the chart in Streamlit
-        st.plotly_chart(fig)
-
-    def efficiency_percentile_chart5(self):
-        # Fetch the data from the database
-        df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, jobID
-                   FROM reportdata
-               """, self.con)
-
-        # Filter out rows where cpu_efficiency is 0
-        df = df[df['cpu_efficiency'] != 0]
-
-        # Check if there are enough unique values in 'cpu_efficiency' to calculate percentiles
-
-
-        # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
-
-        # Aggregate the data by these percentiles
-        percentile_df = df.groupby('efficiency_percentile').agg(
-            mean_cpu_efficiency=('cpu_efficiency', 'mean'),
-            min_cpu_efficiency=('cpu_efficiency', 'min'),
-            max_cpu_efficiency=('cpu_efficiency', 'max'),
-            total_jobs=('jobID', 'count')
-        ).reset_index()
-
-        # Rename columns for better readability
-        percentile_df.columns = ['Efficiency Percentile', 'Mean Efficiency', 'Min Efficiency', 'Max Efficiency',
-                                 'Total Jobs']
-
-        # Create the figure
-        fig = go.Figure()
-
-        # Add the number of jobs as a bar trace
-        fig.add_trace(go.Bar(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Total Jobs'],
-            name='Total Jobs',
-            marker_color='rgba(0,100,200,0.6)'
-        ))
-
-        # Add line trace for mean CPU efficiency
-        fig.add_trace(go.Scatter(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Mean Efficiency'],
-            mode='lines+markers',
-            name='Mean CPU Efficiency',
-            line=dict(color='royalblue')
-        ))
-
-        # Add fill between the min and max efficiency for each percentile
-        fig.add_trace(go.Scatter(
-            x=pd.concat([percentile_df['Efficiency Percentile'], percentile_df['Efficiency Percentile'][::-1]]),
-            y=pd.concat([percentile_df['Min Efficiency'], percentile_df['Max Efficiency'][::-1]]),
-            fill='toself',
-            fillcolor='rgba(0,100,80,0.2)',
-            line=dict(color='rgba(0,100,80,0)'),
-            name='Efficiency Range'
-        ))
-
-        # Update layout
-        fig.update_layout(
-            title='Distribution of Jobs and CPU Efficiency Percentiles',
-            xaxis_title='Efficiency Percentile',
-            yaxis_title='Number of Jobs / CPU Efficiency',
-            template='plotly_white'
-        )
-
-        # Display the chart in Streamlit
-        st.plotly_chart(fig)
-
-    import pandas as pd
-    import plotly.graph_objects as go
-    import streamlit as st
-
     def efficiency_percentile_chart4(self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
@@ -766,7 +580,6 @@ if __name__ == "__main__":
         create.pie_chart_by_session_state()
     with col7:
         create.pie_chart_by_job_count()
-        #create.efficiency_percentile_chart3()
     with col8:
         create.efficiency_percentile_chart4()
         # create.chart_cpu_utilization()
