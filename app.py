@@ -592,7 +592,7 @@ if __name__ == "__main__":
     create = CreateFigures(con)
 
     # Tabs erstellen
-    tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Miscellaneous"])
+    tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Jobs"])
 
     with tab1:
         st.header("User Data")
