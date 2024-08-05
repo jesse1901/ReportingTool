@@ -79,6 +79,15 @@ def seconds_to_timestring(total_seconds):
     return timestring
 
 
+def format_interval_label(interval_label):
+    try:
+        min_time, max_time = map(int, interval_label.split('-'))
+        min_time_str = f"{min_time // 60}:{min_time % 60:02d}"
+        max_time_str = f"{max_time // 60}:{max_time % 60:02d}"
+        return f"{min_time_str} - {max_time_str}"
+    except ValueError:
+        return interval_label
+
 class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
@@ -260,15 +269,6 @@ class CreateFigures:
 
         # Aggregate total CPU time by runtime interval
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)['total_cpu_time_booked'].sum().reset_index()
-
-        def format_interval_label(interval_label):
-            try:
-                min_time, max_time = map(int, interval_label.split('-'))
-                min_time_str = f"{min_time // 60}:{min_time % 60:02d}"
-                max_time_str = f"{max_time // 60}:{max_time % 60:02d}"
-                return f"{min_time_str} - {max_time_str}"
-            except ValueError:
-                return interval_label
 
         cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].astype(str).apply(format_interval_label)
 
