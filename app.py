@@ -79,16 +79,12 @@ def seconds_to_timestring(total_seconds):
     return timestring
 
 
-def format_interval_label(interval_label):
-    try:
-        print('try')
-        min_time, max_time = map(int, interval_label.split('-'))
-        min_time_str = f"{min_time // 60}:{min_time % 60:02d}"
-        max_time_str = f"{max_time // 60}:{max_time % 60:02d}"
-        return f"{min_time_str} - {max_time_str}"
-    except ValueError:
-        return interval_label
-
+def format_interval_label(interval):
+    min_time = interval.left
+    max_time = interval.right
+    min_time_str = f"{int(min_time // 60)}:{int(min_time % 60):02d}"
+    max_time_str = f"{int(max_time // 60)}:{int(max_time % 60):02d}"
+    return f"{min_time_str} - {max_time_str}"
 class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
