@@ -195,7 +195,7 @@ class GetStats:
 
             if stats.job_data.end_time is not None:
                 end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                end_time = end_time.isoformat('T', 'auto')
+                end_time = end_time.isoformat('t', 'auto')
                 try:
                     if end_time is not None and end_time > self.latest_end:
                         #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
