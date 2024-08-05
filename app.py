@@ -476,8 +476,8 @@ class CreateFigures:
             title=f"Lost CPU Time by state",
             color='category',
             color_discrete_map=color_map,
-            showlegend = False
         )
+        fig.update_layout(showlegend=False)
 
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
