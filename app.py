@@ -436,6 +436,7 @@ class CreateFigures:
         query = f"""
             SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
+            WHERE job_name IS NOT 'spawner-jupyterhub'
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
