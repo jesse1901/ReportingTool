@@ -287,7 +287,9 @@ class CreateFigures:
         color_map = {
             'Interactive': 'red',
             'Batch': 'darkcyan',
-            'None': 'grey'  # You can remove this if 'None' is hidden
+            'None': 'grey',
+            'spawner-jupyterhub': '#e377c2'
+            # You can remove this if 'None' is hidden
         }        # Create the pie chart
         fig = px.pie(
             aggregated_df,
