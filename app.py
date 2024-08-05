@@ -261,9 +261,20 @@ class CreateFigures:
         # Aggregate total CPU time by runtime interval
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)['total_cpu_time_booked'].sum().reset_index()
 
+        def format_interval_label(interval_label):
+            try:
+                min_time, max_time = map(int, interval_label.split('-'))
+                min_time_str = f"{min_time // 60}:{min_time % 60:02d}"
+                max_time_str = f"{max_time // 60}:{max_time % 60:02d}"
+                return f"{min_time_str} - {max_time_str}"
+            except ValueError:
+                return interval_label
+
+        cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].astype(str).apply(format_interval_label)
+
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
-                     title='Total CPU Time by Job Runtime Interval', labels={"runtime_intervall": timedelta(minutes='runtime_intervall')})
+                     title='Total CPU Time by Job Runtime Interval')
 
         st.plotly_chart(fig)
         # Plot pie chart in Streamlit
