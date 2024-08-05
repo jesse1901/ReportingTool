@@ -84,9 +84,19 @@ def format_interval_label(interval):
     max_time = interval.right
 
     def format_time(minutes):
-        hours = int(minutes // 60)
+        days = int(minutes // 1440)  # 1440 minutes in a day
+        hours = int((minutes % 1440) // 60)
         mins = int(minutes % 60)
-        if hours > 0 and mins > 0:
+
+        if days > 0 and hours > 0 and mins > 0:
+            return f"{days}d {hours}h {mins}m"
+        elif days > 0 and hours > 0:
+            return f"{days}d {hours}h"
+        elif days > 0 and mins > 0:
+            return f"{days}d {mins}m"
+        elif days > 0:
+            return f"{days}d"
+        elif hours > 0 and mins > 0:
             return f"{hours}h {mins}m"
         elif hours > 0:
             return f"{hours}h"
