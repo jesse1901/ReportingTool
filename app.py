@@ -241,46 +241,45 @@ class CreateFigures:
         st.bar_chart(job_counts)
 
     def pie_chart_job_count(self) -> None:
-        def pie_chart_job_count(self) -> None:
-            st.write('Job Count by Job Time and CPU Time')
+        st.write('Job Count by Job Time and CPU Time')
 
-            # Query to get runtime in minutes, lost CPU time, and job CPU time
-            df = pd.read_sql_query("""
-            SELECT
-                (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
-                lost_cpu_time_sec,
-                job_cpu_time
-            FROM reportdata;
-            """, self.con)
+        # Query to get runtime in minutes, lost CPU time, and job CPU time
+        df = pd.read_sql_query("""
+        SELECT
+            (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
+            lost_cpu_time_sec,
+            job_cpu_time
+        FROM reportdata;
+        """, self.con)
 
-            # Calculate total CPU time booked
-            if 'job_cpu_time' in df:
-                df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
-            else:
-                df['job_cpu_time'] = 0
+        # Calculate total CPU time booked
+        if 'job_cpu_time' in df:
+            df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+        else:
+            df['job_cpu_time'] = 0
 
-            df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
+        df['total_cpu_time_booked'] = df['lost_cpu_time_sec'] + df['job_cpu_time']
 
-            # Calculate bins for logarithmic intervals
-            max_runtime = df['runtime_minutes'].max()
-            bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
+        # Calculate bins for logarithmic intervals
+        max_runtime = df['runtime_minutes'].max()
+        bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
 
-            # Assign each job to a runtime interval
-            df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, include_lowest=True)
+        # Assign each job to a runtime interval
+        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, include_lowest=True)
 
-            # Aggregate total CPU time by runtime interval
-            cpu_time_by_interval = df.groupby('runtime_interval', observed=True)[
-                'total_cpu_time_booked'].sum().reset_index()
+        # Aggregate total CPU time by runtime interval
+        cpu_time_by_interval = df.groupby('runtime_interval', observed=True)[
+            'total_cpu_time_booked'].sum().reset_index()
 
-            # Format labels to HH:MM
-            cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].apply(
-                format_interval_label)
+        # Format labels to HH:MM
+        cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].apply(
+            format_interval_label)
 
-            # Create pie chart with Plotly
-            fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
-                         title='Total CPU Time by Job Runtime Interval')
+        # Create pie chart with Plotly
+        fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
+                     title='Total CPU Time by Job Runtime Interval')
 
-            st.plotly_chart(fig)
+        st.plotly_chart(fig)
     def pie_chart_batch_inter(self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
