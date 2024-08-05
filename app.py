@@ -277,6 +277,7 @@ class CreateFigures:
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df['job_name'].apply(
             lambda x: 'Interactive' if x and x.lower() == 'interactive'
+            else 'spawner-jupyterhub' if x and x.lower() == 'spawner-jupyterhub'
             else 'Batch' if x and x.lower() != ''
             else 'None'
         )
