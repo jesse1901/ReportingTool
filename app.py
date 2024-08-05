@@ -188,10 +188,9 @@ class CreateFigures:
 
         if st.session_state.scale_efficiency:
             # Calculate scaling factor based on cores, assuming hyperthreading
-            df['cpu_efficiency'] = df.apply(
-                lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row[
-                    'cpu_efficiency'], axis=1)
-
+            if st.session_state.scale_efficiency:
+                # Filter out jobs with over 50% efficiency that have lost CPU time
+                df = df[df.apply(lambda row: row['avg_cpu_efficiency'] <= 50 or row['total_lost_cpu_time'] == 0, axis=1)]
 
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
