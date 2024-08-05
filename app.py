@@ -477,8 +477,6 @@ class CreateFigures:
             color='category',
             color_discrete_map=color_map,
         )
-        fig.update_layout(showlegend=False)
-
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
     def pie_chart_by_job_count(self):
@@ -501,7 +499,7 @@ class CreateFigures:
             color='category',
             color_discrete_map=color_map
         )
-
+        fig.update_layout(showlegend=False)
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
