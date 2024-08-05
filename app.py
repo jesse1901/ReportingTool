@@ -263,7 +263,7 @@ class CreateFigures:
 
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
-                     title='Total CPU Time by Job Runtime Interval')
+                     title='Total CPU Time by Job Runtime Interval', labels={"runtime_intervall": timedelta(minutes='runtime_intervall')})
 
         st.plotly_chart(fig)
         # Plot pie chart in Streamlit
