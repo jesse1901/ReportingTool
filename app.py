@@ -256,8 +256,6 @@ class CreateFigures:
         st.bar_chart(job_counts)
 
     def pie_chart_job_count(self) -> None:
-        st.write('Job Count by Job Time and CPU Time')
-
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
         SELECT
