@@ -475,7 +475,8 @@ class CreateFigures:
             values='total_lost_cpu_time',
             title=f"Lost CPU Time by state",
             color='category',
-            color_discrete_map=color_map
+            color_discrete_map=color_map,
+            showlegend = False
         )
 
         # Pie-Chart in Streamlit anzeigen
@@ -625,7 +626,7 @@ if __name__ == "__main__":
             # create.chart_cpu_utilization()
 
     with tab4:
-        st.header("Miscellaneous")
+        st.header("")
         col9, col10 = st.columns(2)
         with col9:
             create.bar_char_by_user()
