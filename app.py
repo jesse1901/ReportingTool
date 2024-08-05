@@ -82,8 +82,19 @@ def seconds_to_timestring(total_seconds):
 def format_interval_label(interval):
     min_time = interval.left
     max_time = interval.right
-    min_time_str = f"{int(min_time // 60)}:{int(min_time % 60):02d}"
-    max_time_str = f"{int(max_time // 60)}:{int(max_time % 60):02d}"
+
+    def format_time(minutes):
+        hours = int(minutes // 60)
+        mins = int(minutes % 60)
+        if hours > 0 and mins > 0:
+            return f"{hours}h {mins}m"
+        elif hours > 0:
+            return f"{hours}h"
+        else:
+            return f"{mins}m"
+
+    min_time_str = format_time(min_time)
+    max_time_str = format_time(max_time)
     return f"{min_time_str} - {max_time_str}"
 class CreateFigures:
     def __init__(self, con):
