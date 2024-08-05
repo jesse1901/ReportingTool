@@ -88,12 +88,8 @@ def format_interval_label(interval):
         hours = int((minutes % 1440) // 60)
         mins = int(minutes % 60)
 
-        if days > 0 and hours > 0 and mins > 0:
-            return f"{days}d {hours}h {mins}m"
-        elif days > 0 and hours > 0:
+        if days > 0 and hours > 0:
             return f"{days}d {hours}h"
-        elif days > 0 and mins > 0:
-            return f"{days}d {mins}m"
         elif days > 0:
             return f"{days}d"
         elif hours > 0 and mins > 0:
@@ -106,6 +102,8 @@ def format_interval_label(interval):
     min_time_str = format_time(min_time)
     max_time_str = format_time(max_time)
     return f"{min_time_str} - {max_time_str}"
+
+
 class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
@@ -589,36 +587,51 @@ class CreateFigures:
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
-    st_autorefresh(interval=60000)
-    col1, col2 = st.columns([3, 1])
-    col3, col4, col5 = st.columns(3)
-    col6, col7, col8 = st.columns(3)
-    col9, col10 = st.columns(2)
+    st_autorefresh(interval=600000)
+
     con = sqlite3.connect('reports.db')
-    cur = con.cursor()
     create = CreateFigures(con)
 
-    with col1:
-        create.frame_user_all()
-    with col2:
-        create.frame_group_by_user()
-    with col3:
-        create.job_counts_by_log2()
-    with col4:
-        create.pie_chart_job_count()
-    with col5:
-        create.pie_chart_batch_inter()
-    with col6:
-        create.pie_chart_by_session_state()
-    with col7:
-        create.pie_chart_by_job_count()
-    with col8:
-        create.efficiency_percentile_chart4()
-        # create.chart_cpu_utilization()
-    with col9:
-        create.bar_char_by_user()
-    with col10:
-        create.scatter_chart_data_cpu_gpu_eff()
+    # Tabs erstellen
+    tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Miscellaneous"])
+
+    with tab1:
+        st.header("User Data")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            create.frame_user_all()
+        with col2:
+            create.frame_group_by_user()
+
+    with tab2:
+        st.header("Job Data")
+        col3, col4, col5 = st.columns(3)
+        with col3:
+            create.job_counts_by_log2()
+        with col4:
+            create.pie_chart_job_count()
+        with col5:
+            create.pie_chart_batch_inter()
+
+    with tab3:
+        st.header("Efficiency")
+        col6, col7, col8 = st.columns(3)
+        with col6:
+            create.pie_chart_by_session_state()
+        with col7:
+            create.pie_chart_by_job_count()
+        with col8:
+            create.efficiency_percentile_chart4()
+            # create.chart_cpu_utilization()
+
+    with tab4:
+        st.header("Miscellaneous")
+        col9, col10 = st.columns(2)
+        with col9:
+            create.bar_char_by_user()
+        with col10:
+            create.scatter_chart_data_cpu_gpu_eff()
+
         #create.scatter_chart_data_cpu_gpu_eff()
 
 # create.scatter_chart_data_color_lost_cpu()
