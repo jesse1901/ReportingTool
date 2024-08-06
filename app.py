@@ -296,7 +296,7 @@ class CreateFigures:
     def pie_chart_batch_inter(self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
-            SELECT lost_cpu_time_sec, job_name FROM reportdata
+            SELECT lost_cpu_time_sec, job_name, partition FROM reportdata
         """, con)
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df['job_name'].apply(
