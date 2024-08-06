@@ -600,7 +600,7 @@ if __name__ == "__main__":
         init_options={
             "pkceMethod": "S256",
             "checkLoginIframe": False,
-            "redirectUri": 'https://max-infra006.desy.de:8501/',
+            "redirectUri": 'https://max-infra006.desy.de:8501/*',
         }
     )
     if keycloak.authenticated:
