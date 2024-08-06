@@ -594,9 +594,12 @@ def main():
 if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
     keycloak = login(
-        url="https://keycloak.desy.de",
+        url="https://keycloak.desy.de/auth",
         realm="testing",
-        client_id="myclient",
+        client_id="maxwell-reporting-oidc",
+        init_options={
+            "pkceMethod": "S256"
+        }
     )
     if keycloak.authenticated:
         st.set_page_config(layout="wide")
