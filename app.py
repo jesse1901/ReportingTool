@@ -191,7 +191,7 @@ class CreateFigures:
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
                            partition
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}'AND partition IS NOT 'jhub' 
+                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition IS NOT 'jhub' 
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
