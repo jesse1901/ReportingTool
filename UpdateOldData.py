@@ -178,10 +178,10 @@ class GetStats:
         # cur.execute("SELECT MAX(end) FROM reportdata")
         # self.latest_end = str(cur.fetchone()[0] or 0)
         jobs = cur.execute("""
-                    SELECT jobID FROM reportdata WHERE end < '2024-08-04T23:59:50'  
+                    SELECT jobID FROM reportdata
         """)
         # Process each job
-        for job_id in self.jobs.keys():
+        for job_id in jobs:
             #try:
             stats = GetStats()
             stats.job_stats(job_id)
