@@ -184,6 +184,7 @@ class GetStats:
         # Process each job
         for job_id in jobs:
             #try:
+            count = 1
             stats = GetStats()
             stats.job_stats(job_id[0])
             data_dict = stats.to_dict()
@@ -230,7 +231,8 @@ class GetStats:
                             data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
                             data['total_cpu_time_booked'], data['partition']
                         ))
-                        print(f"inserted Job: {data['job_id']}")
+                        print(f"inserted Job {count}: ID = {data['job_id']}")
+                        count += 1
                         #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
                         cur.connection.commit()
                 except Exception as e:
