@@ -592,16 +592,16 @@ def main():
             create.scatter_chart_data_cpu_gpu_eff()
 
 if __name__ == "__main__":
-    st.title("Streamlit Keycloak example")
-    keycloak = login(
-        url="https://keycloak.desy.de/auth",
-        realm="testing",
-        client_id="maxwell-reporting-oidc",
-        init_options={
-            "pkceMethod": "S256"
-        }
-    )
-    if keycloak.authenticated:
+    # st.title("Streamlit Keycloak example")
+    # keycloak = login(
+    #     url="https://keycloak.desy.de/auth",
+    #     realm="testing",
+    #     client_id="maxwell-reporting-oidc",
+    #     init_options={
+    #         "pkceMethod": "S256"
+    #     }
+    # )
+    # if keycloak.authenticated:
         st.set_page_config(layout="wide")
         st_autorefresh(interval=600000)
         con = sqlite3.connect('reports.db')
