@@ -12,6 +12,7 @@ import gpu_node_data
 import json
 
 
+
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0:
         return 0
@@ -176,12 +177,9 @@ class GetStats:
         # Retrieve the highest jobID currently in the reportdata table
         # cur.execute("SELECT MAX(end) FROM reportdata")
         # self.latest_end = str(cur.fetchone()[0] or 0)
-        self.latest_end = '2024-07-03T17:27:15'
-        # Create a list of job IDs to filter and load jobs
-        self.list_filter = round(time.time())
-        # [self.jobID_count + i + 1 for i in range(1000)]
-        self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
-        self.jobs = pyslurm.db.Jobs.load(self.db_filter)
+        jobs = cur.execute("""
+                    SELECT jobID FROM reportdata WHERE end < '2024-08-04T23:59:50'  
+        """)
         # Process each job
         for job_id in self.jobs.keys():
             #try:
@@ -239,52 +237,6 @@ class GetStats:
         #except Exception as err:
         #    print(f'Error endtime, job {job_id}:{err}')
         # Print an error message if job processing fails
-
-    def calculate_avg_eff(self, cur) -> None:
-        """
-        Calculates and updates the average efficiency over time intervals.
-        """
-        # Retrieve the latest efficiency start time from the avg_eff table
-        cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
-        self.latest_avg_eff = cur.fetchone()[0] or self.min_start
-
-        # Retrieve the minimum start time
-        cur.execute("""
-            SELECT MIN(start) AS min_start
-            FROM reportdata 
-            WHERE start IS NOT NULL AND start <> ''
-        """)
-        min_start = cur.fetchone()
-        # Set the interval for calculating average efficiency
-        self.intervall = min_start[0]
-
-        # Loop through each time interval and calculate average efficiency
-        while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') < datetime.now():
-            interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
-            interval_end = interval_start + timedelta(hours=1)
-
-            # Calculate average efficiency and count of jobs in the interval
-            cur.execute("""
-                SELECT AVG(efficiency) as a_eff, COUNT(cores) as c_job
-                FROM reportdata 
-                WHERE start <= ? AND end >= ?
-            """, (interval_end, interval_start))
-            a_eff, c_job = cur.fetchone()
-            self.avg_eff = a_eff
-            self.cores_job = c_job
-
-            # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
-            cur.execute(""" INSERT INTO avg_eff (eff, cores, start, end) VALUES (?, ?, ?, ?)
-            ON CONFLICT(start) DO UPDATE SET eff = excluded.eff, cores = excluded.cores""",
-                        (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
-
-            self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-            # print(self.intervall)
-            cur.connection.commit()
-
-        # Sleep for 2 seconds to avoid excessive querying
-
-        return
 
     def get_gpu_data(self):
         step = 1
@@ -360,43 +312,8 @@ if __name__ == "__main__":
     # Connect to SQLite database and create necessary tables
     con = sqlite3.connect('reports.db')
     cur = con.cursor()
-    # # create table
-    con.execute('PRAGMA journal_mode=WAL;')
-    cur.execute("""
-              CREATE TABLE IF NOT EXISTS reportdata (
-                  jobID INTEGER NOT NULL UNIQUE,
-                  username TEXT,
-                  account TEXT,
-                  cpu_efficiency REAL,
-                  lost_cpu_time TEXT,
-                  lost_cpu_time_sec INT,
-                  gpu_efficiency REAL,
-                  lost_gpu_time TEXT,
-                  lost_gpu_time_sec INT,
-                  real_time TEXT,
-                  job_cpu_time TEXT,
-                  real_time_sec REAL,
-                  state TEXT,
-                  cores INT,
-                  gpu_nodes TEXT,
-                  start TEXT,
-                  end TEXT,
-                  job_name TEXT,
-                  total_cpu_time_booked TEXT,
-                  partiton TEXT
-              )
-              """)
 
-    cur.execute("""CREATE TABLE IF NOT EXISTS avg_eff (eff REAL, count_job INT, start TEXT UNIQUE, end TEXT)""")
-
-    cur.connection.commit()
-
-    # Create figures and display them
-
-
-    # Main loop to continuously fetch job data.py and update average efficiency
     while True:
-        x = 29
         get = GetStats()
         get.get_jobs_calculate_insert_data(cur)
 
