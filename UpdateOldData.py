@@ -178,7 +178,7 @@ class GetStats:
         # cur.execute("SELECT MAX(end) FROM reportdata")
         # self.latest_end = str(cur.fetchone()[0] or 0)
         jobs = cur.execute("""
-                    SELECT jobID FROM reportdata WHERE partition IS None
+                    SELECT jobID FROM reportdata WHERE partition IS NULL
         """)
         jobs = cur.fetchall()
         count = 1
