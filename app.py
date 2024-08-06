@@ -604,8 +604,8 @@ if __name__ == "__main__":
         client_id="myclient",
     )
 
-    if keycloak.authenticated:
-        main()
+    #if keycloak.authenticated:
+    main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
 
