@@ -184,7 +184,7 @@ class GetStats:
         for job_id in jobs:
             #try:
             stats = GetStats()
-            stats.job_stats(job_id)
+            stats.job_stats(job_id[0])
             data_dict = stats.to_dict()
 
             if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
