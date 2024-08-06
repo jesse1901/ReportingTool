@@ -594,7 +594,7 @@ def main():
 if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
     keycloak = login(
-        url="https://keycloak.desy.de",
+        url="https://keycloak.desy.de/auth",
         realm="testing",
         client_id="maxwell-reporting-oidc",
         init_options={
