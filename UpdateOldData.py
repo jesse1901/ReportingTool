@@ -180,6 +180,7 @@ class GetStats:
         jobs = cur.execute("""
                     SELECT jobID FROM reportdata
         """)
+        jobs = cur.fetchall()
         # Process each job
         for job_id in jobs:
             #try:
