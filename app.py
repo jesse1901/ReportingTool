@@ -104,6 +104,7 @@ def format_interval_label(interval):
     return f"{min_time_str} - {max_time_str}"
 
 
+
 class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
