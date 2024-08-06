@@ -12,8 +12,7 @@ import hostlist
 import gpu_node_data
 import json
 from streamlit_autorefresh import st_autorefresh
-from streamlit_elements import dashboard
-from streamlit_elements import elements, mui, html
+from streamlit_keycloak import login
 
 color_map = {
     'CANCELLED': '#1f77b4 ',    # Light Blue
@@ -548,9 +547,7 @@ class CreateFigures:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
-
-
-if __name__ == "__main__":
+def main():
     st.set_page_config(layout="wide")
     st_autorefresh(interval=600000)
 
@@ -596,6 +593,17 @@ if __name__ == "__main__":
             create.bar_char_by_user()
         with col10:
             create.scatter_chart_data_cpu_gpu_eff()
+
+if __name__ == "__main__":
+    st.title("Streamlit Keycloak example")
+    keycloak = login(
+        url="http://localhost:8080",
+        realm="myrealm",
+        client_id="myclient",
+    )
+
+    if keycloak.authenticated:
+        main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
 
