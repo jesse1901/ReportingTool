@@ -188,7 +188,8 @@ class CreateFigures:
                            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
                            COUNT(jobID) AS anzahl_jobs, 
                            SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                           partition
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}'AND partition IS NOT 'jhub' 
                         GROUP BY username
