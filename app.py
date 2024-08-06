@@ -146,7 +146,7 @@ class CreateFigures:
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
                            partition
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition IS NOT 'jhub'
+                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub'
                         GROUP BY username
         """, con)
 
@@ -191,7 +191,7 @@ class CreateFigures:
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
                            partition
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition IS NOT 'jhub' 
+                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub' 
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
@@ -247,7 +247,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
         SELECT
             (julianday(end) - julianday(start)) * 24 * 60, partition AS runtime_minutes
-            WHERE partition IS NOT 'jhub'
+            WHERE partition != 'jhub'
         FROM reportdata;
         """, con)
         max_runtime = df['runtime_minutes'].max()
@@ -385,7 +385,7 @@ class CreateFigures:
                    cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state, partition
             FROM reportdata
             WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}' 
-            AND partition IS NOT 'jhub' 
+            AND partition != 'jhub' 
             ORDER BY real_time_sec ASC;
         """
         df = pd.read_sql_query(query, self.con)
@@ -428,7 +428,7 @@ class CreateFigures:
         query = f"""
             SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
-            WHERE partition IS NOT "jhub"
+            WHERE partition != "jhub"
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -450,7 +450,7 @@ class CreateFigures:
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
         query = f"""
             SELECT state AS category, COUNT(jobID) AS Job_count
-            FROM reportdata WHERE partition IS NOT "jhub"
+            FROM reportdata WHERE partition != "jhub"
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -472,7 +472,7 @@ class CreateFigures:
         # Fetch the data from the database
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
-                   FROM reportdata WHERE partition IS NOT "jhub"
+                   FROM reportdata WHERE partition != "jhub"
                """, self.con)
 
         # Filter out rows where cpu_efficiency is 0
