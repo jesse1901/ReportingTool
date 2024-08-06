@@ -551,10 +551,6 @@ class CreateFigures:
 
 def main():
     st.set_page_config(layout="wide")
-    st_autorefresh(interval=600000)
-
-    con = sqlite3.connect('reports.db')
-    create = CreateFigures(con)
 
     # Tabs erstellen
     tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
@@ -603,8 +599,10 @@ if __name__ == "__main__":
     #    realm="testing",
     #    client_id="myclient",
     #)
-
     #if keycloak.authenticated:
+    st_autorefresh(interval=600000)
+    con = sqlite3.connect('reports.db')
+    create = CreateFigures(con)
     main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
