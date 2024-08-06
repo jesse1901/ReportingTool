@@ -264,7 +264,7 @@ class CreateFigures:
             (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes,
             lost_cpu_time_sec,
             job_cpu_time
-        FROM reportdata;
+        FROM reportdata
         WHERE partition != 'jhub'
         """, self.con)
 
