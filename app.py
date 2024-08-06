@@ -143,9 +143,10 @@ class CreateFigures:
                            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
                            COUNT(jobID) AS anzahl_jobs, 
                            SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                           partition
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}'
+                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition IS NOT 'jhub'
                         GROUP BY username
         """, con)
 
@@ -189,7 +190,7 @@ class CreateFigures:
                            SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}'
+                        WHERE start >= '{start_date}' AND end <= '{end_date}'AND partition IS NOT 'jhub' 
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
@@ -244,7 +245,8 @@ class CreateFigures:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
         SELECT
-            (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
+            (julianday(end) - julianday(start)) * 24 * 60, partition AS runtime_minutes
+            WHERE partition IS NOT 'jhub'
         FROM reportdata;
         """, con)
         max_runtime = df['runtime_minutes'].max()
@@ -339,42 +341,6 @@ class CreateFigures:
         """, self.con)
         st.line_chart(df.set_index('period'))
 
-    def scatter_chart_data_color_lost_cpu(self):
-        df = pd.read_sql_query("""
-            SELECT jobID, username, gpu_efficiency, cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
-            FROM reportdata
-            ORDER BY real_time_sec ASC;""", self.con)
-
-        df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
-        df = df.dropna(subset=['real_time_sec'])
-        df['real_time_sec'] = df['real_time_sec'].astype(int)
-        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
-
-        df['lost_cpu_time'] = df['lost_cpu_time'].apply(timestring_to_seconds)
-        df['log_lost_cpu_time'] = np.log1p(df['lost_cpu_time'])
-
-        fig = px.scatter(
-            df,
-            x="real_time_sec",
-            y="cpu_efficiency",
-            color="log_lost_cpu_time",
-            color_continuous_scale="blues",
-            size_max=1,
-            hover_data=["jobID", "username", "lost_cpu_time", "lost_gpu_time", "real_time", "cores", "state"],
-            log_x=False,
-            log_y=False,
-            labels={"real_time_sec": "real_job_time"}
-        )
-        fig.update_layout(coloraxis_colorbar=dict(title="Log Lost CPU Time"))
-        fig.update_coloraxes(colorbar=dict(
-            tickvals=[np.log1p(10 ** i) for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)],
-            ticktext=[10 ** i for i in range(0, int(np.log10(df['lost_cpu_time'].max())) + 1)]
-        ))
-        fig.update_traces(marker=dict(size=3))
-
-        st.plotly_chart(fig, theme=None)
-
-
     def scatter_chart_data_cpu_gpu_eff(self):
         st.write('CPU Efficiency by Job duration')
 
@@ -415,9 +381,10 @@ class CreateFigures:
         # Load data from database with date filtering
         query = f"""
             SELECT jobID, username, gpu_efficiency, 
-                   cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state
+                   cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state, partition
             FROM reportdata
-            WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}'
+            WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}' 
+            AND partition IS NOT 'jhub' 
             ORDER BY real_time_sec ASC;
         """
         df = pd.read_sql_query(query, self.con)
@@ -460,7 +427,7 @@ class CreateFigures:
         query = f"""
             SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
-            WHERE job_name IS NOT 'spawner-jupyterhub'
+            WHERE partition IS NOT "jhub"
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -482,7 +449,7 @@ class CreateFigures:
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
         query = f"""
             SELECT state AS category, COUNT(jobID) AS Job_count
-            FROM reportdata
+            FROM reportdata WHERE partition IS NOT "jhub"
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -504,7 +471,7 @@ class CreateFigures:
         # Fetch the data from the database
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
-                   FROM reportdata
+                   FROM reportdata WHERE partition IS NOT "jhub"
                """, self.con)
 
         # Filter out rows where cpu_efficiency is 0
