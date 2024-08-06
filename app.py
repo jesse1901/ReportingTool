@@ -547,6 +547,8 @@ class CreateFigures:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
+
+
 def main():
     st.set_page_config(layout="wide")
     st_autorefresh(interval=600000)
@@ -597,8 +599,8 @@ def main():
 if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
     keycloak = login(
-        url="http://localhost:8080",
-        realm="myrealm",
+        url="https://keycloak.desy.de",
+        realm="desy",
         client_id="myclient",
     )
 
