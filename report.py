@@ -120,8 +120,15 @@ class GetStats:
         """
         self.job_id = job_id
         self.job_data = pyslurm.db.Job.load(job_id)
-        self.job_cpu = self.job_data.steps.to_dict()
-        self.job_all = self.job_data.to_dict()
+        try:
+            self.job_cpu = self.job_data.steps.to_dict()
+            self.job_all = self.job_data.to_dict()
+        except KeyError as e:
+            print(f"KeyError: {e} - UID not found for job {job_id}")
+            self.job_cpu = {}
+            self.job_all = {}
+            return
+
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
         self.name = self.job_data.name
