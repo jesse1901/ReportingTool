@@ -265,6 +265,7 @@ class CreateFigures:
             lost_cpu_time_sec,
             job_cpu_time
         FROM reportdata;
+        WHERE partition != 'jhub'
         """, self.con)
 
         # Calculate total CPU time booked
@@ -329,17 +330,17 @@ class CreateFigures:
         # Display the pie chart
         st.plotly_chart(fig)
 
-    def chart_cpu_utilization(self) -> None:
-        """
-        Displays a line chart of average CPU utilization by hour from the avg_eff table.
-        """
-        df = pd.read_sql_query("""
-            SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, eff AS avg_efficiency
-            FROM avg_eff
-            GROUP BY strftime('%Y-%m-%d %H:00:00', start)
-            ORDER BY period
-        """, self.con)
-        st.line_chart(df.set_index('period'))
+    # def chart_cpu_utilization(self) -> None:
+    #     """
+    #     Displays a line chart of average CPU utilization by hour from the avg_eff table.
+    #     """
+    #     df = pd.read_sql_query("""
+    #         SELECT strftime('%Y-%m-%d %H:00:00', start) AS period, eff AS avg_efficiency
+    #         FROM avg_eff
+    #         GROUP BY strftime('%Y-%m-%d %H:00:00', start)
+    #         ORDER BY period
+    #     """, self.con)
+    #     st.line_chart(df.set_index('period'))
 
     def scatter_chart_data_cpu_gpu_eff(self):
         st.write('CPU Efficiency by Job duration')
@@ -427,7 +428,7 @@ class CreateFigures:
         query = f"""
             SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
-            WHERE partition != "jhub"
+            WHERE partition != 'jhub'
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -449,7 +450,7 @@ class CreateFigures:
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
         query = f"""
             SELECT state AS category, COUNT(jobID) AS Job_count
-            FROM reportdata WHERE partition != "jhub"
+            FROM reportdata WHERE partition != 'jhub'
             GROUP BY state
         """
         df = pd.read_sql_query(query, con)
@@ -471,7 +472,7 @@ class CreateFigures:
         # Fetch the data from the database
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
-                   FROM reportdata WHERE partition != "jhub"
+                   FROM reportdata WHERE partition != 'jhub'
                """, self.con)
 
         # Filter out rows where cpu_efficiency is 0
