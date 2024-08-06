@@ -299,13 +299,13 @@ class CreateFigures:
             SELECT lost_cpu_time_sec, job_name, partition FROM reportdata
         """, con)
         # Create a new column to categorize jobs, handling None and empty values
-        df['category'] = df['job_name'].apply(
-            lambda x: 'Interactive' if x and x.lower() == 'interactive'
-            else 'spawner-jupyterhub' if x and x.lower() == 'spawner-jupyterhub'
-            else 'Batch' if x and x.lower() != ''
-            else 'None'
+        df['category'] = df.apply(
+            lambda row: 'Jupyter Hub' if row['partition'] == 'Jupyterhub'
+            else 'Interactive' if row['job_name'] and row['job_name'].lower() == 'interactive'
+            else 'Batch' if row['job_name'] and row['job_name'].lower() != ''
+            else 'None',
+            axis=1
         )
-
         # Aggregate the data by category
         aggregated_df = df.groupby('category', as_index=False).agg({'lost_cpu_time_sec': 'sum'})
         color_map = {
