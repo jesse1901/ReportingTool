@@ -191,7 +191,7 @@ class CreateFigures:
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
                            partition
                         FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub' 
+                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub'  AND gpu_efficiency IS NULL
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
@@ -385,7 +385,7 @@ class CreateFigures:
                    cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state, partition
             FROM reportdata
             WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}' 
-            AND partition != 'jhub' AND gpu_efficiency IS NULL 
+            AND partition != 'jhub' 
             ORDER BY real_time_sec ASC;
         """
         df = pd.read_sql_query(query, self.con)
