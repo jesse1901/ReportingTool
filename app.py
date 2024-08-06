@@ -13,6 +13,7 @@ import gpu_node_data
 import json
 from streamlit_autorefresh import st_autorefresh
 from streamlit_keycloak import login
+from dataclasses import asdict
 
 color_map = {
     'CANCELLED': '#1f77b4 ',    # Light Blue
@@ -591,18 +592,18 @@ def main():
             create.scatter_chart_data_cpu_gpu_eff()
 
 if __name__ == "__main__":
-    #st.title("Streamlit Keycloak example")
-    #keycloak = login(
-    #    url="https://keycloak.desy.de",
-    #    realm="testing",
-    #    client_id="myclient",
-    #)
-    #if keycloak.authenticated:
-    st.set_page_config(layout="wide")
-    st_autorefresh(interval=600000)
-    con = sqlite3.connect('reports.db')
-    create = CreateFigures(con)
-    main()
+    st.title("Streamlit Keycloak example")
+    keycloak = login(
+        url="https://keycloak.desy.de",
+        realm="testing",
+        client_id="myclient",
+    )
+    if keycloak.authenticated:
+        st.set_page_config(layout="wide")
+        st_autorefresh(interval=600000)
+        con = sqlite3.connect('reports.db')
+        create = CreateFigures(con)
+        main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
 
