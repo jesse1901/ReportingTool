@@ -385,7 +385,7 @@ class CreateFigures:
                    cpu_efficiency, lost_cpu_time, lost_gpu_time, real_time_sec, real_time, cores, state, partition
             FROM reportdata
             WHERE start >= '{start_date.strftime('%Y-%m-%d')}' AND end <= '{end_date.strftime('%Y-%m-%d')}' 
-            AND partition != 'jhub' 
+            AND partition != 'jhub' AND gpu_efficiency IS NULL 
             ORDER BY real_time_sec ASC;
         """
         df = pd.read_sql_query(query, self.con)
