@@ -245,7 +245,7 @@ class CreateFigures:
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
-            SELECT (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes, partition
+            SELECT partition, (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
             FROM reportdata
             WHERE partition != 'jhub'
         """, con)
