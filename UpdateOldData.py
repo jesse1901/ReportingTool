@@ -181,10 +181,10 @@ class GetStats:
                     SELECT jobID FROM reportdata
         """)
         jobs = cur.fetchall()
+        count = 1
         # Process each job
         for job_id in jobs:
             #try:
-            count = 1
             stats = GetStats()
             stats.job_stats(job_id[0])
             data_dict = stats.to_dict()
