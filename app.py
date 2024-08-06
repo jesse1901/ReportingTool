@@ -245,10 +245,9 @@ class CreateFigures:
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
-        SELECT
-            (julianday(end) - julianday(start)) * 24 * 60, partition AS runtime_minutes
+            SELECT (julianday(end) - julianday(start)) * 24 * 60, partition AS runtime_minutes
             WHERE partition != 'jhub'
-        FROM reportdata;
+            FROM reportdata
         """, con)
         max_runtime = df['runtime_minutes'].max()
         bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
