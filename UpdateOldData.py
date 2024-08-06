@@ -229,7 +229,7 @@ class GetStats:
                             data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
                             data['total_cpu_time_booked'], data['partition']
                         ))
-                        #print(f"lost gpu time: {data['job_id']}")
+                        print(f"inserted Job: {data['job_id']}")
                         #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
                         cur.connection.commit()
                 except Exception as e:
