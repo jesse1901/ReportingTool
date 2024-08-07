@@ -549,8 +549,6 @@ class CreateFigures:
 
 
 def main():
-    con = sqlite3.connect('reports.db')
-    create = CreateFigures(con)
     # Tabs erstellen
     tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
 
@@ -596,22 +594,24 @@ def main():
  #   return keycloak
 
 if __name__ == "__main__":
-#    st.set_page_config(layout="wide")
-#     st.title("Streamlit Keycloak example")
-#     st_autorefresh(interval=600000)
-#
-#     key = login(
-#         url="https://keycloak.desy.de/auth",
-#         realm="testing",
-#         client_id="maxwell-reporting-oidc",
-#         init_options={
-#             "pkceMethod": "S256",
-#             "checkLoginIframe": False
-#         }
-#     )
-#     print(key)
-#     if key.authenticated:
-#         st.write('Authenticated')
+    #    st.set_page_config(layout="wide")
+    #     st.title("Streamlit Keycloak example")
+    #     st_autorefresh(interval=600000)
+    #
+    #     key = login(
+    #         url="https://keycloak.desy.de/auth",
+    #         realm="testing",
+    #         client_id="maxwell-reporting-oidc",
+    #         init_options={
+    #             "pkceMethod": "S256",
+    #             "checkLoginIframe": False
+    #         }
+    #     )
+    #     print(key)
+    #     if key.authenticated:
+    #         st.write('Authenticated')
+    con = sqlite3.connect('reports.db')
+    create = CreateFigures(con)
     main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
