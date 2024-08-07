@@ -606,9 +606,9 @@ def perform_login():
     return keycloak
 
 if __name__ == "__main__":
-    st.set_page_config(layout="wide")
+#    st.set_page_config(layout="wide")
     st.title("Streamlit Keycloak example")
-    st_autorefresh(interval=600000)
+#    st_autorefresh(interval=600000)
 
     keycloak = perform_login()
     if keycloak.authenticated:
