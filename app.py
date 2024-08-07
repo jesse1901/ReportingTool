@@ -610,7 +610,7 @@ if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
     st_autorefresh(interval=600000)
 
-    perform_login()
+    keycloak = perform_login()
     if keycloak.authenticated:
         st.write(keycloak)
         main()
