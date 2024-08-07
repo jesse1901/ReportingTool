@@ -603,7 +603,7 @@ if __name__ == "__main__":
 #    st_autorefresh(interval=600000)
 
     key = login(
-        url="https://keycloak.desy.de/auth",
+        url="https://keycloak.desy.de",
         realm="testing",
         client_id="maxwell-reporting-oidc",
         init_options={
