@@ -594,8 +594,8 @@ def main():
             create.scatter_chart_data_cpu_gpu_eff()
 
 if __name__ == "__main__":
-    st.title("Streamlit Keycloak example")
     st.set_page_config(layout="wide")
+    st.title("Streamlit Keycloak example")
 
     keycloak = login(
         url="https://keycloak.desy.de/auth",
