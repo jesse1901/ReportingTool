@@ -593,6 +593,8 @@ def main():
 
 if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
+    st.set_page_config(layout="wide")
+
     keycloak = login(
         url="https://keycloak.desy.de/auth",
         realm="testing",
@@ -603,7 +605,6 @@ if __name__ == "__main__":
         }
     )
     if keycloak.authenticated:
-        st.set_page_config(layout="wide")
         st_autorefresh(interval=600000)
         con = sqlite3.connect('reports.db')
         create = CreateFigures(con)
