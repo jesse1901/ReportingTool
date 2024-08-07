@@ -612,7 +612,7 @@ if __name__ == "__main__":
     )
     print(keycloak)
     if keycloak.authenticated:
-        st.write(asdict(keycloak))
+        st.write('Authenticated')
 
         #create.scatter_chart_data_cpu_gpu_eff()
 
