@@ -608,6 +608,7 @@ if __name__ == "__main__":
         client_id="maxwell-reporting-oidc",
         init_options={
             "pkceMethod": "S256",
+            "checkLoginIframe": False
         }
     )
     print(keycloak)
