@@ -602,7 +602,7 @@ if __name__ == "__main__":
     st.title("Streamlit Keycloak example")
 #    st_autorefresh(interval=600000)
 
-    keycloak = login(
+    key = login(
         url="https://keycloak.desy.de/auth",
         realm="testing",
         client_id="maxwell-reporting-oidc",
@@ -611,8 +611,8 @@ if __name__ == "__main__":
             "checkLoginIframe": False
         }
     )
-    print(keycloak)
-    if keycloak.authenticated:
+    print(key)
+    if key.authenticated:
         st.write('Authenticated')
 
         #create.scatter_chart_data_cpu_gpu_eff()
