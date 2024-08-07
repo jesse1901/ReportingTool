@@ -593,7 +593,15 @@ def main():
         with col10:
             create.scatter_chart_data_cpu_gpu_eff()
 
-def perform_login():
+#def perform_login():
+
+ #   return keycloak
+
+if __name__ == "__main__":
+#    st.set_page_config(layout="wide")
+    st.title("Streamlit Keycloak example")
+#    st_autorefresh(interval=600000)
+
     keycloak = login(
         url="https://keycloak.desy.de/auth",
         realm="testing",
@@ -603,14 +611,6 @@ def perform_login():
             "checkLoginIframe": False,
         }
     )
-    return keycloak
-
-if __name__ == "__main__":
-#    st.set_page_config(layout="wide")
-    st.title("Streamlit Keycloak example")
-#    st_autorefresh(interval=600000)
-
-    keycloak = perform_login()
     print(keycloak)
     if keycloak.authenticated:
         st.write(asdict(keycloak))
