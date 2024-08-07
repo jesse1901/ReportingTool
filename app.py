@@ -597,21 +597,22 @@ def main():
 
 if __name__ == "__main__":
 #    st.set_page_config(layout="wide")
-    st.title("Streamlit Keycloak example")
-#    st_autorefresh(interval=600000)
-
-    key = login(
-        url="https://keycloak.desy.de/auth",
-        realm="testing",
-        client_id="maxwell-reporting-oidc",
-        init_options={
-            "pkceMethod": "S256",
-            "checkLoginIframe": False
-        }
-    )
-    print(key)
-    if key.authenticated:
-        st.write('Authenticated')
+#     st.title("Streamlit Keycloak example")
+#     st_autorefresh(interval=600000)
+#
+#     key = login(
+#         url="https://keycloak.desy.de/auth",
+#         realm="testing",
+#         client_id="maxwell-reporting-oidc",
+#         init_options={
+#             "pkceMethod": "S256",
+#             "checkLoginIframe": False
+#         }
+#     )
+#     print(key)
+#     if key.authenticated:
+#         st.write('Authenticated')
+    main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
 
