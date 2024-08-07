@@ -611,6 +611,7 @@ if __name__ == "__main__":
 #    st_autorefresh(interval=600000)
 
     keycloak = perform_login()
+    print(keycloak)
     if keycloak.authenticated:
         st.write(asdict(keycloak))
 
