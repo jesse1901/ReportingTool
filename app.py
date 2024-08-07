@@ -606,8 +606,8 @@ if __name__ == "__main__":
             "checkLoginIframe": False,
         }
     )
+    st_autorefresh(interval=600000)
     if keycloak.authenticated:
-        st_autorefresh(interval=600000)
         st.write(keycloak)
         main()
 
