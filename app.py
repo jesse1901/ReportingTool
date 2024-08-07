@@ -608,6 +608,7 @@ if __name__ == "__main__":
     )
     if keycloak.authenticated:
         st_autorefresh(interval=600000)
+        st.write(keycloak)
         main()
 
         #create.scatter_chart_data_cpu_gpu_eff()
