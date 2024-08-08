@@ -302,7 +302,7 @@ class CreateFigures:
         """, con)
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df.apply(
-            lambda row: 'Jupyter Hub' if row['partition'] == 'jhub'
+            lambda row: 'Jupyterhub' if row['partition'] == 'jhub'
             else 'Interactive' if row['job_name'] and row['job_name'].lower() == 'interactive'
             else 'Batch' if row['job_name'] and row['job_name'].lower() != ''
             else 'None',
