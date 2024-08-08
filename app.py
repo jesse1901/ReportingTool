@@ -20,7 +20,8 @@ color_map = {
     'COMPLETED': '#17becf ',    # Light Sky Blue
     'TIMEOUT': '#d62728 ',     # red
     'FAILED': '#e377c2',      # Pink
-    'PREEMPTED': '#2ca02c'     # Light Green
+    'PREEMPTED': '#2ca02c',     # Light Green
+    'NODE_FAIL': '#fcf76a'
 }
 
 
