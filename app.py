@@ -206,20 +206,12 @@ class CreateFigures:
 
         scale_efficiency = st.checkbox("Hyperthreading Aus")
 
-        # Manage the button state using Streamlit session state
-        if 'scale_efficiency' not in st.session_state:
-            st.session_state.scale_efficiency = False
-
-        # Update session state based on button click
-        if st.session_state.scale_efficiency:
-            st.session_state.scale_efficiency = not st.session_state.scale_efficiency
-
-        if st.session_state.scale_efficiency:
+        if scale_efficiency:
             # Filter out jobs with over 50% efficiency that have lost CPU time
             df['total_job_time'] = df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100)
             df['cpu_efficiency'] = df.apply(
                 lambda row: min(row['avg_cpu_efficiency'] * 2, 100) if row['avg_cpu_efficiency'] <= 100 else row[
-                    'cpu_efficiency'], axis=1)
+                    'avg_cpu_efficiency'], axis=1)
             df['total_lost_cpu_time'] = df['total_job_time'] / df['cpu_efficiency']
 
         # Define constant tick values for the y-axis (vertical chart)
