@@ -206,13 +206,13 @@ class CreateFigures:
         scale_efficiency = st.checkbox("Hyperthreading Aus")
 
         # Manage the button state using Streamlit session state
-        #if 'scale_efficiency' not in st.session_state:
-        #    st.session_state.scale_efficiency = False
+        if 'scale_efficiency' not in st.session_state:
+            st.session_state.scale_efficiency = False
 
 
         # Update session state based on button click
-       # if scale_efficiency:
-       #     st.session_state.scale_efficiency = not st.session_state.scale_efficiency
+        if scale_efficiency:
+            st.session_state.scale_efficiency = not st.session_state.scale_efficiency
 
         if scale_efficiency:
             # Filter out jobs with over 50% efficiency that have lost CPU time
