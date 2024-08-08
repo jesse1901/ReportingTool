@@ -191,7 +191,7 @@ class CreateFigures:
                            COUNT(jobID) AS anzahl_jobs, 
                            SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
-                           partition
+                           partition,
                         FROM reportdata
                         WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub'  AND gpu_efficiency IS NULL
                         GROUP BY username
@@ -210,14 +210,17 @@ class CreateFigures:
         if 'scale_efficiency' not in st.session_state:
             st.session_state.scale_efficiency = False
 
-
         # Update session state based on button click
         if st.session_state.scale_efficiency:
             st.session_state.scale_efficiency = not st.session_state.scale_efficiency
 
         if st.session_state.scale_efficiency:
             # Filter out jobs with over 50% efficiency that have lost CPU time
-            df = df[df.apply(lambda row: row['avg_cpu_efficiency'] <= 50 or row['total_lost_cpu_time'] == 0, axis=1)]
+            df['total_job_time'] = df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100)
+            df['cpu_efficiency'] = df.apply(
+                lambda row: min(row['avg_cpu_efficiency'] * 2, 100) if row['avg_cpu_efficiency'] <= 100 else row[
+                    'cpu_efficiency'], axis=1)
+            df['total_lost_cpu_time'] = df['total_job_time'] / df['cpu_efficiency']
 
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
