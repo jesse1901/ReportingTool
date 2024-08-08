@@ -3,10 +3,18 @@ import pyslurm
 import pandas as pd
 import time
 from datetime import timedelta, datetime
+<<<<<<< HEAD
 import requests
 import hostlist
 import gpu_node_data
 import faulthandler
+=======
+import sqlite3
+import requests
+import hostlist
+import gpu_node_data
+
+>>>>>>> bc66df2 (fix query)
 
 faulthandler.enable()
 def timestring_to_seconds(timestring):
