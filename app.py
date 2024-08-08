@@ -209,13 +209,19 @@ class CreateFigures:
 
         scale_efficiency = st.checkbox("Hyperthreading Aus")
 
-        if scale_efficiency:
-            # Filter out jobs with over 50% efficiency that have lost CPU time
-            df['total_job_time'] = df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100)
-            df['cpu_efficiency'] = df.apply(
-                lambda row: min(row['avg_cpu_efficiency'] * 2, 100) if row['avg_cpu_efficiency'] <= 100 else row[
-                    'avg_cpu_efficiency'], axis=1)
-            df['total_lost_cpu_time'] = df['total_job_time'] / df['cpu_efficiency']
+        df['total_job_time'] = np.where(df['avg_cpu_efficiency'] != 100,
+                                        df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100),
+                                        np.nan)
+        df['cpu_efficiency'] = df.apply(
+            lambda row: min(row['avg_cpu_efficiency'] * 2, 100) if row['avg_cpu_efficiency'] <= 100 else row[
+                'avg_cpu_efficiency'], axis=1)
+
+        # Handle NaN in cpu_efficiency and total_job_time
+        df['cpu_efficiency'] = df['cpu_efficiency'].fillna(0)
+        df['total_lost_cpu_time'] = np.where(df['cpu_efficiency'] != 0,
+                                             df['total_job_time'] / df['cpu_efficiency'],
+                                             np.nan)
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].fillna(0)
 
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
