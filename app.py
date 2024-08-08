@@ -183,6 +183,7 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
+
         df = pd.read_sql_query(f"""
                         SELECT username, 
                            AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
@@ -211,10 +212,10 @@ class CreateFigures:
 
 
         # Update session state based on button click
-        if scale_efficiency:
+        if st.session_state.scale_efficiency:
             st.session_state.scale_efficiency = not st.session_state.scale_efficiency
 
-        if scale_efficiency:
+        if st.session_state.scale_efficiency:
             # Filter out jobs with over 50% efficiency that have lost CPU time
             df = df[df.apply(lambda row: row['avg_cpu_efficiency'] <= 50 or row['total_lost_cpu_time'] == 0, axis=1)]
 
