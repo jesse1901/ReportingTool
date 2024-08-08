@@ -7,10 +7,6 @@ import numpy as np
 import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
-import requests
-import hostlist
-import gpu_node_data
-import json
 from streamlit_autorefresh import st_autorefresh
 from streamlit_keycloak import login
 from dataclasses import asdict
@@ -596,10 +592,10 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide")
     con = sqlite3.connect('reports.db')
     create = CreateFigures(con)
+    st_autorefresh(interval=600000)
     main()
 
     #     st.title("Streamlit Keycloak example")
-    #     st_autorefresh(interval=600000)
     #
     #     key = login(
     #         url="https://keycloak.desy.de/auth",

@@ -1,0 +1,9 @@
+pyslurm==23.11.0
+streamlit==1.37.1
+pandas==2.2.2
+numpy==2.0.0
+plotly==5.22.0
+requests==2.28.2
+hostlist==1.0.6
+streamlit-autorefresh==1.0.1
+requests==2.32.3
