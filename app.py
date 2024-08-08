@@ -35,7 +35,7 @@ def timestring_to_seconds(timestring):
     # Ensure timestring is in string format
     timestring = str(timestring).strip()
 
-    # Split by 'T' to separate days from time
+    # Split by "T" to separate days from time
     if 'T' in timestring:
         days_part, time_part = timestring.split('T')
     else:
@@ -103,7 +103,6 @@ def format_interval_label(interval):
     min_time_str = format_time(min_time)
     max_time_str = format_time(max_time)
     return f"{min_time_str} - {max_time_str}"
-
 
 
 class CreateFigures:
@@ -242,6 +241,7 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
+
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
@@ -296,14 +296,15 @@ class CreateFigures:
                      title='Total CPU Time by Job Runtime Interval')
 
         st.plotly_chart(fig)
+
     def pie_chart_batch_inter(self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
-            SELECT lost_cpu_time_sec, job_name, partition FROM reportdata
+            SELECT lost_cpu_time_sec, job_name, partition FROM reportdata WHERE partition != 'jhub'
         """, con)
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df.apply(
-            lambda row: 'Jupyterhub' if row['partition'] == 'jhub'
+            lambda row: 'Jupyterhub' if row['job_name'] == 'spawner-jupyterhub'
             else 'Interactive' if row['job_name'] and row['job_name'].lower() == 'interactive'
             else 'Batch' if row['job_name'] and row['job_name'].lower() != ''
             else 'None',
@@ -444,6 +445,7 @@ class CreateFigures:
         )
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
+
     def pie_chart_by_job_count(self):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
@@ -468,7 +470,7 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def efficiency_percentile_chart4(self):
+    def efficiency_percentile_chart(self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
@@ -579,7 +581,7 @@ def main():
         with col7:
             create.pie_chart_by_job_count()
         with col8:
-            create.efficiency_percentile_chart4()
+            create.efficiency_percentile_chart()
             # create.chart_cpu_utilization()
 
     with tab4:
@@ -590,12 +592,12 @@ def main():
         with col10:
             create.scatter_chart_data_cpu_gpu_eff()
 
-#def perform_login():
-
- #   return keycloak
-
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
+    con = sqlite3.connect('reports.db')
+    create = CreateFigures(con)
+    main()
+
     #     st.title("Streamlit Keycloak example")
     #     st_autorefresh(interval=600000)
     #
@@ -611,11 +613,6 @@ if __name__ == "__main__":
     #     print(key)
     #     if key.authenticated:
     #         st.write('Authenticated')
-    con = sqlite3.connect('reports.db')
-    create = CreateFigures(con)
-    main()
 
-        #create.scatter_chart_data_cpu_gpu_eff()
 
-# create.scatter_chart_data_color_lost_cpu()
 
