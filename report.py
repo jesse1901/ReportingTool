@@ -332,6 +332,7 @@ class GetStats:
     #        print(f"gpu-usage: {response.json()['gpu_usage']}")
     #        self.gpu_eff = response.json()['gpu_usage']
 
+
     def to_dict(self) -> dict:
         """
         Converts job statistics to a dictionary format
