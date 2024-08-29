@@ -109,6 +109,8 @@ class GetStats:
         self.intervall = ''
         self.nodelist = []
         self.all_nodes = []
+        self.lost_cpu_time_s = None
+
 
     def job_stats(self, job_id: int) -> None:
         """
@@ -124,6 +126,10 @@ class GetStats:
             self.job_cpu = {}
             self.job_all = {}
             return
+        try:
+            self.lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
+        except ValueError:
+            print("error slurm utils")
 
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
@@ -337,11 +343,7 @@ class GetStats:
         """
         Converts job statistics to a dictionary format
         """
-        lost_cpu_time_s = None
-        try:
-            lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
-        except ValueError:
-            print("error slurm utils")
+
         return {
             "job_id": self.job_id,
             "user": self.job_data.user_name,
