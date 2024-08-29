@@ -343,7 +343,6 @@ class GetStats:
         """
         Converts job statistics to a dictionary format
         """
-
         return {
             "job_id": self.job_id,
             "user": self.job_data.user_name,
