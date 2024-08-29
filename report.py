@@ -336,13 +336,18 @@ class GetStats:
         """
         Converts job statistics to a dictionary format
         """
+        lost_cpu_time_s = None
+        try:
+            lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
+        except ValueError:
+            print("error slurm utils")
         return {
             "job_id": self.job_id,
             "user": self.job_data.user_name,
             "account": self.job_data.account,
             "efficiency": self.job_eff,
             "lost_cpu_time": self.lost_cpu_time,
-            "lost_cpu_time_sec": timestring_to_seconds(self.lost_cpu_time),
+            "lost_cpu_time_sec": lost_cpu_time_s,
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
             "lost_gpu_time_sec": self.lost_gpu_time_sec,
