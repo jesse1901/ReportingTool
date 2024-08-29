@@ -350,7 +350,7 @@ class GetStats:
             "account": self.job_data.account,
             "efficiency": self.job_eff,
             "lost_cpu_time": self.lost_cpu_time,
-            "lost_cpu_time_sec": lost_cpu_time_s,
+            "lost_cpu_time_sec": self.lost_cpu_time_s,
             "gpu_efficiency": self.gpu_eff * 100 if self.gpu_eff else None,
             "lost_gpu_time": self.lost_gpu_time,
             "lost_gpu_time_sec": self.lost_gpu_time_sec,
