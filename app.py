@@ -129,11 +129,10 @@ class CreateFigures:
         #         sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
 
             # Zeige die SQL-Abfrage in Streamlit an
-        sql_query = "SELECT * FROM reportdata"
+        sql_query = "SELECT * FROM reportdata LIMIT 10000"
         df = pd.read_sql_query(sql_query, self.con)
         config = config_from_dataframe(df)
-        query_string = condition_tree(config)
-
+        query_string = condition_tree(config, return_type="sql")
         df = df.query(query_string)
         st.dataframe(df)
     def frame_group_by_user(self) -> None:
