@@ -133,7 +133,7 @@ class CreateFigures:
         df = pd.read_sql_query(sql_query, self.con)
         config = config_from_dataframe(df)
         query_string = condition_tree(config, return_type="sql")
-        df = pd.read_sql_query(query_string)
+        df = pd.read_sql_query(query_string, self.con)
         st.dataframe(df)
     def frame_group_by_user(self) -> None:
         """
