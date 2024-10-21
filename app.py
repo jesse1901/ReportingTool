@@ -146,7 +146,7 @@ class CreateFigures:
 
             # Construct the final SQL query
             if query_string:
-                final_query = f"SELECT {selected_columns_str} FROM reportdata {query_string}"
+                final_query = f"SELECT {selected_columns_str} FROM reportdata WHERE {query_string}"
             else:
                 final_query = f"SELECT {selected_columns_str} FROM reportdata"
 
