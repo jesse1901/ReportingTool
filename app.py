@@ -130,12 +130,7 @@ class CreateFigures:
             # Zeige die SQL-Abfrage in Streamlit an
             st.write("Die erstellte SQL-Abfrage lautet:")
             df = pd.read_sql_query(sql_query, self.con)
-        # df = pd.read_sql_query("""
-        #     SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time,
-        #     lost_gpu_time_sec, real_time, job_cpu_time, real_time_sec, state, cores, gpu_nodes, start, end, job_name, partition
-        #     FROM reportdata
-        #     """, self.con)
-        st.write(df)
+            st.write(df)
 
     def frame_group_by_user(self) -> None:
         """
