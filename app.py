@@ -8,6 +8,7 @@ import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
+from streamlit_condition_tree import condition_tree, config_from_dataframe
 from streamlit_keycloak import login
 from dataclasses import asdict
 
@@ -128,10 +129,13 @@ class CreateFigures:
                 sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
 
             # Zeige die SQL-Abfrage in Streamlit an
-            st.write("Die erstellte SQL-Abfrage lautet:")
+            sql_query = "SELECT * FROM reportdata"
             df = pd.read_sql_query(sql_query, self.con)
-            st.write(df)
+            config = config_from_dataframe(df)
+            query_string = condition_tree(config)
 
+            df = pd.read_sql_query(query_string, self.con)
+            st.dataframe(df)
     def frame_group_by_user(self) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
