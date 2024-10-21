@@ -134,7 +134,7 @@ class CreateFigures:
                 selected_columns_str = "*"
 
             # Fetch all data to create the config for the condition tree
-            sql_query = "SELECT * FROM reportdata"
+            sql_query = "SELECT * FROM reportdata LIMIT 1000"
             df = pd.read_sql_query(sql_query, self.con)
 
             # Generate configuration from the DataFrame
