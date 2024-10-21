@@ -128,7 +128,7 @@ class CreateFigures:
             else:
                 sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
 
-        df = pd.read_sql_query(sql_query, self.con)
+            df = pd.read_sql_query(sql_query, self.con)
 
         config = config_from_dataframe(df)
         query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
