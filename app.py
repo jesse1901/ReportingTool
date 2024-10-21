@@ -123,17 +123,16 @@ class CreateFigures:
         ]
 
         # Multi-select for column selection
-        selected_columns = st.multiselect('Select Data', sql_select)
+        selected_columns = st.multiselect('SELECT', sql_select)
         # Generate configuration from the DataFrame
         config = get_config()
 
         # Create the condition tree and generate the SQL WHERE clause
-        st.write("WHERE CLAUSE")
+        st.write("WHERE")
         query_string = condition_tree(
             config=config,
             return_type="sql",
             min_height=200,
-            placeholder="WHERE",
             always_show_buttons=True,
             key="my_unique_query_builder")
 
