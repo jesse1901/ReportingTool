@@ -124,6 +124,11 @@ class CreateFigures:
 
         # Multi-select for column selection
         selected_columns = st.multiselect('Select Data', sql_select)
+        # Generate configuration from the DataFrame
+        config = get_config()
+
+        # Create the condition tree and generate the SQL WHERE clause
+        query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
 
         # Use the condition tree for the WHERE clause
         if st.button("Abfrage ausführen"):
@@ -134,11 +139,7 @@ class CreateFigures:
                 st.warning("No columns selected; displaying all columns.")
                 selected_columns_str = "*"
 
-            # Generate configuration from the DataFrame
-            config = get_config()
 
-            # Create the condition tree and generate the SQL WHERE clause
-            query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
 
             # Construct the final SQL query
             if query_string:
