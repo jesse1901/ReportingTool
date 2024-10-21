@@ -1,13 +1,14 @@
+import sqlite3
 import pyslurm
 import pandas as pd
 import time
 from datetime import timedelta, datetime
-import sqlite3
 import requests
 import hostlist
 import gpu_node_data
+import faulthandler
 
-
+faulthandler.enable()
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0:
         return 0
