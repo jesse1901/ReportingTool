@@ -113,14 +113,9 @@ class CreateFigures:
         st.write('All Data')
         sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
             "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
-        select = st.multiselect('Select Data', sql_select, key=sql_select)
+        select = st.multiselect('Select Data', sql_select)
 
-        sql_where = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec",
-                        "gpu_efficiency", "lost_gpu_time",
-                        "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
-                        "gpu_nodes", "start", "end", "job_name", "partition"]
-        select = st.multiselect('Select Data', sql_where, key=sql_where)
-        sql_where_condition = st.text_input
+        sql_where_condition = st.text_input("WHERE", value="WHERE")
         df = pd.read_sql_query(f'SELECT {sql_select} FROM reportdata WHERE {sql_where_condition}', self.con)
         # df = pd.read_sql_query("""
         #     SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time,
