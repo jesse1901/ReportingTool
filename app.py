@@ -132,7 +132,7 @@ class CreateFigures:
         query_string = condition_tree(
             config=config,
             return_type="sql",
-            min_height=200,
+            min_height=250,
             always_show_buttons=True,
             key="my_unique_query_builder")
 
