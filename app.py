@@ -134,15 +134,15 @@ class CreateFigures:
             query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
             st.write("Generated Query String:", query_string)
 
-        if query_string:
-            try:
-                df_filtered = pd.read_sql_query(query_string, self.con)
-                st.dataframe(df_filtered)
-            except ValueError as e:
-                st.error(f"Query failed: {e}")
-        else:
-            st.warning("No filters applied; displaying all data.")
-            st.dataframe(df)  # Show original DataFrame if no filters
+            if query_string:
+                try:
+                    df_filtered = pd.read_sql_query(query_string, self.con)
+                    st.dataframe(df_filtered)
+                except ValueError as e:
+                    st.error(f"Query failed: {e}")
+            else:
+                st.warning("No filters applied; displaying all data.")
+                st.dataframe(df)  # Show original DataFrame if no filters
 
     def frame_group_by_user(self) -> None:
         """
