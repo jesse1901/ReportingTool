@@ -130,9 +130,9 @@ class CreateFigures:
 
             df = pd.read_sql_query(sql_query, self.con)
 
-        config = config_from_dataframe(df)
-        query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
-        st.write("Generated Query String:", query_string)
+            config = config_from_dataframe(df)
+            query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
+            st.write("Generated Query String:", query_string)
 
         if query_string:
             try:
