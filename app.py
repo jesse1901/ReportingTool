@@ -130,10 +130,12 @@ class CreateFigures:
         # Create the condition tree and generate the SQL WHERE clause
         st.write("WHERE CLAUSE")
         query_string = condition_tree(
-        config=config,
-        return_type="sql",
-        always_show_buttons=True,
-        key="my_unique_query_builder")
+            config=config,
+            return_type="sql",
+            min_height=200,
+            placeholder="WHERE",
+            always_show_buttons=True,
+            key="my_unique_query_builder")
 
         # Use the condition tree for the WHERE clause
         if st.button("Abfrage ausführen"):
