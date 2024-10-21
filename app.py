@@ -131,10 +131,29 @@ class CreateFigures:
             # Zeige die SQL-Abfrage in Streamlit an
         sql_query = "SELECT * FROM reportdata LIMIT 10000"
         df = pd.read_sql_query(sql_query, self.con)
-        config = config_from_dataframe(df)
-        query_string = condition_tree(config, return_type="sql")
-        df = pd.read_sql_query(query_string, self.con)
-        st.dataframe(df)
+
+        if df.empty:
+            st.warning("No data found in reportdata.")
+        else:
+            st.success("Data loaded successfully!")
+            st.dataframe(df)  # Display the DataFrame
+
+            config = config_from_dataframe(df)
+            st.write("Configuration from DataFrame:", config)
+
+            query_string = condition_tree(config, return_type="sql")
+            st.write("Generated Query String:", query_string)
+
+            if query_string:
+                try:
+                    df_filtered = df.query(query_string)
+                    st.dataframe(df_filtered)
+                except ValueError as e:
+                    st.error(f"Query failed: {e}")
+            else:
+                st.warning("No filters applied; displaying all data.")
+                st.dataframe(df)  # Show original DataFrame if no filters
+
     def frame_group_by_user(self) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
