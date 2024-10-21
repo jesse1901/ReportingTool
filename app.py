@@ -115,8 +115,21 @@ class CreateFigures:
             "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
         select = st.multiselect('Select Data', sql_select)
 
-        sql_where_condition = st.text_input("WHERE", value="WHERE")
-        df = pd.read_sql_query(f'SELECT {sql_select} FROM reportdata WHERE {sql_where_condition}', self.con)
+        sql_where_condition = st.text_input(value="WHERE")
+
+        if st.button("Abfrage ausführen"):
+            # Erstelle die SQL-Abfrage
+            selected_columns_str = ", ".join(sql_select)
+
+            # Stelle sicher, dass die WHERE-Klausel gültig ist
+            if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
+                sql_query = f'SELECT {selected_columns_str} FROM reportdata'
+            else:
+                sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
+
+            # Zeige die SQL-Abfrage in Streamlit an
+            st.write("Die erstellte SQL-Abfrage lautet:")
+            pd.read_sql_query(sql_query, self.con)
         # df = pd.read_sql_query("""
         #     SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time,
         #     lost_gpu_time_sec, real_time, job_cpu_time, real_time_sec, state, cores, gpu_nodes, start, end, job_name, partition
