@@ -111,28 +111,24 @@ class CreateFigures:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
-        # st.write('All Data')
-        # sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
-        #     "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
-        # select = st.multiselect('Select Data', sql_select)
-        #
-        # sql_where_condition = st.text_input("WHERE", value="WHERE")
-        #
-        # if st.button("Abfrage ausführen"):
-        #     # Erstelle die SQL-Abfrage
-        #     selected_columns_str = ", ".join(sql_select)
-        #
-        #     # Stelle sicher, dass die WHERE-Klausel gültig ist
-        #     if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
-        #         sql_query = f'SELECT {selected_columns_str} FROM reportdata'
-        #     else:
-        #         sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
+        st.write('All Data')
+        sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
+            "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
+        select = st.multiselect('Select Data', sql_select)
 
-            # Zeige die SQL-Abfrage in Streamlit an
-        sql_query = "SELECT * FROM reportdata LIMIT 10000"
+        sql_where_condition = st.text_input("WHERE", value="WHERE")
+
+        if st.button("Abfrage ausführen"):
+            #Erstelle die SQL-Abfrage
+            selected_columns_str = ", ".join(sql_select)
+
+            # Stelle sicher, dass die WHERE-Klausel gültig ist
+            if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
+                sql_query = f'SELECT {selected_columns_str} FROM reportdata'
+            else:
+                sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
+
         df = pd.read_sql_query(sql_query, self.con)
-
-        st.dataframe(df)  # Display the DataFrame
 
         config = config_from_dataframe(df)
         query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
