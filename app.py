@@ -128,7 +128,7 @@ class CreateFigures:
         config = get_config()
 
         # Create the condition tree and generate the SQL WHERE clause
-        query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
+        query_string = condition_tree(config, return_type="sql")
 
         # Use the condition tree for the WHERE clause
         if st.button("Abfrage ausführen"):

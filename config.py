@@ -1,5 +1,5 @@
 def get_config():
-    config = {
+    return {
         "fields": {
             "jobID": {
                 "label": "Job ID",
