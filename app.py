@@ -139,8 +139,6 @@ class CreateFigures:
                 st.warning("No columns selected; displaying all columns.")
                 selected_columns_str = "*"
 
-
-
             # Construct the final SQL query
             if query_string:
                 final_query = f"SELECT {selected_columns_str} FROM reportdata {query_string}"

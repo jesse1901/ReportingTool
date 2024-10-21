@@ -1,56 +1,90 @@
 def get_config():
-    return {
+    config = {
         "fields": {
             "jobID": {
                 "label": "Job ID",
                 "type": "number",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "fieldSettings": {
+                    "min": 0
+                },
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "username": {
                 "label": "Username",
                 "type": "text",
-                "operators": ["=", "!="]
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "like", "not_like"]
             },
             "account": {
                 "label": "Account",
                 "type": "text",
-                "operators": ["=", "!="]
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "like", "not_like"]
             },
             "cpu_efficiency": {
                 "label": "CPU Efficiency",
                 "type": "number",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "fieldSettings": {
+                    "min": 0,
+                    "max": 100
+                },
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "lost_cpu_time_sec": {
                 "label": "Lost CPU Time (sec)",
                 "type": "number",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "fieldSettings": {
+                    "min": 0
+                },
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "gpu_efficiency": {
                 "label": "GPU Efficiency",
                 "type": "number",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "fieldSettings": {
+                    "min": 0,
+                    "max": 100
+                },
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "lost_gpu_time_sec": {
                 "label": "Lost GPU Time (sec)",
                 "type": "number",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "fieldSettings": {
+                    "min": 0
+                },
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "state": {
                 "label": "State",
-                "type": "text",
-                "operators": ["=", "!="]
+                "type": "select",
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal"],
+                "fieldSettings": {
+                    "listValues": [
+                        {"value": "running", "title": "Running"},
+                        {"value": "completed", "title": "Completed"},
+                        {"value": "failed", "title": "Failed"}
+                    ]
+                }
             },
             "start": {
                 "label": "Start Time",
                 "type": "datetime",
-                "operators": ["=", ">", "<", ">=", "<="]
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
             },
             "end": {
                 "label": "End Time",
                 "type": "datetime",
-                "operators": ["=", ">", "<", ">=", "<="]
-            },
-            # Add more fields here as needed
+                "valueSources": ["value"],
+                "operators": ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"]
+            }
         }
     }
+    return config
