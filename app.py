@@ -109,40 +109,93 @@ class CreateFigures:
 
     def frame_user_all(self) -> None:
         """
-        Displays all job data.py from the reportdata table in the Streamlit app.
+        Displays all job data from the reportdata table in the Streamlit app.
         """
         st.write('All Data')
-        sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
-            "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
-        select = st.multiselect('Select Data', sql_select)
 
-        sql_where_condition = st.text_input("WHERE", value="WHERE")
+        # List of available columns for selection
+        sql_select = [
+            "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
+            "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
+            "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
+            "gpu_nodes", "start", "end", "job_name", "partition"
+        ]
 
+        # Multi-select for column selection
+        selected_columns = st.multiselect('Select Data', sql_select)
+
+        # Use the condition tree for the WHERE clause
         if st.button("Abfrage ausführen"):
-            #Erstelle die SQL-Abfrage
-            selected_columns_str = ", ".join(sql_select)
-
-            # Stelle sicher, dass die WHERE-Klausel gültig ist
-            if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
-                sql_query = f'SELECT {selected_columns_str} FROM reportdata'
+            # Create the SQL SELECT part
+            if selected_columns:
+                selected_columns_str = ", ".join(selected_columns)
             else:
-                sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
+                st.warning("No columns selected; displaying all columns.")
+                selected_columns_str = "*"
 
+            # Fetch all data to create the config for the condition tree
+            sql_query = "SELECT * FROM reportdata"
             df = pd.read_sql_query(sql_query, self.con)
 
+            # Generate configuration from the DataFrame
             config = config_from_dataframe(df)
-            query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
-            st.write("Generated Query String:", query_string)
 
+            # Create the condition tree and generate the SQL WHERE clause
+            query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
+
+            # Construct the final SQL query
             if query_string:
-                try:
-                    df_filtered = pd.read_sql_query(query_string, self.con)
-                    st.dataframe(df_filtered)
-                except ValueError as e:
-                    st.error(f"Query failed: {e}")
+                final_query = f"SELECT {selected_columns_str} FROM reportdata {query_string}"
             else:
-                st.warning("No filters applied; displaying all data.")
-                st.dataframe(df)  # Show original DataFrame if no filters
+                final_query = f"SELECT {selected_columns_str} FROM reportdata"
+
+            # Execute the final SQL query
+            try:
+                df_filtered = pd.read_sql_query(final_query, self.con)
+                st.dataframe(df_filtered)
+            except ValueError as e:
+                st.error(f"Query failed: {e}")
+            except pd.io.sql.DatabaseError as db_err:
+                st.error(f"Database error occurred: {db_err}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
+
+    # def frame_user_all(self) -> None:
+    #     """
+    #     Displays all job data.py from the reportdata table in the Streamlit app.
+    #     """
+    #     st.write('All Data')
+    #     sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
+    #         "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
+    #     select = st.multiselect('Select Data', sql_select)
+    #
+    #     sql_where_condition = st.text_input("WHERE", value="WHERE")
+    #
+    #     if st.button("Abfrage ausführen"):
+    #         #Erstelle die SQL-Abfrage
+    #         selected_columns_str = ", ".join(sql_select)
+    #
+    #         # Stelle sicher, dass die WHERE-Klausel gültig ist
+    #         if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
+    #             sql_query = f'SELECT {selected_columns_str} FROM reportdata'
+    #         else:
+    #             sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
+    #
+    #         df = pd.read_sql_query(sql_query, self.con)
+    #
+    #         config = config_from_dataframe(df)
+    #         query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
+    #         st.write("Generated Query String:", query_string)
+    #
+    #         if query_string:
+    #             try:
+    #                 df_filtered = pd.read_sql_query(query_string, self.con)
+    #                 st.dataframe(df_filtered)
+    #             except ValueError as e:
+    #                 st.error(f"Query failed: {e}")
+    #         else:
+    #             st.warning("No filters applied; displaying all data.")
+    #             st.dataframe(df)  # Show original DataFrame if no filters
 
     def frame_group_by_user(self) -> None:
         """
