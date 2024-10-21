@@ -2,6 +2,7 @@ import pyslurm
 import streamlit as st
 import pandas as pd
 import time
+from config import get_config
 from datetime import timedelta, datetime
 import numpy as np
 import sqlite3
@@ -133,12 +134,8 @@ class CreateFigures:
                 st.warning("No columns selected; displaying all columns.")
                 selected_columns_str = "*"
 
-            # Fetch all data to create the config for the condition tree
-            sql_query = "SELECT * FROM reportdata LIMIT 1000"
-            df = pd.read_sql_query(sql_query, self.con)
-
             # Generate configuration from the DataFrame
-            config = config_from_dataframe(df)
+            config = get_config()
 
             # Create the condition tree and generate the SQL WHERE clause
             query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
