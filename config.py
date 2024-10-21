@@ -4,7 +4,7 @@ def get_config():
             "jobID": {
                 "label": "Job ID",
                 "type": "number",
-                "fieldSettings": {
+                "fieldSettings": {  
                     "min": 0
                 },
                 "valueSources": ["value"],

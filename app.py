@@ -114,7 +114,7 @@ class CreateFigures:
         """
         st.write('All Data')
 
-        # List of available columns for selection
+        # List of available columns for     selection
         sql_select = [
             "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
             "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
@@ -128,7 +128,12 @@ class CreateFigures:
         config = get_config()
 
         # Create the condition tree and generate the SQL WHERE clause
-        query_string = condition_tree(config, return_type="sql")
+        st.write("WHERE CLAUSE")
+        query_string = condition_tree(
+        config=config,
+        return_type="sql",
+        always_show_buttons=True,
+        key="my_unique_query_builder")
 
         # Use the condition tree for the WHERE clause
         if st.button("Abfrage ausführen"):
