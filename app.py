@@ -113,10 +113,7 @@ class CreateFigures:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
-        def frame_user_all(self) -> None:
-        """
-        Displays all job data from the reportdata table in the Streamlit app.
-        """
+        
         st.write('All Data')
 
         # List of available columns for     selection
