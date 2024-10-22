@@ -2,14 +2,12 @@ import pyslurm
 import streamlit as st
 import pandas as pd
 import time
-from config import get_config
 from datetime import timedelta, datetime
 import numpy as np
 import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
-from streamlit_condition_tree import condition_tree, config_from_dataframe
 from streamlit_keycloak import login
 from dataclasses import asdict
 
@@ -110,94 +108,15 @@ class CreateFigures:
 
     def frame_user_all(self) -> None:
         """
-        Displays all job data from the reportdata table in the Streamlit app.
+        Displays all job data.py from the reportdata table in the Streamlit app.
         """
         st.write('All Data')
-
-        # List of available columns for     selection
-        sql_select = [
-            "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
-            "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
-            "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
-            "gpu_nodes", "start", "end", "job_name", "partition"
-        ]
-
-        # Multi-select for column selection
-        selected_columns = st.multiselect('SELECT', sql_select)
-        # Generate configuration from the DataFrame
-        config = get_config()
-
-        # Create the condition tree and generate the SQL WHERE clause
-        st.write("WHERE")
-        query_string = condition_tree(
-            config=config,
-            return_type="sql",
-            min_height=250,
-            always_show_buttons=True,
-            key="my_unique_query_builder")
-
-        # Use the condition tree for the WHERE clause
-        if st.button("Abfrage ausführen"):
-            # Create the SQL SELECT part
-            if selected_columns:
-                selected_columns_str = ", ".join(selected_columns)
-            else:
-                st.warning("No columns selected; displaying all columns.")
-                selected_columns_str = "*"
-
-            # Construct the final SQL query
-            if query_string:
-                final_query = f"SELECT {selected_columns_str} FROM reportdata WHERE {query_string}"
-            else:
-                final_query = f"SELECT {selected_columns_str} FROM reportdata"
-
-            # Execute the final SQL query
-            try:
-                df_filtered = pd.read_sql_query(final_query, self.con)
-                st.dataframe(df_filtered)
-            except ValueError as e:
-                st.error(f"Query failed: {e}")
-            except pd.io.sql.DatabaseError as db_err:
-                st.error(f"Database error occurred: {db_err}")
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
-
-    # def frame_user_all(self) -> None:
-    #     """
-    #     Displays all job data.py from the reportdata table in the Streamlit app.
-    #     """
-    #     st.write('All Data')
-    #     sql_select = ["jobID", "username", "account", "cpu_efficiency", "lost_cpu_time", "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time",
-    #         "lost_gpu_time_sec", "real_time", "job_cpu_time", "real_time_sec", "state", "cores", "gpu_nodes", "start", "end", "job_name", "partition" ]
-    #     select = st.multiselect('Select Data', sql_select)
-    #
-    #     sql_where_condition = st.text_input("WHERE", value="WHERE")
-    #
-    #     if st.button("Abfrage ausführen"):
-    #         #Erstelle die SQL-Abfrage
-    #         selected_columns_str = ", ".join(sql_select)
-    #
-    #         # Stelle sicher, dass die WHERE-Klausel gültig ist
-    #         if sql_where_condition.strip() == "WHERE" or sql_where_condition.strip() == "":
-    #             sql_query = f'SELECT {selected_columns_str} FROM reportdata'
-    #         else:
-    #             sql_query = f'SELECT {selected_columns_str} FROM reportdata {sql_where_condition}'
-    #
-    #         df = pd.read_sql_query(sql_query, self.con)
-    #
-    #         config = config_from_dataframe(df)
-    #         query_string = condition_tree(config, return_type="sql", always_show_buttons=True)
-    #         st.write("Generated Query String:", query_string)
-    #
-    #         if query_string:
-    #             try:
-    #                 df_filtered = pd.read_sql_query(query_string, self.con)
-    #                 st.dataframe(df_filtered)
-    #             except ValueError as e:
-    #                 st.error(f"Query failed: {e}")
-    #         else:
-    #             st.warning("No filters applied; displaying all data.")
-    #             st.dataframe(df)  # Show original DataFrame if no filters
+        df = pd.read_sql_query("""
+            SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time, 
+            lost_gpu_time_sec, real_time, job_cpu_time, real_time_sec, state, cores, gpu_nodes, start, end, job_name, partition 
+            FROM reportdata
+            """, self.con)
+        st.write(df)
 
     def frame_group_by_user(self) -> None:
         """
@@ -261,7 +180,7 @@ class CreateFigures:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
 
-        query = ("""
+        df = pd.read_sql_query(f"""
                         SELECT username, 
                            AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
                            AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
@@ -270,12 +189,10 @@ class CreateFigures:
                            SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
                            partition
                         FROM reportdata
-                        WHERE start >= ? AND end <= ? AND partition != 'jhub'  AND gpu_efficiency IS NULL
+                        WHERE start >= ' {start_date} ' AND end <= ' {end_date} ' AND partition != 'jhub'  AND gpu_efficiency IS NULL
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
-        """)
-
-        df = pd.read_sql_query(query, con=con, params=(start_date, end_date))
+        """, con)
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
         df.fillna({'total_lost_cpu_time': 0, 'avg_cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
 
