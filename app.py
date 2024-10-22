@@ -2,14 +2,17 @@ import pyslurm
 import streamlit as st
 import pandas as pd
 import time
+from config import get_config
 from datetime import timedelta, datetime
 import numpy as np
 import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
+from streamlit_condition_tree import condition_tree, config_from_dataframe
 from streamlit_keycloak import login
 from dataclasses import asdict
+
 
 color_map = {
     'CANCELLED': '#1f77b4 ',    # Light Blue
@@ -110,13 +113,59 @@ class CreateFigures:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
+        def frame_user_all(self) -> None:
+        """
+        Displays all job data from the reportdata table in the Streamlit app.
+        """
         st.write('All Data')
-        df = pd.read_sql_query("""
-            SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, gpu_efficiency, lost_gpu_time, 
-            lost_gpu_time_sec, real_time, job_cpu_time, real_time_sec, state, cores, gpu_nodes, start, end, job_name, partition 
-            FROM reportdata
-            """, self.con)
-        st.write(df)
+
+        # List of available columns for     selection
+        sql_select = [
+            "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
+            "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
+            "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
+            "gpu_nodes", "start", "end", "job_name", "partition"
+        ]
+
+        # Multi-select for column selection
+        selected_columns = st.multiselect('SELECT', sql_select)
+        # Generate configuration from the DataFrame
+        config = get_config()
+
+        # Create the condition tree and generate the SQL WHERE clause
+        st.write("WHERE")
+        query_string = condition_tree(
+            config=config,
+            return_type="sql",
+            min_height=250,
+            always_show_buttons=True,
+            key="my_unique_query_builder")
+
+        # Use the condition tree for the WHERE clause
+        if st.button("Abfrage ausführen"):
+            # Create the SQL SELECT part
+            if selected_columns:
+                selected_columns_str = ", ".join(selected_columns)
+            else:
+                st.warning("No columns selected; displaying all columns.")
+                selected_columns_str = "*"
+
+            # Construct the final SQL query
+            if query_string:
+                final_query = f"SELECT {selected_columns_str} FROM reportdata WHERE {query_string}"
+            else:
+                final_query = f"SELECT {selected_columns_str} FROM reportdata"
+
+            # Execute the final SQL query
+            try:
+                df_filtered = pd.read_sql_query(final_query, self.con)
+                st.dataframe(df_filtered)
+            except ValueError as e:
+                st.error(f"Query failed: {e}")
+            except pd.io.sql.DatabaseError as db_err:
+                st.error(f"Database error occurred: {db_err}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
 
     def frame_group_by_user(self) -> None:
         """
