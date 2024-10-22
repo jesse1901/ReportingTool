@@ -273,7 +273,7 @@ class CreateFigures:
                         WHERE start >= ? AND end <= ? AND partition != 'jhub'  AND gpu_efficiency IS NULL
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
-        """, con)
+        """)
 
         df = pd.read_sql_query(query, con=con, params=(start_date, end_date))
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
