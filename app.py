@@ -354,6 +354,26 @@ class CreateFigures:
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
         st.write(df)
+        
+        max_lost_time = df['total_lost_cpu_time'].max()
+        tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
+        tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
+        fig = px.bar(df, x='username', y='total_lost_cpu_time')
+
+        # Update the y-axis to display formatted time with constant tick values
+        fig.update_layout(
+            xaxis=dict(
+                title='Username',
+                tickangle=-45  # Rotate x-axis labels if needed for better readability
+            ),
+            yaxis=dict(
+                title='Total Lost CPU Time',
+                tickmode='array',
+                tickvals=tick_vals,
+                ticktext=tick_text
+            )
+        )
+
 
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
