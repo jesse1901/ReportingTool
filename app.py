@@ -696,7 +696,7 @@ def main():
                 create.pie_chart_by_job_count()
             with col8:
                 create.efficiency_percentile_chart()
-                # create.chart_cpu_utilization()
+            # create.chart_cpu_utilization()
 
         with tab4:
             st.header("")
