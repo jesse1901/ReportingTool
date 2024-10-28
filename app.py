@@ -301,6 +301,9 @@ class CreateFigures:
         max_lost_time = df['total_lost_cpu_time'].max()
         tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
+        st.write("Dataframe head:", df.head())
+        st.write("Tick text:", tick_text)
+
 
         # Plot vertical bar chart using Plotly
         fig = px.bar(df, x='username', y='total_lost_cpu_time')
@@ -406,7 +409,6 @@ class CreateFigures:
             color='category',
             color_discrete_map=color_map
         )
-
         # Display the pie chart
         st.plotly_chart(fig)
 
