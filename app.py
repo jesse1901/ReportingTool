@@ -217,18 +217,18 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
-        df = pd.read_sql_query(f"""
-                        SELECT username, 
-                           AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
-                           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
-                           COUNT(jobID) AS anzahl_jobs, 
-                           SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
-                           partition
-                        FROM reportdata
-                        WHERE start >= '{start_date}' AND end <= '{end_date}' AND partition != 'jhub'
-                        GROUP BY username
-        """, con)
+        df = pd.read_sql_query("""
+                SELECT username, 
+                   AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
+                   AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                   COUNT(jobID) AS anzahl_jobs, 
+                   SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                   SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                   partition
+                FROM reportdata
+                WHERE start >= ? AND end <= ? AND partition != 'jhub'
+                GROUP BY username
+                """, con, params=(start_date, end_date))
 
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
         df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
