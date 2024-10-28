@@ -262,7 +262,7 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
-
+        st.write(start_date, end_date)
         df = pd.read_sql_query(f"""
                         SELECT username, 
                            AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
