@@ -262,7 +262,7 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
-        st.write(start_date, end_date)
+
         df = pd.read_sql_query(f"""
                         SELECT username, 
                            AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
@@ -276,6 +276,7 @@ class CreateFigures:
                         GROUP BY username
                         ORDER BY lost_cpu_time_sec DESC
         """, con)
+        st.write(df)
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
         df.fillna({'total_lost_cpu_time': 0, 'avg_cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
 
@@ -301,8 +302,6 @@ class CreateFigures:
         max_lost_time = df['total_lost_cpu_time'].max()
         tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
-        st.write("Dataframe head:", df.head())
-        st.write("Tick text:", tick_text)
 
 
         # Plot vertical bar chart using Plotly
