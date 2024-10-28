@@ -302,7 +302,9 @@ class CreateFigures:
         tick_vals = np.linspace(0, max_lost_time, num=10)
         tick_vals = [val for val in tick_vals if not np.isnan(val) and np.isfinite(val)]
 
-        tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
+        tick_text = [seconds_to_timestring(int(val)) if np.isfinite(val) else "Invalid" for val in tick_vals]
+
+        #tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
         # Plot vertical bar chart using Plotly
         fig = px.bar(df, x='username', y='total_lost_cpu_time')
