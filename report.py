@@ -6,8 +6,7 @@ from datetime import timedelta, datetime
 import requests
 import hostlist
 import gpu_node_data
-import faulthandler
-
+    
 def timestring_to_seconds(timestring):
     if pd.isna(timestring) or timestring == '0' or timestring == 0:
         return 0
@@ -393,7 +392,7 @@ if __name__ == "__main__":
                   end TEXT,
                   job_name TEXT,
                   total_cpu_time_booked TEXT,
-                  partiton TEXT
+                  partition TEXT
               )
               """)
 
