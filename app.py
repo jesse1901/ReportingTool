@@ -670,7 +670,7 @@ def main():
             st.header("")
             col9, col10 = st.columns(2)
             with col9:
-                create.bar_chart()
+                create.bar_char_by_user()
             with col10:
                 create.scatter_chart_data_cpu_gpu_eff()
     else:
