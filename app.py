@@ -322,58 +322,6 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
-    def bar_chart():
-        st.write('Total Lost CPU-Time per User')
-
-        start_date, end_date = st.date_input(
-            'Start Date und End Date',
-            [datetime.today() - timedelta(days=30), datetime.today()],
-        )
-        end_date += timedelta(days=1)
-
-        display_user = st.number_input(
-            'Anzahl User', value=20,
-        )
-
-        if start_date and end_date:
-            if start_date > end_date:
-                st.error("Error: End date must fall after start date.")
-                return  # Exit if there's an error
-            df = pd.read_sql_query("""
-                SELECT username, 
-                   AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
-                   AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
-                   COUNT(jobID) AS anzahl_jobs, 
-                   SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                   SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
-                   partition
-                FROM reportdata
-                WHERE start >= ? AND end <= ? AND partition != 'jhub'
-                GROUP BY username
-                """, con, params=(start_date, end_date))
-            st.write(df)
-        
-        max_lost_time = df['total_lost_cpu_time'].max()
-        tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
-        tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
-        fig = px.bar(df, x='username', y='total_lost_cpu_time')
-
-        # Update the y-axis to display formatted time with constant tick values
-        fig.update_layout(
-            xaxis=dict(
-                title='Username',
-                tickangle=-45  # Rotate x-axis labels if needed for better readability
-            ),
-            yaxis=dict(
-                title='Total Lost CPU Time',
-                tickmode='array',
-                tickvals=tick_vals,
-                ticktext=tick_text
-            )
-        )
-        st.plotly_chart(fig)
-
-
 
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
