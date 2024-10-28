@@ -322,6 +322,38 @@ class CreateFigures:
         )
 
         st.plotly_chart(fig)
+    def bar_chart():
+        st.write('Total Lost CPU-Time per User')
+
+        start_date, end_date = st.date_input(
+            'Start Date und End Date',
+            [datetime.today() - timedelta(days=30), datetime.today()],
+        )
+        end_date += timedelta(days=1)
+
+        display_user = st.number_input(
+            'Anzahl User', value=20,
+        )
+
+        if start_date and end_date:
+            if start_date > end_date:
+                st.error("Error: End date must fall after start date.")
+                return  # Exit if there's an error
+
+        df = pd.read_sql_query(f"""
+                        SELECT username, 
+                           AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
+                           AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                           COUNT(jobID) AS anzahl_jobs, 
+                           SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                           SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                           partition
+                        FROM reportdata
+                        WHERE start >= ' {start_date} ' AND end <= ' {end_date} ' AND partition != 'jhub'  AND gpu_efficiency IS NULL
+                        GROUP BY username
+                        ORDER BY lost_cpu_time_sec DESC
+        """, con)
+        st.write(df)
 
     def job_counts_by_log2(self) -> None:
         st.write('Job Count by Job Time')
@@ -670,7 +702,7 @@ def main():
             st.header("")
             col9, col10 = st.columns(2)
             with col9:
-                create.bar_char_by_user()
+                create.bar_chart()
             with col10:
                 create.scatter_chart_data_cpu_gpu_eff()
     else:
