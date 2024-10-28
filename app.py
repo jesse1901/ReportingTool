@@ -300,6 +300,8 @@ class CreateFigures:
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
         tick_vals = np.linspace(0, max_lost_time, num=10)
+        tick_vals = [val for val in tick_vals if not np.isnan(val) and np.isfinite(val)]
+
         tick_text = [seconds_to_timestring(int(val)) for val in tick_vals]
 
         # Plot vertical bar chart using Plotly
