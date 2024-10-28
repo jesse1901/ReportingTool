@@ -274,6 +274,7 @@ class CreateFigures:
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
+                ORDER BY lost_cpu_time_sec DESC
                 """, con, params=(start_date, end_date))
 
         st.write(df)
