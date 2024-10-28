@@ -373,6 +373,8 @@ class CreateFigures:
                 ticktext=tick_text
             )
         )
+        st.plotly_chart(fig)
+
 
 
     def job_counts_by_log2(self) -> None:
