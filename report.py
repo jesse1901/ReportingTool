@@ -1,3 +1,8 @@
+import os
+
+# Set LD_PRELOAD environment variable
+os.environ['LD_PRELOAD'] = '/lib64/libcrypto.so.3:/lib64/libssl.so.'
+
 import sqlite3
 import pyslurm
 import pandas as pd
