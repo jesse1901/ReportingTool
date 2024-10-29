@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
 from dataclasses import asdict
 from config import get_config
+from figures import time
 
 
 class time:
