@@ -164,7 +164,7 @@ class CreateFigures:
                     st.error(f"An unexpected error occurred: {e}")
         else:
             base_query = "SELECT * FROM reportdata WHERE username = ?"
-            param = (current_user)
+            param = (current_user,)
             df = pd.read_sql_query(base_query, self.con, params=param)
 
     def frame_group_by_user(self) -> None:
