@@ -95,6 +95,14 @@ class time:
 
 
 class CreateFigures:
+    color_map = {
+    'CANCELLED': '#1f77b4 ',    # Light Blue
+    'COMPLETED': '#17becf ',    # Light Sky Blue
+    'TIMEOUT': '#d62728 ',     # red
+    'FAILED': '#e377c2',      # Pink
+    'PREEMPTED': '#2ca02c',     # Light Green
+    'NODE_FAIL': '#fcf76a'
+    }
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
         self.con = sqlite3.connect('reports.db')
@@ -195,8 +203,8 @@ class CreateFigures:
         df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
 
         # Apply the conversion functions
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
-        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(seconds_to_timestring)
+        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
+        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
         st.write(df)
 
     def bar_char_by_user(self) -> None:
@@ -237,7 +245,7 @@ class CreateFigures:
 
         # Ensure that total_lost_cpu_time is integer and formatted correctly
         df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-        df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(seconds_to_timestring)
+        df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
 
         # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
         df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
@@ -306,7 +314,7 @@ class CreateFigures:
 
         # Calculate total CPU time booked
         if 'job_cpu_time' in df:
-            df['job_cpu_time'] = df['job_cpu_time'].apply(timestring_to_seconds)
+            df['job_cpu_time'] = df['job_cpu_time'].apply(time.timestring_to_seconds)
         else:
             df['job_cpu_time'] = 0
 
@@ -325,7 +333,7 @@ class CreateFigures:
 
         # Format labels to HH:MM
         cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].apply(
-            format_interval_label)
+            time.format_interval_label)
 
         # Create pie chart with Plotly
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='total_cpu_time_booked',
@@ -430,7 +438,7 @@ class CreateFigures:
         df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
         df = df.dropna(subset=['real_time_sec'])
         df['real_time_sec'] = df['real_time_sec'].astype(int)
-        df['real_time_sec'] = df['real_time_sec'].apply(seconds_to_timestring)
+        df['real_time_sec'] = df['real_time_sec'].apply(time.seconds_to_timestring)
 
         # Filter dataframe based on the checkbox
         row_var = ['gpu_efficiency']

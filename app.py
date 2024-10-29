@@ -16,14 +16,6 @@ from dataclasses import asdict
 from figures import CreateFigures
 
 
-color_map = {
-    'CANCELLED': '#1f77b4 ',    # Light Blue
-    'COMPLETED': '#17becf ',    # Light Sky Blue
-    'TIMEOUT': '#d62728 ',     # red
-    'FAILED': '#e377c2',      # Pink
-    'PREEMPTED': '#2ca02c',     # Light Green
-    'NODE_FAIL': '#fcf76a'
-}
 secrets = toml.load('.streamlit/secrets.toml')
 
 # LDAP Configuration
