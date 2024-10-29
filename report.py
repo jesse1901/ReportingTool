@@ -7,7 +7,7 @@ import sqlite3
 import pyslurm
 import pandas as pd
 import time
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import requests
 import hostlist
 import gpu_node_data
@@ -171,7 +171,7 @@ class GetStats:
 
         if self.job_data.end_time and self.job_data.start_time:
             self.start = datetime.fromtimestamp(self.job_data.start_time, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
-            self.end = datetime.fromtimestamp(self.job_data.end_time, tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
+            self.end = datetime.fromtimestamp(self.job_data.end_time, tz=utc).strftime('%Y-%m-%dT%H:%M:%S')
 
 
         # Calculate job efficiency
