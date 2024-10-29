@@ -197,9 +197,11 @@ class CreateFigures:
                         """, 
             if st.session_state['admin']:    
                 params=(start_date, end_date)
-            if st.session_state['user']:
+            elif st.session_state['user']:
                 base_query += "AND username = ?"
                 params=(start_date, end_date, current_user)
+            else:
+                Exception
             
             df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
 
