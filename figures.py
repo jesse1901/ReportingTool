@@ -194,7 +194,7 @@ class CreateFigures:
                         partition
                         FROM reportdata
                         WHERE start >= ? AND end <= ? AND partition != 'jhub'
-                        """, 
+                        """ 
             if 'admin' in st.session_state:    
                 params=(start_date, end_date)
             if 'user' in st.session_state:
