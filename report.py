@@ -130,10 +130,10 @@ class GetStats:
             self.job_cpu = {}
             self.job_all = {}
             return
-        try:
-            self.lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
-        except ValueError:
-            print("error slurm utils")
+        #try:
+        #    self.lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
+        #except ValueError:
+        #    print("error slurm utils")
 
         self.job_elapsed_s = self.job_data.elapsed_time
         self.cores = self.job_data.cpus
@@ -156,6 +156,7 @@ class GetStats:
             self.dict_steps[step] = self.job_cpu[step]["stats"]["total_cpu_time"]
 
         self.total_cpu_time_sum = round(sum(self.dict_steps.values()) / 1000)
+
         #  Calculate used time and booked time
         if self.job_elapsed_s:
             self.used_time = seconds_to_timestring(self.total_cpu_time_sum)
@@ -163,6 +164,7 @@ class GetStats:
             self.job_elapsed_cpu_time = seconds_to_timestring(
                 self.job_elapsed_s * self.cores) if self.cores and self.job_elapsed_s else 0
             self.lost_cpu_time = seconds_to_timestring((self.job_elapsed_s * self.cores) - self.total_cpu_time_sum)
+            self.lost_cpu_time_s = timestring_to_seconds(self.lost_cpu_time)
 
         # Format start and end times
         if self.job_data.end_time and self.job_data.start_time:
@@ -294,8 +296,6 @@ class GetStats:
             self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
             # print(self.intervall)
             cur.connection.commit()
-
-        # Sleep for 2 seconds to avoid excessive querying
 
         return
 
