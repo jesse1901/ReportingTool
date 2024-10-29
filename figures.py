@@ -166,6 +166,7 @@ class CreateFigures:
             base_query = "SELECT * FROM reportdata WHERE username = ?"
             param = (current_user,)
             df = pd.read_sql_query(base_query, self.con, params=param)
+            st.dataframe(df)
 
     def frame_group_by_user(self) -> None:
         """
