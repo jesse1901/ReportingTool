@@ -13,10 +13,92 @@ from dataclasses import asdict
 from config import get_config
 
 
+class time:
+    def timestring_to_seconds(timestring):
+        if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
+            return 0
+
+        if isinstance(timestring, float):
+            timestring = str(int(timestring))  # Convert float to integer string
+
+        # Ensure timestring is in string format
+        timestring = str(timestring).strip()
+
+        # Split by "T" to separate days from time
+        if 'T' in timestring:
+            days_part, time_part = timestring.split('T')
+        else:
+            days_part, time_part = '0', timestring
+
+        # Convert days part
+        try:
+            days = int(days_part.strip()) if days_part.strip() else 0
+        except ValueError:
+            days = 0
+
+        # Convert time part (HH:MM:SS)
+        time_parts = time_part.split(':')
+        try:
+            hours = int(time_parts[0].strip()) if len(time_parts) > 0 and time_parts[0].strip() else 0
+        except ValueError:
+            hours = 0
+        try:
+            minutes = int(time_parts[1].strip()) if len(time_parts) > 1 and time_parts[1].strip() else 0
+        except ValueError:
+            minutes = 0
+        try:
+            seconds = int(time_parts[2].strip()) if len(time_parts) > 2 and time_parts[2].strip() else 0
+        except ValueError:
+            seconds = 0
+
+        # Calculate total seconds
+        total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
+        return total_seconds
+
+
+    def seconds_to_timestring(total_seconds):
+        # Create a timedelta object from the total seconds
+        td = timedelta(seconds=total_seconds)
+        # Extract days, hours, minutes, and seconds from timedelta
+        days = td.days
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        seconds = round(seconds)
+        # Format the result as a string
+        timestring = f"{days}T {hours}:{minutes}:{seconds}"
+        return timestring
+
+
+    def format_interval_label(interval):
+        min_time = interval.left
+        max_time = interval.right
+
+        def format_time(minutes):
+            days = int(minutes // 1440)  # 1440 minutes in a day
+            hours = int((minutes % 1440) // 60)
+            mins = int(minutes % 60)
+
+            if days > 0 and hours > 0:
+                return f"{days}d {hours}h"
+            elif days > 0:
+                return f"{days}d"
+            elif hours > 0 and mins > 0:
+                return f"{hours}h {mins}m"
+            elif hours > 0:
+                return f"{hours}h"
+            else:
+                return f"{mins}m"
+
+        min_time_str = format_time(min_time)
+        max_time_str = format_time(max_time)
+        return f"{min_time_str} - {max_time_str}"
+
+
 class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
-        self.con = con
+        self.con = sqlite3.connect('reports.db')
+
 
     def frame_user_all(self) -> None:
         """
@@ -100,7 +182,7 @@ class CreateFigures:
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
-                """, con, params=(start_date, end_date))
+                """, self.con, params=(start_date, end_date))
 
         df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
         df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
@@ -202,7 +284,7 @@ class CreateFigures:
             SELECT partition, (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
             FROM reportdata
             WHERE partition != 'jhub'
-        """, con)
+        """, self.con)
         max_runtime = df['runtime_minutes'].max()
         bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
         labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
@@ -255,7 +337,7 @@ class CreateFigures:
         # Fetch data from the database
         df = pd.read_sql_query("""
             SELECT lost_cpu_time_sec, job_name, partition FROM reportdata WHERE partition != 'jhub'
-        """, con)
+        """,self.con)
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df.apply(
             lambda row: 'Jupyterhub' if row['job_name'] == 'spawner-jupyterhub'
@@ -385,7 +467,7 @@ class CreateFigures:
             WHERE partition != 'jhub'
             GROUP BY state
         """
-        df = pd.read_sql_query(query, con)
+        df = pd.read_sql_query(query, self.con)
 
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
@@ -408,7 +490,7 @@ class CreateFigures:
             FROM reportdata WHERE partition != 'jhub'
             GROUP BY state
         """
-        df = pd.read_sql_query(query, con)
+        df = pd.read_sql_query(query, self.con)
 
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
