@@ -58,13 +58,8 @@ def is_user_admin(username):
     return username in ADMIN_USERS
 
 def main():
+    username = "unknown"
     if 'admin' in st.session_state:
-
-        create.bar_char_by_user()
-
-        create.frame_user_all()
-    elif 'user' in st.session_state:    
-        # Tabs erstellen
         tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
 
         with tab1:
@@ -103,6 +98,11 @@ def main():
                 create.bar_char_by_user()
             with col10:
                 create.scatter_chart_data_cpu_gpu_eff()
+
+    elif 'user' in st.session_state:    
+        create.bar_char_by_user()
+
+        create.frame_user_all()
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
