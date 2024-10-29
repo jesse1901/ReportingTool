@@ -3,7 +3,7 @@ pandas==2.2.2
 numpy==2.0.0
 plotly==5.22.0
 requests==2.32.3
-hostlist==1.0.6
+python-hostlist==2.0.0
 streamlit-autorefresh==1.0.1
 ldap3==2.9.1  # Specify version if needed
 streamlit-condition-tree==0.2.0  # Adjust version as per your requirement
