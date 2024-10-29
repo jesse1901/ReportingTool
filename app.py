@@ -24,6 +24,7 @@ SEARCH_BASE = secrets['ldap']['search_base']
 USE_SSL = secrets['ldap']['use_ssl']
 
 ALLOWED_USERS = secrets['users']['allowed_users']
+ADMIN_USERS = secrets['users']['admin_users']
 
 
 def authenticate(username, password):
@@ -53,9 +54,13 @@ def authenticate(username, password):
 def is_user_allowed(username):
     return username in ALLOWED_USERS
 
+def is_user_admin(username):
+    return username in ADMIN_USERS
+
 def main():
-        
-    if 'user' in st.session_state:    
+    if 'admin' in st.session_state:
+        create.bar_char_by_user
+    elif 'user' in st.session_state:    
         # Tabs erstellen
         tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
 
@@ -104,7 +109,11 @@ def main():
         try:
             if form.form_submit_button("Login"):
                 if authenticate(username, password):
-                    if is_user_allowed(username):        
+                    if is_user_admin(username):
+                        st.session_state['admin'] = username
+                        st.success('success')
+                        st.rerun()
+                    elif is_user_allowed(username):        
                         st.session_state['user'] = username
                         st.success('success')
                         st.rerun()
