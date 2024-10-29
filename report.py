@@ -184,120 +184,181 @@ class GetStats:
         else:
             self.job_eff = 0
 
-    def get_jobs_calculate_insert_data(self, cur) -> None:
-        """
-        Fetches jobs, calculates their statistics, and inserts them into the database.
-        """
-        # Retrieve the highest jobID currently in the reportdata table
-        # cur.execute("SELECT MAX(end) FROM reportdata")
-        # self.latest_end = str(cur.fetchone()[0] or 0)
-        self.latest_end = '2024-07-03T17:27:15'
-        # Create a list of job IDs to filter and load jobs
-        self.list_filter = round(time.time())
-        # [self.jobID_count + i + 1 for i in range(1000)]
-        self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
-        self.jobs = pyslurm.db.Jobs.load(self.db_filter)
-        # Process each job
-        for job_id in self.jobs.keys():
-            #try:
+def get_jobs_calculate_insert_data(self, cur) -> None:
+    """
+    Fetches jobs, calculates their statistics, and inserts them into the database.
+    """
+    # Retrieve the highest jobID currently in the reportdata table
+    # cur.execute("SELECT MAX(end) FROM reportdata")
+    # self.latest_end = str(cur.fetchone()[0] or 0)
+    self.latest_end = '2024-07-03T17:27:15'
+    
+    # Create a list of job IDs to filter and load jobs
+    self.list_filter = round(time.time())
+    
+    # Prepare to track the earliest end time
+    earliest_end_time = None
+
+    # Load jobs with current end time as filter
+    self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
+    self.jobs = pyslurm.db.Jobs.load(self.db_filter)
+
+    # Process each job
+    for job_id in self.jobs.keys():
+        try:
             stats = GetStats()
             stats.job_stats(job_id)
             data_dict = stats.to_dict()
 
             if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
-                #print(f"GPU-Data nodes = {data_dict['gpu_nodes']} end = {data_dict['end']} start = {data_dict['start']}")
-                #print("get gpu data.py")
                 stats.get_gpu_data()
-                #print(self.job_hostlist)
 
             if stats.job_data.end_time is not None:
                 end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                end_time = end_time.isoformat('t', 'auto')
+                end_time_iso = end_time.isoformat('t', 'auto')
+
+                if earliest_end_time is None or end_time < earliest_end_time:
+                    earliest_end_time = end_time  # Update to the earliest end time found
+
+                if end_time_iso > self.latest_end:
+                    data = stats.to_dict()
+
+                    # Prepare values for insertion
+                    lost_gpu_time_sec = int(data['lost_gpu_time_sec']) if data['lost_gpu_time_sec'] else None
+                    lost_cpu_time_sec = int(data['lost_cpu_time_sec']) if data['lost_cpu_time_sec'] else None
+
+                    # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
+                    cur.execute("""
+                        INSERT INTO reportdata (
+                            jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
+                            gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
+                            real_time_sec, state, cores, gpu_nodes, start, end, job_name, 
+                            total_cpu_time_booked, partition
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                        ON CONFLICT(jobID) DO UPDATE SET 
+                            gpu_nodes = excluded.gpu_nodes,
+                            lost_gpu_time = excluded.lost_gpu_time,
+                            gpu_efficiency = excluded.gpu_efficiency,
+                            lost_gpu_time_sec = excluded.lost_gpu_time_sec,
+                            lost_cpu_time_sec = excluded.lost_cpu_time_sec,
+                            job_name = excluded.job_name,
+                            total_cpu_time_booked = excluded.total_cpu_time_booked,
+                            partition = excluded.partition
+                    """, (
+                        data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
+                        lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
+                        data['real_time'], data['job_cpu_time'], data['real_time_sec'], data['state'],
+                        data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
+                        data['total_cpu_time_booked'], data['partition']
+                    ))
+                    cur.connection.commit()
+
+        except Exception as e:
+            print(f"Error processing job {job_id}: {e}")
+
+    # After processing the latest jobs, fill in gaps for jobs with end times earlier than the latest processed end time
+    if earliest_end_time is not None:
+        self.latest_end = earliest_end_time.isoformat('t', 'auto')
+        
+        # Fill in gaps in the database
+        try:
+            # Assuming you have a method to get jobs by earliest_end_time
+            self.db_filter = pyslurm.db.JobFilter(end_time=self.latest_end)
+            gap_jobs = pyslurm.db.Jobs.load(self.db_filter)
+
+            for job_id in gap_jobs.keys():
                 try:
-                    if end_time is not None and end_time > self.latest_end:
-                        #   print(f'execute query cause: {end_time} > {self.latest_end}  jobID: {job_id}')
-                        data = stats.to_dict()
+                    stats = GetStats()
+                    stats.job_stats(job_id)
+                    data_dict = stats.to_dict()
+                    
+                    # Only insert if data is valid
+                    if data_dict['gpu_nodes'] is not None and data_dict['end'] is not None and data_dict['start'] is not None:
+                        stats.get_gpu_data()
+                        
+                        if stats.job_data.end_time is not None:
+                            end_time = datetime.fromtimestamp(stats.job_data.end_time)
+                            end_time_iso = end_time.isoformat('t', 'auto')
 
-                        # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                        lost_gpu_time_sec = int(data['lost_gpu_time_sec']) if data['lost_gpu_time_sec'] else None
-                        lost_cpu_time_sec = int(data['lost_cpu_time_sec']) if data['lost_cpu_time_sec'] else None
+                            data = stats.to_dict()
+                            lost_gpu_time_sec = int(data['lost_gpu_time_sec']) if data['lost_gpu_time_sec'] else None
+                            lost_cpu_time_sec = int(data['lost_cpu_time_sec']) if data['lost_cpu_time_sec'] else None
 
-                        # Insert job statistics into reportdata table, avoiding conflicts on unique jobID
-                        cur.execute("""
-                                          INSERT INTO reportdata (
-                                              jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
-                                              gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
-                                              real_time_sec, state, cores, gpu_nodes, start, end, job_name, 
-                                              total_cpu_time_booked, partition
-                                          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
-                                          ON CONFLICT(jobID) DO UPDATE SET 
-                                              gpu_nodes = excluded.gpu_nodes,
-                                              lost_gpu_time = excluded.lost_gpu_time,
-                                              gpu_efficiency = excluded.gpu_efficiency,
-                                              lost_gpu_time_sec = excluded.lost_gpu_time_sec,
-                                              lost_cpu_time_sec = excluded.lost_cpu_time_sec,
-                                              job_name = excluded.job_name,
-                                              total_cpu_time_booked = excluded.total_cpu_time_booked,
-                                              partition = excluded.partition
-                                      """, (
-                            data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
-                            lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
-                            data['real_time'], data['job_cpu_time'], data['real_time_sec'], data['state'],
-                            data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
-                            data['total_cpu_time_booked'], data['partition']
-                        ))
-                        #print(f"lost gpu time: {data['job_id']}")
-                        #print(f"lost gpu time sec: {data['lost_gpu_time_sec']}")
-                        cur.connection.commit()
+                            # Insert or update the statistics in the database
+                            cur.execute("""
+                                INSERT INTO reportdata (
+                                    jobID, username, account, cpu_efficiency, lost_cpu_time, lost_cpu_time_sec, 
+                                    gpu_efficiency, lost_gpu_time, lost_gpu_time_sec, real_time, job_cpu_time,
+                                    real_time_sec, state, cores, gpu_nodes, start, end, job_name, 
+                                    total_cpu_time_booked, partition
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                                ON CONFLICT(jobID) DO UPDATE SET 
+                                    gpu_nodes = excluded.gpu_nodes,
+                                    lost_gpu_time = excluded.lost_gpu_time,
+                                    gpu_efficiency = excluded.gpu_efficiency,
+                                    lost_gpu_time_sec = excluded.lost_gpu_time_sec,
+                                    lost_cpu_time_sec = excluded.lost_cpu_time_sec,
+                                    job_name = excluded.job_name,
+                                    total_cpu_time_booked = excluded.total_cpu_time_booked,
+                                    partition = excluded.partition
+                            """, (
+                                data['job_id'], data['user'], data['account'], data['efficiency'], data['lost_cpu_time'],
+                                lost_cpu_time_sec, data['gpu_efficiency'], data['lost_gpu_time'], lost_gpu_time_sec,
+                                data['real_time'], data['job_cpu_time'], data['real_time_sec'], data['state'],
+                                data['cores'], data['gpu_nodes'], data['start'], data['end'], data['job_name'],
+                                data['total_cpu_time_booked'], data['partition']
+                            ))
+                            cur.connection.commit()
+
                 except Exception as e:
-                    print(f"Error processing job {job_id}: {e}")
-        #except Exception as err:
-        #    print(f'Error endtime, job {job_id}:{err}')
-        # Print an error message if job processing fails
+                    print(f"Error filling gap for job {job_id}: {e}")
+        except Exception as e:
+                    print(f"unknown Error for job: {job_id}: {e}")
 
-    def calculate_avg_eff(self, cur) -> None:
-        """
-        Calculates and updates the average efficiency over time intervals.
-        """
-        # Retrieve the latest efficiency start time from the avg_eff table
-        cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
-        self.latest_avg_eff = cur.fetchone()[0] or self.min_start
 
-        # Retrieve the minimum start time
-        cur.execute("""
-            SELECT MIN(start) AS min_start
-            FROM reportdata 
-            WHERE start IS NOT NULL AND start <> ''
-        """)
-        min_start = cur.fetchone()
-        # Set the interval for calculating average efficiency
-        self.intervall = min_start[0]
+    # def calculate_avg_eff(self, cur) -> None:
+    #     """
+    #     Calculates and updates the average efficiency over time intervals.
+    #     """
+    #     # Retrieve the latest efficiency start time from the avg_eff table
+    #     cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
+    #     self.latest_avg_eff = cur.fetchone()[0] or self.min_start
 
-        # Loop through each time interval and calculate average efficiency
-        while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') < datetime.now():
-            interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
-            interval_end = interval_start + timedelta(hours=1)
+    #     # Retrieve the minimum start time
+    #     cur.execute("""
+    #         SELECT MIN(start) AS min_start
+    #         FROM reportdata 
+    #         WHERE start IS NOT NULL AND start <> ''
+    #     """)
+    #     min_start = cur.fetchone()
+    #     # Set the interval for calculating average efficiency
+    #     self.intervall = min_start[0]
 
-            # Calculate average efficiency and count of jobs in the interval
-            cur.execute("""
-                SELECT AVG(efficiency) as a_eff, COUNT(cores) as c_job
-                FROM reportdata 
-                WHERE start <= ? AND end >= ?
-            """, (interval_end, interval_start))
-            a_eff, c_job = cur.fetchone()
-            self.avg_eff = a_eff
-            self.cores_job = c_job
+    #     # Loop through each time interval and calculate average efficiency
+    #     while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') < datetime.now():
+    #         interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
+    #         interval_end = interval_start + timedelta(hours=1)
 
-            # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
-            cur.execute(""" INSERT INTO avg_eff (eff, cores, start, end) VALUES (?, ?, ?, ?)
-            ON CONFLICT(start) DO UPDATE SET eff = excluded.eff, cores = excluded.cores""",
-                        (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
+    #         # Calculate average efficiency and count of jobs in the interval
+    #         cur.execute("""
+    #             SELECT AVG(efficiency) as a_eff, COUNT(cores) as c_job
+    #             FROM reportdata 
+    #             WHERE start <= ? AND end >= ?
+    #         """, (interval_end, interval_start))
+    #         a_eff, c_job = cur.fetchone()
+    #         self.avg_eff = a_eff
+    #         self.cores_job = c_job
 
-            self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-            # print(self.intervall)
-            cur.connection.commit()
+    #         # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
+    #         cur.execute(""" INSERT INTO avg_eff (eff, cores, start, end) VALUES (?, ?, ?, ?)
+    #         ON CONFLICT(start) DO UPDATE SET eff = excluded.eff, cores = excluded.cores""",
+    #                     (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
 
-        return
+    #         self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
+    #         # print(self.intervall)
+    #         cur.connection.commit()
+
+    #     return
 
     def get_gpu_data(self):
         step = 1
