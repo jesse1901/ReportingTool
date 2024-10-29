@@ -59,7 +59,8 @@ def is_user_admin(username):
 
 def main():
     if 'admin' in st.session_state:
-        create.bar_char_by_user
+
+        create.bar_char_by_user()
     elif 'user' in st.session_state:    
         # Tabs erstellen
         tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
