@@ -95,18 +95,18 @@ class time:
 
 
 class CreateFigures:
-    color_map = {
-    'CANCELLED': '#1f77b4 ',    # Light Blue
-    'COMPLETED': '#17becf ',    # Light Sky Blue
-    'TIMEOUT': '#d62728 ',     # red
-    'FAILED': '#e377c2',      # Pink
-    'PREEMPTED': '#2ca02c',     # Light Green
-    'NODE_FAIL': '#fcf76a'
-    }
+
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
         self.con = sqlite3.connect('reports.db')
-
+        color_map = {
+         'CANCELLED': '#1f77b4 ',    # Light Blue
+         'COMPLETED': '#17becf ',    # Light Sky Blue
+        'TIMEOUT': '#d62728 ',     # red
+        'FAILED': '#e377c2',      # Pink
+        'PREEMPTED': '#2ca02c',     # Light Green
+        'NODE_FAIL': '#fcf76a'
+    }
 
     def frame_user_all(self) -> None:
         """
