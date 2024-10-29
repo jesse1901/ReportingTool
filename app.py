@@ -25,7 +25,7 @@ USE_SSL = secrets['ldap']['use_ssl']
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
-
+username = None
 
 def authenticate(username, password):
     if not password:
