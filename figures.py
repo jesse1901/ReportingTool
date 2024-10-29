@@ -99,7 +99,7 @@ class CreateFigures:
     def __init__(self, con):
         # Initialize the CreateFigures class with a database connection
         self.con = sqlite3.connect('reports.db')
-        color_map = {
+        self.color_map = {
          'CANCELLED': '#1f77b4 ',    # Light Blue
          'COMPLETED': '#17becf ',    # Light Sky Blue
         'TIMEOUT': '#d62728 ',     # red
@@ -484,7 +484,7 @@ class CreateFigures:
             values='total_lost_cpu_time',
             title=f"Lost CPU Time by state",
             color='category',
-            color_discrete_map=color_map,
+            color_discrete_map=self.color_map,
         )
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
