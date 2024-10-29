@@ -37,7 +37,7 @@ def authenticate(username, password):
         server = Server(LDAP_SERVER, use_ssl=USE_SSL, get_info=ALL)
 
         # Adjust this user format according to your LDAP server requirements
-        user = f"uid={username},ou=people,ou=rgy,o=desy,c=de"  # Change if necessary
+        user = f"uid={username},ou=people,ou=rgy,o=desy,c=de"
 
         # Establish a connection
         conn = Connection(server, user=user, password=password.strip())  # Ensure no whitespace in password
@@ -71,7 +71,7 @@ def main():
             st.header("User Data")
             col1, col2 = st.columns([3, 1])
             with col1:
-                create.frame_user_all()
+                create.frame_user_all(username)
             with col2:
                 create.frame_group_by_user()
 

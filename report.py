@@ -345,8 +345,7 @@ class GetStats:
             # Debug: Print the full JSON response
             #print(f"Full JSON response: {data.py}")
 
-            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in \
-                    data['data']['result'][0]:
+            if 'data' in data and 'result' in data['data'] and len(data['data']['result']) > 0 and 'values' in data['data']['result'][0]:
                 values = data['data']['result'][0]['values']
                 int_values = [float(value[1]) for value in values]
                 self.gpu_eff = (sum(int_values) / len(int_values)) if int_values else 0

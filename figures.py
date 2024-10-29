@@ -108,60 +108,64 @@ class CreateFigures:
         'NODE_FAIL': '#fcf76a'
     }
 
-    def frame_user_all(self) -> None:
+    def frame_user_all(self, current_user) -> None:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
 
         st.write('All Data')
-
+        if "admin" in st.session_state:
         # List of available columns for     selection
-        sql_select = [
-            "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
-            "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
-            "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
-            "gpu_nodes", "start", "end", "job_name", "partition"
-        ]
+            sql_select = [
+                "jobID", "username", "account", "cpu_efficiency", "lost_cpu_time",
+                "lost_cpu_time_sec", "gpu_efficiency", "lost_gpu_time", "lost_gpu_time_sec",
+                "real_time", "job_cpu_time", "real_time_sec", "state", "cores",
+                "gpu_nodes", "start", "end", "job_name", "partition"
+            ]
 
-        # Multi-select for column selection
-        selected_columns = st.multiselect('SELECT', sql_select)
-        # Generate configuration from the DataFrame
-        config = get_config()
+            # Multi-select for column selection
+            selected_columns = st.multiselect('SELECT', sql_select)
+            # Generate configuration from the DataFrame
+            config = get_config()
 
-        # Create the condition tree and generate the SQL WHERE clause
-        st.write("WHERE")
-        query_string = condition_tree(
-            config=config,
-            return_type="sql",
-            min_height=250,
-            always_show_buttons=True,
-            key="my_unique_query_builder")
+            # Create the condition tree and generate the SQL WHERE clause
+            st.write("WHERE")
+            query_string = condition_tree(
+                config=config,
+                return_type="sql",
+                min_height=250,
+                always_show_buttons=True,
+                key="my_unique_query_builder")
 
-        # Use the condition tree for the WHERE clause
-        if st.button("Abfrage ausführen"):
-            # Create the SQL SELECT part
-            if selected_columns:
-                selected_columns_str = ", ".join(selected_columns)
-            else:
-                st.warning("No columns selected; displaying all columns.")
-                selected_columns_str = "*"
+            # Use the condition tree for the WHERE clause
+            if st.button("Abfrage ausführen"):
+                # Create the SQL SELECT part
+                if selected_columns:
+                    selected_columns_str = ", ".join(selected_columns)
+                else:
+                    st.warning("No columns selected; displaying all columns.")
+                    selected_columns_str = "*"
 
-            # Construct the final SQL query
-            if query_string:
-                final_query = f"SELECT {selected_columns_str} FROM reportdata WHERE {query_string}"
-            else:
-                final_query = f"SELECT {selected_columns_str} FROM reportdata"
+                # Construct the final SQL query
+                if query_string:
+                    final_query = f"SELECT {selected_columns_str} FROM reportdata WHERE {query_string}"
+                else:
+                    final_query = f"SELECT {selected_columns_str} FROM reportdata"
 
-            # Execute the final SQL query
-            try:
-                df_filtered = pd.read_sql_query(final_query, self.con)
-                st.dataframe(df_filtered)
-            except ValueError as e:
-                st.error(f"Query failed: {e}")
-            except pd.io.sql.DatabaseError as db_err:
-                st.error(f"Database error occurred: {db_err}")
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
+                # Execute the final SQL query
+                try:
+                    df_filtered = pd.read_sql_query(final_query, self.con)
+                    st.dataframe(df_filtered)
+                except ValueError as e:
+                    st.error(f"Query failed: {e}")
+                except pd.io.sql.DatabaseError as db_err:
+                    st.error(f"Database error occurred: {db_err}")
+                except Exception as e:
+                    st.error(f"An unexpected error occurred: {e}")
+        else:
+            base_query = "SELECT * FROM reportdata WHERE username = ?"
+            params = (current_user)
+            df = pd.read_sql_query(base_query, self.con, params=params)
 
     def frame_group_by_user(self) -> None:
         """
