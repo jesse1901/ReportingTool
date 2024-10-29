@@ -25,7 +25,6 @@ USE_SSL = secrets['ldap']['use_ssl']
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
-username = None
 
 def authenticate(username, password):
     if not password:
@@ -58,8 +57,8 @@ def is_user_admin(username):
     return username in ADMIN_USERS
 
 def main():
-    username = "unknown"
     if 'admin' in st.session_state:
+        username = st.session_state['admin']
         tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
 
         with tab1:
@@ -99,9 +98,9 @@ def main():
             with col10:
                 create.scatter_chart_data_cpu_gpu_eff()
 
-    elif 'user' in st.session_state:    
-        create.bar_char_by_user()
-
+    elif 'user' in st.session_state:
+        username = st.session_state['user']
+    
         create.frame_user_all(username)
     else:
         st.title("Login Max-Reports")
