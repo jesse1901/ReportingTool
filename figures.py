@@ -195,13 +195,11 @@ class CreateFigures:
                         FROM reportdata
                         WHERE start >= ? AND end <= ? AND partition != 'jhub'
                         """, 
-            if st.session_state['admin']:    
+            if 'admin' in st.session_state:    
                 params=(start_date, end_date)
-            elif st.session_state['user']:
+            if 'user' in st.session_state:
                 base_query += "AND username = ?"
                 params=(start_date, end_date, current_user)
-            else:
-                Exception
             
             df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
 
