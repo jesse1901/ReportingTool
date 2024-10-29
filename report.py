@@ -205,7 +205,8 @@ class GetStats:
         # Load jobs with current end time as filter
         self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
         self.jobs = pyslurm.db.Jobs.load(self.db_filter)
-
+        print(len(self.jobs))
+        print(f"starting for loop NEW at time {datetime.now()}")
         # Process each job
         for job_id in self.jobs.keys():
             try:
@@ -258,17 +259,18 @@ class GetStats:
 
             except Exception as e:
                 print(f"Error processing job {job_id}: {e}")
-
+        print(f"finished for loop NEW Jobs {datetime.now()}")
         # After processing the latest jobs, fill in gaps for jobs with end times earlier than the latest processed end time
         if earliest_end_time is not None:
             self.latest_end = earliest_end_time.isoformat('t', 'auto')
+            print(f'starting END jobs at {datetime.now()}')
             
             # Fill in gaps in the database
             try:
                 # Assuming you have a method to get jobs by earliest_end_time
                 self.db_filter = pyslurm.db.JobFilter(end_time=self.latest_end)
                 gap_jobs = pyslurm.db.Jobs.load(self.db_filter)
-
+                print(len(gap_jobs))
                 for job_id in gap_jobs.keys():
                     try:
                         stats = GetStats()
@@ -317,51 +319,7 @@ class GetStats:
                         print(f"Error filling gap for job {job_id}: {e}")
             except Exception as e:
                         print(f"unknown Error for job: {job_id}: {e}")
-
-
-    # def calculate_avg_eff(self, cur) -> None:
-    #     """
-    #     Calculates and updates the average efficiency over time intervals.
-    #     """
-    #     # Retrieve the latest efficiency start time from the avg_eff table
-    #     cur.execute("SELECT MAX(start) AS max_start FROM avg_eff")
-    #     self.latest_avg_eff = cur.fetchone()[0] or self.min_start
-
-    #     # Retrieve the minimum start time
-    #     cur.execute("""
-    #         SELECT MIN(start) AS min_start
-    #         FROM reportdata 
-    #         WHERE start IS NOT NULL AND start <> ''
-    #     """)
-    #     min_start = cur.fetchone()
-    #     # Set the interval for calculating average efficiency
-    #     self.intervall = min_start[0]
-
-    #     # Loop through each time interval and calculate average efficiency
-    #     while datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S') < datetime.now():
-    #         interval_start = datetime.strptime(self.intervall, '%Y-%m-%dT%H:%M:%S')
-    #         interval_end = interval_start + timedelta(hours=1)
-
-    #         # Calculate average efficiency and count of jobs in the interval
-    #         cur.execute("""
-    #             SELECT AVG(efficiency) as a_eff, COUNT(cores) as c_job
-    #             FROM reportdata 
-    #             WHERE start <= ? AND end >= ?
-    #         """, (interval_end, interval_start))
-    #         a_eff, c_job = cur.fetchone()
-    #         self.avg_eff = a_eff
-    #         self.cores_job = c_job
-
-    #         # Insert average efficiency into avg_eff table, avoiding conflicts on unique start times
-    #         cur.execute(""" INSERT INTO avg_eff (eff, cores, start, end) VALUES (?, ?, ?, ?)
-    #         ON CONFLICT(start) DO UPDATE SET eff = excluded.eff, cores = excluded.cores""",
-    #                     (self.avg_eff, self.cores_job, self.intervall, interval_end.strftime('%Y-%m-%dT%H:%M:%S')))
-
-    #         self.intervall = interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-    #         # print(self.intervall)
-    #         cur.connection.commit()
-
-    #     return
+        print(f"finished for loop OLD at {datetime.now()}")
 
     def get_gpu_data(self):
         step = 1
