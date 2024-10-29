@@ -168,7 +168,7 @@ class CreateFigures:
             df = pd.read_sql_query(base_query, self.con, params=param)
             st.dataframe(df)
 
-    def frame_group_by_user(self) -> None:
+    def frame_group_by_user(self, current_user) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
@@ -184,33 +184,39 @@ class CreateFigures:
             if start_date > end_date:
                 st.error("Error: End date must fall after start date.")
                 return  # Exit if there's an error
-        df = pd.read_sql_query("""
-                SELECT username, 
-                   AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
-                   AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
-                   COUNT(jobID) AS anzahl_jobs, 
-                   SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                   SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
-                   partition
-                FROM reportdata
-                WHERE start >= ? AND end <= ? AND partition != 'jhub'
-                GROUP BY username
-                """, self.con, params=(start_date, end_date))
+        
+            base_query =""" SELECT username, 
+                        AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
+                        AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                        COUNT(jobID) AS anzahl_jobs, 
+                        SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
+                        SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                        partition
+                        FROM reportdata
+                        WHERE start >= ? AND end <= ? AND partition != 'jhub'
+                        """, 
+            if st.session_state['admin']:    
+                params=(start_date, end_date)
+            if st.session_state['user']:
+                base_query += "AND username = ?"
+                params=(start_date, end_date, current_user)
+            
+            df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
 
-        df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
-        df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
+            df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
+            df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
 
-        # Drop rows where the conversion failed
-        df = df.dropna(subset=['total_lost_cpu_time', 'total_lost_gpu_time'])
+            # Drop rows where the conversion failed
+            df = df.dropna(subset=['total_lost_cpu_time', 'total_lost_gpu_time'])
 
-        # Convert the columns to integers
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
+            # Convert the columns to integers
+            df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
+            df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
 
-        # Apply the conversion functions
-        df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
-        df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
-        st.write(df)
+            # Apply the conversion functions
+            df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
+            df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
+            st.write(df)
 
     def bar_char_by_user(self) -> None:
         st.write('Total Lost CPU-Time per User')

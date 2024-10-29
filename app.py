@@ -100,8 +100,8 @@ def main():
 
     elif 'user' in st.session_state:
         username = st.session_state['user']
-    
         create.frame_user_all(username)
+        create.frame_group_by_user(username)
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
