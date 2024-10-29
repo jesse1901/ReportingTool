@@ -13,6 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
 from dataclasses import asdict
+from figures import CreateFigures
 
 
 color_map = {
