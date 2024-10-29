@@ -507,7 +507,7 @@ class CreateFigures:
             values='Job_count',
             title=f"Job Count by state",
             color='category',
-            color_discrete_map=color_map
+            color_discrete_map=self.color_map
         )
         fig.update_layout(showlegend=False)
         # Pie-Chart in Streamlit anzeigen
