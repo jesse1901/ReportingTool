@@ -109,7 +109,7 @@ def main():
             with col2:
                 create.frame_group_by_user(username)
         with tab2:
-            col3, col4 = st.columns()
+            col3, col4 = st.columns(2)
             with col3:
                 create.pie_chart_by_job_count(username)
             with col4:
