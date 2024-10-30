@@ -172,7 +172,10 @@ class CreateFigures:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        st.write('Data grouped by user')
+        if "admin" in st.session_state:
+            st.write('Data grouped by user')
+        else:
+            st.write('Your Data in Timerange:')
         # Get start and end dates from Streamlit date input
         start_date, end_date = st.date_input(
             'Start Date - End Date',
@@ -190,8 +193,7 @@ class CreateFigures:
                         AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
                         COUNT(jobID) AS anzahl_jobs, 
                         SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                        SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
-                        partition
+                        SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
                         FROM reportdata
                         WHERE start >= ? AND end <= ? AND partition != 'jhub'
                         """ 
@@ -216,6 +218,8 @@ class CreateFigures:
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
+            df = df.T.reset_index()
+            df.columns = ["Metric", "Value"]
             st.write(df)
 
     def bar_char_by_user(self) -> None:
