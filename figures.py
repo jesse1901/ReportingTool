@@ -584,7 +584,7 @@ class CreateFigures:
 
         # Rename columns for better readability
         percentile_df.columns = ['Efficiency Percentile', 'Mean Efficiency', 'Min Efficiency', 'Max Efficiency',
-                                 'Std Dev Efficiency', 'Total Jobs', 'Job Percentage']
+                                 'Total Jobs', 'Job Percentage']
 
         # Create the figure
         fig = go.Figure()
@@ -615,16 +615,7 @@ class CreateFigures:
             line=dict(color='rgba(0,100,80,0)'),
             name='Efficiency Range'
         ))
-
-        # Add line trace for standard deviation
-        fig.add_trace(go.Scatter(
-            x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Std Dev Efficiency'],
-            mode='lines',
-            name='Std Dev Efficiency',
-            line=dict(color='orange', dash='dash')
-        ))
-
+        
         # Update layout
         fig.update_layout(
             title='Distribution of Jobs and CPU Efficiency Percentiles',
