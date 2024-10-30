@@ -507,10 +507,11 @@ class CreateFigures:
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
-        base_query = f"""
+        base_query = """
             SELECT state AS category, COUNT(jobID) AS Job_count
             FROM reportdata WHERE partition != 'jhub'
         """
+
         if 'admin' in st.session_state:    
                 params=()
         elif 'user' in st.session_state:
