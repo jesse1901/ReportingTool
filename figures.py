@@ -163,7 +163,10 @@ class CreateFigures:
                 except Exception as e:
                     st.error(f"An unexpected error occurred: {e}")
         else:
-            base_query = "SELECT * FROM reportdata WHERE username = ?"
+            base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
+                            gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
+                            gpu_nodes, start, end, job_name, partition
+                            FROM reportdata WHERE username = ?"""
             param = (current_user,)
             df = pd.read_sql_query(base_query, self.con, params=param)
             st.dataframe(df)
