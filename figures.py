@@ -209,7 +209,7 @@ class CreateFigures:
                     SUM(IFNULL(lost_gpu_time_sec, 0)) AS gpu_efficency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
-                    SUM(lost_gpu_time_sec)
+                    SUM(lost_gpu_time_sec) AS total_lost_gpu_time
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
             """ 
