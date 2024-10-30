@@ -475,18 +475,22 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
-    def pie_chart_by_session_state(self):
+    def pie_chart_by_session_state(self, current_user):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
-        query = f"""
+        base_query = f"""
             SELECT state AS category, SUM(lost_cpu_time_sec) AS total_lost_cpu_time
             FROM reportdata
             WHERE partition != 'jhub'
-            GROUP BY state
         """
-        df = pd.read_sql_query(query, self.con)
-
+        if 'admin' in st.session_state:    
+                params=()
+        elif 'user' in st.session_state:
+                base_query += "AND username = ?"
+                params=(current_user)
+            
+        df = pd.read_sql_query(base_query + "GROUP BY state", self.con, params=params)
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
             df,
@@ -499,16 +503,21 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def pie_chart_by_job_count(self):
+    def pie_chart_by_job_count(self, current_user):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
-        query = f"""
+        base_query = f"""
             SELECT state AS category, COUNT(jobID) AS Job_count
             FROM reportdata WHERE partition != 'jhub'
-            GROUP BY state
         """
-        df = pd.read_sql_query(query, self.con)
+        if 'admin' in st.session_state:    
+                params=()
+        elif 'user' in st.session_state:
+                base_query += "AND username = ?"
+                params=(current_user)
+            
+        df = pd.read_sql_query(base_query + "GROUP BY state", self.con, params=params)
 
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(

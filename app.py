@@ -85,7 +85,7 @@ def main():
             with col6:
                 create.pie_chart_by_session_state()
             with col7:
-                create.pie_chart_by_job_count()
+                create.pie_chart_by_job_count(username)
             with col8:
                 create.efficiency_percentile_chart()
             # create.chart_cpu_utilization()
@@ -100,8 +100,20 @@ def main():
 
     elif 'user' in st.session_state:
         username = st.session_state['user']
-        create.frame_user_all(username)
-        create.frame_group_by_user(username)
+        tab1, tab2 = st.tabs(["Tables", "Charts"]) 
+        
+        with tab1:
+            col1, col2 = st.columns([3, 1])
+            with col1: 
+                create.frame_user_all(username)
+            with col2:
+                create.frame_group_by_user(username)
+        with tab2:
+            col3, col4 = st.columns()
+            with col3:
+                create.pie_chart_by_job_count(username)
+            with col4:
+                create
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
