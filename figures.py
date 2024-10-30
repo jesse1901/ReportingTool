@@ -183,12 +183,10 @@ class CreateFigures:
         date_selection = st.date_input(
             'Start Date - End Date', value=default_range
         )
-        if isinstance(date_selection, datetime):
-            start_date = date_selection
-            end_date = start_date + timedelta(days=1)  # Add a default end date if only start date selected
-        else:
-            start_date, end_date = date_selection
-            end_date += timedelta(days=1)
+        if len(date_selection) != 2:
+            st.stop()
+        
+        start_date, end_date = date_selection
 
         if start_date and end_date:
             if start_date > end_date:
