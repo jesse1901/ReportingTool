@@ -203,7 +203,7 @@ class CreateFigures:
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time * cores ELSE NULL END) /
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
 
-                    COUNT(jobID),
+                    COUNT(jobID) AS job_count,
 
                     SUM(real_time * cores) / 
                     SUM(lost_gpu_time_sec) AS gpu_efficency,
@@ -267,7 +267,6 @@ class CreateFigures:
                 SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency
                 
                 SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
-                
                                
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
