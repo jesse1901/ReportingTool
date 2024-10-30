@@ -83,7 +83,7 @@ def main():
             st.header("Efficiency")
             col6, col7, col8 = st.columns(3)
             with col6:
-                create.pie_chart_by_session_state()
+                create.pie_chart_by_session_state(username)
             with col7:
                 create.pie_chart_by_job_count(username)
             with col8:
@@ -113,7 +113,7 @@ def main():
             with col3:
                 create.pie_chart_by_job_count(username)
             with col4:
-                create
+                create.pie_chart_by_session_state(username)
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
