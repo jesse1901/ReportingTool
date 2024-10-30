@@ -237,9 +237,9 @@ class CreateFigures:
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
-            
-            df = df.T.reset_index()
-            df.columns = ["Metric", "Value"]
+            if 'user' in st.session_state:
+                df = df.T.reset_index()
+                df.columns = ["Metric", "Value"]
             st.write(df)
 
     def bar_char_by_user(self) -> None:
