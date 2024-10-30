@@ -485,12 +485,12 @@ class CreateFigures:
             WHERE partition != 'jhub'
         """
         if 'admin' in st.session_state:    
-                params=()
+                params= None
         elif 'user' in st.session_state:
                 base_query += "AND username = ?"
-                params=(current_user)
+                params=(current_user, )
             
-        df = pd.read_sql_query(base_query + "GROUP BY state", self.con, params=params)
+        df = pd.read_sql_query(base_query + " GROUP BY state", self.con, params=params)
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
             df,
@@ -516,7 +516,7 @@ class CreateFigures:
                 params=None
         elif 'user' in st.session_state:
                 base_query += "AND username = ?"
-                params=(current_user)
+                params=(current_user, )
             
         df = pd.read_sql_query(base_query + " GROUP BY state", self.con, params=params)
 
