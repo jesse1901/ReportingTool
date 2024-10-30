@@ -111,9 +111,9 @@ def main():
         with tab2:
             col3, col4 = st.columns(2)
             with col3:
-                create.pie_chart_by_job_count(username)
-            with col4:
                 create.pie_chart_by_session_state(username)
+            with col4:
+                create.pie_chart_by_job_count(username)
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
