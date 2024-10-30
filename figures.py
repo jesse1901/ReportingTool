@@ -197,11 +197,11 @@ class CreateFigures:
                 return  # Exit if there's an error
         
             base_query =""" SELECT username, 
-                        AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
-                        AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                        AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
+                        AVG(gpu_efficiency) AS avg_gpu_efficiency,
                         COUNT(jobID) AS anzahl_jobs, 
-                        SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                        SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                        SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time, 
+                        SUM(lost_gpu_time_sec) AS total_lost_gpu_time
                         FROM reportdata
                         WHERE start >= ? AND end <= ? AND partition != 'jhub'
                         """ 
