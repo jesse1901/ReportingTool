@@ -200,13 +200,13 @@ class CreateFigures:
             base_query = """
                 SELECT username,   
 
-                    SUM(real_time * cores) /                                     
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time * cores ELSE NULL END) /
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
 
                     COUNT(jobID),
 
                     SUM(real_time * cores) / 
-                    SUM(IFNULL(lost_gpu_time_sec, 0)) AS gpu_efficency,
+                    SUM(lost_gpu_time_sec) AS gpu_efficency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
                     SUM(lost_gpu_time_sec) AS total_lost_gpu_time
@@ -263,8 +263,12 @@ class CreateFigures:
 
         df = pd.read_sql_query("""
                 SELECT username, 
-                   AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
-                   SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
+                SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time * cores ELSE NULL END) /
+                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency
+                
+                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
+                
+                               
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
