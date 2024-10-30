@@ -264,7 +264,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
                 SELECT username, 
                 SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time * cores ELSE NULL END) /
-                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency
+                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
                 
                 SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
                                
