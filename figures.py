@@ -223,12 +223,12 @@ class CreateFigures:
 
             
             df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
-
+            
             df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
             df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
 
             # Drop rows where the conversion failed
-            df = df.dropna(subset=['total_lost_cpu_time', 'total_lost_gpu_time'])
+            df = df.fillna(0)
 
             # Convert the columns to integers
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
@@ -237,6 +237,7 @@ class CreateFigures:
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
+            
             if 'user' in st.session_state:
                 df = df.T.reset_index()
                 df.columns = ["Metric", "Value"]
