@@ -198,18 +198,18 @@ class CreateFigures:
 
             # Define the base SQL query to retrieve data from the reportdata table
             base_query = """
-                SELECT username, 
-                  
-                        -- Calculate the average CPU efficiency where GPU efficiency is NULL
-                    
-                    AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
-                    AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
-                    COUNT(jobID) AS anzahl_jobs, 
-                    
-                        -- Sum the lost CPU time only where GPU efficiency is NULL
-                    
+                SELECT username,   
+
+                    SUM(real_time * cores) /                                     
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
+
+                    COUNT(jobID),
+
+                    SUM(real_time * cores) / 
+                    SUM(IFNULL(lost_gpu_time_sec, 0)) AS gpu_efficency,
+
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
-                    SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time
+                    SUM(lost_gpu_time_sec)
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
             """ 
@@ -263,11 +263,7 @@ class CreateFigures:
         df = pd.read_sql_query("""
                 SELECT username, 
                    AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
-                   AVG(gpu_efficiency) AS avg_gpu_efficiency,
-                   COUNT(jobID) AS anzahl_jobs, 
                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
-                   SUM(lost_gpu_time_sec) AS total_lost_gpu_time,
-                   partition
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
@@ -294,6 +290,7 @@ class CreateFigures:
             df['cpu_efficiency'] = df['cpu_efficiency'].fillna(0)
             df['total_lost_cpu_time'] = np.where(df['cpu_efficiency'] != 0, df['total_job_time'] / df['cpu_efficiency'], np.nan)
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].fillna(0)
+
 
         # Define constant tick values for the y-axis (vertical chart)
         max_lost_time = df['total_lost_cpu_time'].max()
@@ -615,7 +612,7 @@ class CreateFigures:
             line=dict(color='rgba(0,100,80,0)'),
             name='Efficiency Range'
         ))
-        
+
         # Update layout
         fig.update_layout(
             title='Distribution of Jobs and CPU Efficiency Percentiles',
