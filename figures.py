@@ -575,7 +575,6 @@ class CreateFigures:
             mean_cpu_efficiency=('cpu_efficiency', 'mean'),
             min_cpu_efficiency=('cpu_efficiency', 'min'),
             max_cpu_efficiency=('cpu_efficiency', 'max'),
-            std_cpu_efficiency=('cpu_efficiency', 'std'),
             total_jobs=('jobID', 'count')
         ).reset_index()
 
