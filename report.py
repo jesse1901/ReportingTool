@@ -219,7 +219,7 @@ class GetStats:
 
                 if stats.job_data.end_time is not None:
                     end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                    end_time_iso = end_time.isoformat('t', 'auto')
+                    end_time_iso = end_time.isoformat('T' , 'auto')
 
                     if earliest_end_time is None or end_time < earliest_end_time:
                         earliest_end_time = end_time  # Update to the earliest end time found
@@ -262,8 +262,8 @@ class GetStats:
         print(f"finished for loop NEW Jobs {datetime.now()}")
         # After processing the latest jobs, fill in gaps for jobs with end times earlier than the latest processed end time
         if earliest_end_time is not None:
-            self.latest_end = earliest_end_time.isoformat('t', 'auto')
-            print(f'starting END jobs at {datetime.now()}')
+            self.latest_end = earliest_end_time.isoformat('T', 'auto')
+            print(f'starting OLD jobs at {datetime.now()}')
             
             # Fill in gaps in the database
             try:
@@ -283,7 +283,7 @@ class GetStats:
                             
                             if stats.job_data.end_time is not None:
                                 end_time = datetime.fromtimestamp(stats.job_data.end_time)
-                                end_time_iso = end_time.isoformat('t', 'auto')
+                                end_time_iso = end_time.isoformat('T', 'auto')
 
                                 data = stats.to_dict()
                                 lost_gpu_time_sec = int(data['lost_gpu_time_sec']) if data['lost_gpu_time_sec'] else None
