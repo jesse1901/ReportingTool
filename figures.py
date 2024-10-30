@@ -177,11 +177,18 @@ class CreateFigures:
         else:
             st.write('Your Data in Timerange:')
         # Get start and end dates from Streamlit date input
-        start_date, end_date = st.date_input(
-            'Start Date - End Date',
-            [datetime.today() - timedelta(days=30), datetime.today()],
+        default_range = [datetime.today() - timedelta(days=30), datetime.today()]
+
+        # Capture date input and handle single or double date selection
+        date_selection = st.date_input(
+            'Start Date - End Date', value=default_range
         )
-        end_date += timedelta(days=1)
+        if isinstance(date_selection, datetime):
+            start_date = date_selection
+            end_date = start_date + timedelta(days=1)  # Add a default end date if only start date selected
+        else:
+            start_date, end_date = date_selection
+            end_date += timedelta(days=1)
 
         if start_date and end_date:
             if start_date > end_date:
