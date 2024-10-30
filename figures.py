@@ -191,25 +191,39 @@ class CreateFigures:
         
         start_date, end_date = date_selection
 
+        # Check if both start_date and end_date are provided by the user
         if start_date and end_date:
+            # Validate that the start date is not after the end date
             if start_date > end_date:
+                # Show an error message if the end date is earlier than the start date
                 st.error("Error: End date must fall after start date.")
-                return  # Exit if there's an error
-        
-            base_query =""" SELECT username, 
-                        AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
-                        AVG(gpu_efficiency) AS avg_gpu_efficiency,
-                        COUNT(jobID) AS anzahl_jobs, 
-                        SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time, 
-                        SUM(lost_gpu_time_sec) AS total_lost_gpu_time
-                        FROM reportdata
-                        WHERE start >= ? AND end <= ? AND partition != 'jhub'
-                        """ 
+                return  # Exit the function if there is an error in date selection
+
+            # Define the base SQL query to retrieve data from the reportdata table
+            base_query = """
+                SELECT username, 
+                  
+                        -- Calculate the average CPU efficiency where GPU efficiency is NULL
+                    
+                    AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
+                    AVG(gpu_efficiency) AS avg_gpu_efficiency,
+                    COUNT(jobID) AS anzahl_jobs, 
+                    
+                        -- Sum the lost CPU time only where GPU efficiency is NULL
+                    
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
+                    SUM(lost_gpu_time_sec) AS total_lost_gpu_time
+                FROM reportdata                
+                WHERE start >= ? AND end <= ? AND partition != 'jhub'
+            """ 
+
             if 'admin' in st.session_state:    
-                params=(start_date, end_date)
+                params = (start_date, end_date)
+            
             if 'user' in st.session_state:
-                base_query += "AND username = ?"
-                params=(start_date, end_date, current_user)
+                base_query += " AND username = ?"
+                params = (start_date, end_date, current_user)
+
             
             df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
 
@@ -250,11 +264,11 @@ class CreateFigures:
 
         df = pd.read_sql_query("""
                 SELECT username, 
-                   AVG(IFNULL(cpu_efficiency, 0)) AS avg_cpu_efficiency, 
-                   AVG(IFNULL(gpu_efficiency, 0)) AS avg_gpu_efficiency,
+                   AVG(CASE WHEN gpu_efficiency IS NULL THEN cpu_efficiency ELSE NULL END) AS avg_cpu_efficiency, 
+                   AVG(gpu_efficiency) AS avg_gpu_efficiency,
                    COUNT(jobID) AS anzahl_jobs, 
-                   SUM(IFNULL(lost_cpu_time_sec, 0)) AS total_lost_cpu_time, 
-                   SUM(IFNULL(lost_gpu_time_sec, 0)) AS total_lost_gpu_time,
+                   SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
+                   SUM(lost_gpu_time_sec) AS total_lost_gpu_time,
                    partition
                 FROM reportdata
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
