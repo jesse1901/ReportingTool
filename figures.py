@@ -175,8 +175,6 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata WHERE username = ?"""
             params = (current_user,)
-            st.write(f"Current User: {current_user}")
-            st.write(f"Params: {params}")
             try:    
                 df = pd.read_sql_query(base_query, _self.con, params=params)
                 st.dataframe(df)
@@ -214,12 +212,12 @@ class CreateFigures:
             base_query = """
                 SELECT username,   
 
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time * cores ELSE NULL END) /
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END) /
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
 
                     COUNT(jobID) AS job_count,
 
-                    SUM(real_time * cores) / 
+                    SUM(real_time_sec * cores) / 
                     SUM(lost_gpu_time_sec) AS gpu_efficency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
