@@ -227,7 +227,7 @@ class CreateFigures:
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
             """ 
-
+            params = None
             if user_role =='admin':    
                 params = (start_date, end_date)
             
