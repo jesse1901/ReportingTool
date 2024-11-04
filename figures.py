@@ -137,7 +137,7 @@ class CreateFigures:
                 gridOptions=grid_options,
                 update_mode=GridUpdateMode.SELECTION_CHANGED,
                 theme='streamlit',  # Choose from streamlit, light, dark, etc.
-                height=400
+                height=400,
                 enable_enterprise_modules=False
             )
 
