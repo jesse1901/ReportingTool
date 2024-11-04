@@ -241,10 +241,6 @@ class CreateFigures:
             
             df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
 
-            st.write(df)
-            # Convert to numeric and fill NaN values with 0
-            df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce').fillna(0).astype(int)
-            df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce').fillna(0).astype(int)
 
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
