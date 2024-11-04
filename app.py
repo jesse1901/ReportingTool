@@ -77,7 +77,7 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
         func( start_date, end_date, current_user, role, display_user)
     
     elif hyper_threading: 
-        st.markdown("<div style='visibility:hidden;height:38px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='visibility:hidden;height:42px;'></div>", unsafe_allow_html=True)
         func( start_date, end_date, current_user, role, hyper_threading)
     
     else: 

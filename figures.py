@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
 from dataclasses import asdict
 from config import get_config
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 
 class time:
@@ -70,7 +71,6 @@ class time:
             timestring = f"{days}T {hours}:{minutes}:{seconds}"
             return timestring
         else:
-            st.write("ERRORRORORO")  # Return None for invalid input
             return None
 
     def format_interval_label(interval):
@@ -125,8 +125,22 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata ORDER BY start DESC LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con, params=params)
-            st.dataframe(df)
+            
+            gb = GridOptionsBuilder.from_dataframe(df)
+            gb.configure_pagination(paginationAutoPageSize=True)  # Enables pagination
+            gb.configure_selection('single', use_checkbox=True, pre_selected_rows=[])
+            
+            grid_options = gb.build()
+            
+            grid_response = AgGrid(
+                df,
+                gridOptions=grid_options,
+                update_mode=GridUpdateMode.SELECTION_CHANGED,
+                theme='streamlit',  # Choose from streamlit, light, dark, etc.
+                height=400
+            )
 
+            
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
