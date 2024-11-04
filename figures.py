@@ -56,18 +56,22 @@ class time:
         return total_seconds
 
 
+
     def seconds_to_timestring(total_seconds):
-        if total_seconds is type(int):    
+        if isinstance(total_seconds, int) and total_seconds >= 0:  # Check for integer and non-negative
             # Create a timedelta object from the total seconds
             td = timedelta(seconds=total_seconds)
             # Extract days, hours, minutes, and seconds from timedelta
             days = td.days
             hours, remainder = divmod(td.seconds, 3600)
             minutes, seconds = divmod(remainder, 60)
-            seconds = round(seconds)
+            seconds = round(seconds)  # Round the seconds
             # Format the result as a string
             timestring = f"{days}T {hours}:{minutes}:{seconds}"
             return timestring
+        else:
+            return None  # Return None for invalid input
+
 
 
     def format_interval_label(interval):
@@ -237,6 +241,7 @@ class CreateFigures:
             
             df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
 
+            st.write(df)
             # Convert to numeric and fill NaN values with 0
             df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce').fillna(0).astype(int)
             df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce').fillna(0).astype(int)
