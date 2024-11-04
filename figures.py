@@ -119,7 +119,7 @@ class CreateFigures:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
-                            FROM reportdata"""
+                            FROM reportdata LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con)
             st.dataframe(df)
         # List of available columns for     selection
@@ -177,7 +177,8 @@ class CreateFigures:
             param = (current_user,)
             df = pd.read_sql_query(base_query, _self.con, params=param)
             st.dataframe(df)
-
+    
+    @st.cache_data
     def frame_group_by_user(_self, current_user) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
@@ -249,7 +250,7 @@ class CreateFigures:
                 df = df.T.reset_index()
                 df.columns = ["Metric", "Value"]
             st.write(df)
-
+    @st.cache_data
     def bar_char_by_user(_self) -> None:
         st.write('Total Lost CPU-Time per User')
 
@@ -329,6 +330,7 @@ class CreateFigures:
 
         st.plotly_chart(fig)
 
+    @st.cache_data
     def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
@@ -344,6 +346,7 @@ class CreateFigures:
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
 
+    @st.cache_data
     def pie_chart_job_count(_self) -> None:
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
@@ -384,6 +387,7 @@ class CreateFigures:
 
         st.plotly_chart(fig)
 
+    @st.cache_data
     def pie_chart_batch_inter(_self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
@@ -428,7 +432,8 @@ class CreateFigures:
     #         ORDER BY period
     #     """, _self.con)
     #     st.line_chart(df.set_index('period'))
-
+    
+    @st.cache_data
     def scatter_chart_data_cpu_gpu_eff(_self):
         st.write('CPU Efficiency by Job duration')
 
@@ -507,7 +512,8 @@ class CreateFigures:
 
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
-
+    
+    @st.cache_data
     def pie_chart_by_session_state(_self, current_user):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
@@ -566,6 +572,7 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
+    @st.cache_data
     def efficiency_percentile_chart(_self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
