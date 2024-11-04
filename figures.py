@@ -70,9 +70,8 @@ class time:
             timestring = f"{days}T {hours}:{minutes}:{seconds}"
             return timestring
         else:
-            return None  # Return None for invalid input
-
-
+            st.write("ERRORRORORO")  # Return None for invalid input
+            return None
 
     def format_interval_label(interval):
         min_time = interval.left
@@ -226,7 +225,7 @@ class CreateFigures:
                     NULLIF(SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN real_time_sec * cores ELSE 0 END), 0) AS gpu_efficiency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) AS total_lost_cpu_time,                     
-                    SUM(lost_gpu_time_sec) AS total_lost_gpu_time
+                    CAST(SUM(lost_gpu_time_sec) AS INTEGER) AS total_lost_gpu_time
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
             """
@@ -240,14 +239,15 @@ class CreateFigures:
 
             
             df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
-
             st.write(df)
-            # Convert to numeric and fill NaN values with 0
-            df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
+            df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce').fillna(0).astype('Int64')
+
 
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
+
+            df['total_lost_gpu_time'] = df['total_lost_gpu_time'].replace("0T 0:0:0", None)
 
             if 'user' in st.session_state:
                 df = df.T.reset_index()
