@@ -239,7 +239,6 @@ class CreateFigures:
 
             
             df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
-            st.write(df)
             df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce').fillna(0).astype('Int64')
 
 
