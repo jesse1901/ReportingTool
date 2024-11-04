@@ -145,7 +145,7 @@ class CreateFigures:
                 selected_row = grid_response['selected_rows'][0]
                 selected_id=selected_row['JobID']
                 job_details = pyslurm.db.Job.load(selected_row, with_script=True)
-                with st.expander(f"Job Detail for ID {selected_id}", expanded=True)
+                with st.expander(f"Job Detail for ID {selected_id}", expanded=True):
                         st.write(f"Script: {job_details['script']}")
             
         else:
