@@ -57,16 +57,17 @@ class time:
 
 
     def seconds_to_timestring(total_seconds):
-        # Create a timedelta object from the total seconds
-        td = timedelta(seconds=total_seconds)
-        # Extract days, hours, minutes, and seconds from timedelta
-        days = td.days
-        hours, remainder = divmod(td.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        seconds = round(seconds)
-        # Format the result as a string
-        timestring = f"{days}T {hours}:{minutes}:{seconds}"
-        return timestring
+        if total_seconds is not None:    
+            # Create a timedelta object from the total seconds
+            td = timedelta(seconds=total_seconds)
+            # Extract days, hours, minutes, and seconds from timedelta
+            days = td.days
+            hours, remainder = divmod(td.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            seconds = round(seconds)
+            # Format the result as a string
+            timestring = f"{days}T {hours}:{minutes}:{seconds}"
+            return timestring
 
 
     def format_interval_label(interval):
@@ -239,7 +240,7 @@ class CreateFigures:
             df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
 
             # Drop rows where the conversion failed
-            df = df.fillna(0)
+            #df = df.fillna(0)
 
             # Convert the columns to integers
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
