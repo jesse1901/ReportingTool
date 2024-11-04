@@ -177,8 +177,11 @@ class CreateFigures:
             params = (current_user,)
             st.write(f"Current User: {current_user}")
             st.write(f"Params: {params}")
-            df = pd.read_sql_query(base_query, _self.con, params=params)
-            st.dataframe(df)
+            try:    
+                df = pd.read_sql_query(base_query, _self.con, params=params)
+                st.dataframe(df)
+            except Exception as e:
+                st.error(f"Database connection issue: {e}")
     
     @st.cache_data
     def frame_group_by_user(_self, current_user) -> None:
