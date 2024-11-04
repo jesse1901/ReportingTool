@@ -120,7 +120,7 @@ class CreateFigures:
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata LIMIT 100000"""
-            df = pd.read_sql_query(base_query, _self.con)
+            df = pd.read_sql_query(base_query, _self.con, params=params)
             st.dataframe(df)
         # List of available columns for     selection
             # sql_select = [
