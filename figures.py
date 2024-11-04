@@ -174,8 +174,8 @@ class CreateFigures:
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata WHERE username = ?"""
-            param = (current_user,)
-            df = pd.read_sql_query(base_query, _self.con, params=param)
+            params = (current_user,)
+            df = pd.read_sql_query(base_query, _self.con, params=params)
             st.dataframe(df)
     
     @st.cache_data
