@@ -12,6 +12,7 @@ from streamlit_autorefresh import st_autorefresh
 from dataclasses import asdict
 from config import get_config
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+import pyslurm
 
 
 class time:
@@ -140,7 +141,12 @@ class CreateFigures:
                 height=400,
                 enable_enterprise_modules=False
             )
-
+            if grid_response['selected_rows']:
+                selected_row = grid_response['selected_rows'][0]
+                selected_id=selected_row['JobID']
+                job_details = pyslurm.db.Job.load(selected_row, with_script=True)
+                with st.expander(f"Job Detail for ID {selected_id}", expanded=True)
+                        st.write(f"Script: {job_details['script']}")
             
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
