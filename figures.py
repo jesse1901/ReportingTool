@@ -96,10 +96,10 @@ class time:
 
 class CreateFigures:
 
-    def __init__(self, con):
+    def __init__(_self, con):
         # Initialize the CreateFigures class with a database connection
-        self.con = sqlite3.connect('reports.db')
-        self.color_map = {
+        _self.con = sqlite3.connect('reports.db')
+        _self.color_map = {
          'CANCELLED': '#1f77b4 ',    # Light Blue
          'COMPLETED': '#17becf ',    # Light Sky Blue
         'TIMEOUT': '#d62728 ',     # red
@@ -109,7 +109,7 @@ class CreateFigures:
     }
     
     @st.cache_data
-    def frame_user_all(self, current_user) -> None:
+    def frame_user_all(_self, current_user) -> None:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
@@ -120,7 +120,7 @@ class CreateFigures:
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata"""
-            df = pd.read_sql_query(base_query, self.con)
+            df = pd.read_sql_query(base_query, _self.con)
             st.dataframe(df)
         # List of available columns for     selection
             # sql_select = [
@@ -161,7 +161,7 @@ class CreateFigures:
 
             #     # Execute the final SQL query
             #     try:
-            #         df_filtered = pd.read_sql_query(final_query, self.con)
+            #         df_filtered = pd.read_sql_query(final_query, _self.con)
             #         st.dataframe(df_filtered)
             #     except ValueError as e:
             #         st.error(f"Query failed: {e}")
@@ -175,10 +175,10 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata WHERE username = ?"""
             param = (current_user,)
-            df = pd.read_sql_query(base_query, self.con, params=param)
+            df = pd.read_sql_query(base_query, _self.con, params=param)
             st.dataframe(df)
 
-    def frame_group_by_user(self, current_user) -> None:
+    def frame_group_by_user(_self, current_user) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
@@ -229,7 +229,7 @@ class CreateFigures:
                 params = (start_date, end_date, current_user)
 
             
-            df = pd.read_sql_query(base_query + "GROUP BY username", self.con, params=params)
+            df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
             
             df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
             df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
@@ -250,7 +250,7 @@ class CreateFigures:
                 df.columns = ["Metric", "Value"]
             st.write(df)
 
-    def bar_char_by_user(self) -> None:
+    def bar_char_by_user(_self) -> None:
         st.write('Total Lost CPU-Time per User')
 
         start_date, end_date = st.date_input(
@@ -280,7 +280,7 @@ class CreateFigures:
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
                 ORDER BY lost_cpu_time_sec DESC
-                """, self.con, params=(start_date, end_date))
+                """, _self.con, params=(start_date, end_date))
 
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
         df.fillna({'total_lost_cpu_time': 0, 'avg_cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
@@ -329,13 +329,13 @@ class CreateFigures:
 
         st.plotly_chart(fig)
 
-    def job_counts_by_log2(self) -> None:
+    def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
         df = pd.read_sql_query("""
             SELECT partition, (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
             FROM reportdata
             WHERE partition != 'jhub'
-        """, self.con)
+        """, _self.con)
         max_runtime = df['runtime_minutes'].max()
         bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
         labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
@@ -344,7 +344,7 @@ class CreateFigures:
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
 
-    def pie_chart_job_count(self) -> None:
+    def pie_chart_job_count(_self) -> None:
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
         SELECT
@@ -353,7 +353,7 @@ class CreateFigures:
             job_cpu_time
         FROM reportdata
         WHERE partition != 'jhub'
-        """, self.con)
+        """, _self.con)
 
         # Calculate total CPU time booked
         if 'job_cpu_time' in df:
@@ -384,11 +384,11 @@ class CreateFigures:
 
         st.plotly_chart(fig)
 
-    def pie_chart_batch_inter(self) -> None:
+    def pie_chart_batch_inter(_self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
             SELECT lost_cpu_time_sec, job_name, partition FROM reportdata WHERE partition != 'jhub'
-        """,self.con)
+        """,_self.con)
         # Create a new column to categorize jobs, handling None and empty values
         df['category'] = df.apply(
             lambda row: 'Jupyterhub' if row['job_name'] == 'spawner-jupyterhub'
@@ -417,7 +417,7 @@ class CreateFigures:
         # Display the pie chart
         st.plotly_chart(fig)
 
-    # def chart_cpu_utilization(self) -> None:
+    # def chart_cpu_utilization(_self) -> None:
     #     """
     #     Displays a line chart of average CPU utilization by hour from the avg_eff table.
     #     """
@@ -426,10 +426,10 @@ class CreateFigures:
     #         FROM avg_eff
     #         GROUP BY strftime('%Y-%m-%d %H:00:00', start)
     #         ORDER BY period
-    #     """, self.con)
+    #     """, _self.con)
     #     st.line_chart(df.set_index('period'))
 
-    def scatter_chart_data_cpu_gpu_eff(self):
+    def scatter_chart_data_cpu_gpu_eff(_self):
         st.write('CPU Efficiency by Job duration')
 
         # Fetch the available date range from the database
@@ -437,7 +437,7 @@ class CreateFigures:
             SELECT MIN(start) AS min_date, MAX(end) AS max_date
             FROM reportdata
         """
-        date_range_df = pd.read_sql_query(date_query, self.con)
+        date_range_df = pd.read_sql_query(date_query, _self.con)
         min_date = pd.to_datetime(date_range_df['min_date'].values[0]).date()
         max_date = pd.to_datetime(date_range_df['max_date'].values[0]).date()
         max_date += timedelta(days=1)
@@ -475,7 +475,7 @@ class CreateFigures:
             AND partition != 'jhub' 
             ORDER BY real_time_sec ASC;
         """
-        df = pd.read_sql_query(query, self.con)
+        df = pd.read_sql_query(query, _self.con)
 
         # Data cleaning and transformation
         df['real_time_sec'] = pd.to_numeric(df['real_time_sec'], errors='coerce')
@@ -508,7 +508,7 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
 
-    def pie_chart_by_session_state(self, current_user):
+    def pie_chart_by_session_state(_self, current_user):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
@@ -523,7 +523,7 @@ class CreateFigures:
                 base_query += "AND username = ?"
                 params=(current_user, )
             
-        df = pd.read_sql_query(base_query + " GROUP BY state", self.con, params=params)
+        df = pd.read_sql_query(base_query + " GROUP BY state", _self.con, params=params)
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
             df,
@@ -531,12 +531,12 @@ class CreateFigures:
             values='total_lost_cpu_time',
             title=f"Lost CPU Time by state",
             color='category',
-            color_discrete_map=self.color_map,
+            color_discrete_map=_self.color_map,
         )
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def pie_chart_by_job_count(self, current_user):
+    def pie_chart_by_job_count(_self, current_user):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
@@ -551,7 +551,7 @@ class CreateFigures:
                 base_query += "AND username = ?"
                 params=(current_user, )
             
-        df = pd.read_sql_query(base_query + " GROUP BY state", self.con, params=params)
+        df = pd.read_sql_query(base_query + " GROUP BY state", _self.con, params=params)
 
         # Erstellen des Pie-Charts mit Plotly
         fig = px.pie(
@@ -560,18 +560,18 @@ class CreateFigures:
             values='Job_count',
             title=f"Job Count by state",
             color='category',
-            color_discrete_map=self.color_map
+            color_discrete_map=_self.color_map
         )
         fig.update_layout(showlegend=False)
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    def efficiency_percentile_chart(self):
+    def efficiency_percentile_chart(_self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
                    SELECT cpu_efficiency, jobID
                    FROM reportdata WHERE partition != 'jhub'
-               """, self.con)
+               """, _self.con)
 
         # Filter out rows where cpu_efficiency is 0
         df = df[df['cpu_efficiency'] != 0]
@@ -619,7 +619,7 @@ class CreateFigures:
         fig.add_trace(go.Scatter(
             x=pd.concat([percentile_df['Efficiency Percentile'], percentile_df['Efficiency Percentile'][::-1]]),
             y=pd.concat([percentile_df['Min Efficiency'], percentile_df['Max Efficiency'][::-1]]),
-            fill='toself',
+            fill='to_self',
             fillcolor='rgba(0,100,80,0.2)',
             line=dict(color='rgba(0,100,80,0)'),
             name='Efficiency Range'
