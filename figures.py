@@ -213,13 +213,14 @@ class CreateFigures:
             base_query = """
                 SELECT username,   
 
-                    1 - (SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END) /
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END)) AS cpu_efficiency,
+                    1 - SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END)) / 
+                    (SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END)AS cpu_efficiency,
 
                     COUNT(jobID) AS job_count,
 
-                    1-(SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN real_time_sec * cores ELSE NULL END) / 
-                    SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN lost_gpu_time_sec ELSE NULL END)) AS gpu_efficency,
+                    1 - 
+                    SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN lost_gpu_time_sec ELSE NULL END)) / 
+                    (SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN real_time_sec * cores ELSE NULL END) AS gpu_efficency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
                     SUM(lost_gpu_time_sec) AS total_lost_gpu_time
