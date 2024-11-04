@@ -87,7 +87,7 @@ def main():
                 st.header("Efficiency")
                 col6, col7, col8 = st.columns(3)
                 with col6:
-                    create.pie_chart_by_session_state(username)
+                    create.pie_chart_by_session_state(username, user_role)
                 with col7:
                     create.pie_chart_by_job_count(username)
                 with col8:
@@ -113,7 +113,7 @@ def main():
             with tab2:
                 col3, col4 = st.columns(2)
                 with col3:
-                    create.pie_chart_by_session_state(username)
+                    create.pie_chart_by_session_state(username, user_role)
                 with col4:
                     create.pie_chart_by_job_count(username)
     else:

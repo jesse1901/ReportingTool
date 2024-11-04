@@ -522,7 +522,7 @@ class CreateFigures:
         st.plotly_chart(fig, theme=None)
     
     @st.cache_data
-    def pie_chart_by_session_state(_self, current_user):
+    def pie_chart_by_session_state(_self, current_user, user_role):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
         # SQL-Abfrage zur Aggregation der verlorenen CPU-Zeit nach der Gruppierung
@@ -531,9 +531,9 @@ class CreateFigures:
             FROM reportdata
             WHERE partition != 'jhub'
         """
-        if 'admin' in st.session_state:    
+        if user_role == 'admin':    
                 params= None
-        elif 'user' in st.session_state:
+        else:
                 base_query += "AND username = ?"
                 params=(current_user, )
             
