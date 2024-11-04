@@ -50,11 +50,11 @@ def authenticate(username, password):
         st.error(f"LDAP connection error: {e}")
         return False
 
-def date_slider_wrapper(func, current_user, role):
+def date_slider_wrapper(func, current_user, role, key:str):
 # Wrapper to handle Date-Selection with st.cache
        
     default_range = [datetime.today() - timedelta(days=30), datetime.today()]
-    date_selector = st.date_input("select timerange", default_range)
+    date_selector = st.date_input("select timerange", default_range, key=f"date_slider_{key}")
     
     if len(date_selector) != 2:
         st.stop()
@@ -85,7 +85,7 @@ def main():
                 with col1:
                     create.frame_user_all(username, user_role)
                 with col2:
-                    date_slider_wrapper(create.frame_group_by_user, username, user_role)
+                    date_slider_wrapper(create.frame_group_by_user, username, user_role, "group_by_user")
 
             with tab2:
                 st.header("Job Data")
@@ -101,9 +101,9 @@ def main():
                 st.header("Efficiency")
                 col6, col7, col8 = st.columns(3)
                 with col6:
-                    create.pie_chart_by_session_state(username, user_role)
+                    create.pie_chart_by_session_state(username, user_role, "by_session_state")
                 with col7:
-                    create.pie_chart_by_job_count(username, user_role)
+                    create.pie_chart_by_job_count(username, user_role, "by_job_count")
                 with col8:
                     create.efficiency_percentile_chart()
 
@@ -111,9 +111,9 @@ def main():
                 st.header("")
                 col9, col10 = st.columns(2)
                 with col9:
-                    date_slider_wrapper(create.bar_char_by_user, username, user_role)
+                    date_slider_wrapper(create.bar_char_by_user, username, user_role, "bar_by_user")
                 with col10:
-                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role)
+                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role, "scatter")
 
         elif user_role == 'user':
             tab1, tab2 = st.tabs(["Tables", "Charts"]) 
@@ -123,7 +123,7 @@ def main():
                 with col1: 
                     create.frame_user_all(username, user_role)
                 with col2:
-                    create.frame_group_by_user(username, user_role)
+                    date_slider_wrapper(create.frame_group_by_user(username, user_role), username, user_role, "by_user")
             with tab2:
                 col3, col4 = st.columns(2)
                 with col3:
