@@ -141,7 +141,7 @@ class CreateFigures:
                 height=400,
                 enable_enterprise_modules=False
             )
-            if grid_response['selected_rows']:
+            if grid_response['selected_rows'] and len(grid_response['selected_rows'] > 0):
                 selected_row = grid_response['selected_rows'][0]
                 selected_id=selected_row['JobID']
                 job_details = pyslurm.db.Job.load(selected_row, with_script=True)
