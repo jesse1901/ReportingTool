@@ -225,7 +225,6 @@ class CreateFigures:
                     SUM(lost_gpu_time_sec) AS total_lost_gpu_time
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
-                GROUP BY username
             """
 
             if user_role =='admin':    
