@@ -146,7 +146,7 @@ class CreateFigures:
                 selected_id=selected_row['JobID']
                 job_details = pyslurm.db.Job.load(selected_row, with_script=True)
                 with st.expander(f"Job Detail for ID {selected_id}", expanded=True):
-                        st.write(f"Script: {job_details['script']}")
+                        st.write(f"Script: {job_details.script}")
             
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
