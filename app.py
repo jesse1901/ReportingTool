@@ -123,7 +123,7 @@ def main():
                 with col1: 
                     create.frame_user_all(username, user_role)
                 with col2:
-                    date_slider_wrapper(create.frame_group_by_user(username, user_role), username, user_role, "by_user")
+                    date_slider_wrapper(create.frame_group_by_user, username, user_role, "by_user")
             with tab2:
                 col3, col4 = st.columns(2)
                 with col3:
