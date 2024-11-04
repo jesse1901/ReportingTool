@@ -107,7 +107,8 @@ class CreateFigures:
         'PREEMPTED': '#2ca02c',     # Light Green
         'NODE_FAIL': '#fcf76a'
     }
-
+    
+    @st.cache_data
     def frame_user_all(self, current_user) -> None:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.

@@ -200,7 +200,7 @@ class GetStats:
         self.list_filter = round(time.time())
         
         # Prepare to track the earliest end time
-        earliest_end_time = None
+        earliest_end_time = '2024-10-20T17:27:15'
 
         # Load jobs with current end time as filter
         self.db_filter = pyslurm.db.JobFilter(end_time=self.list_filter)
