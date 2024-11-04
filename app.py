@@ -69,7 +69,7 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
     
     if number_input:
         display_user = st.number_input("Number of Users:", value=20 )
-        func( start_date, end_date, current_user, role)
+        func( start_date, end_date, current_user, role, scale_efficiency, display_user)
     else: 
         func( start_date, end_date, current_user, role)
 
