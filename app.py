@@ -73,10 +73,11 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
         func( start_date, end_date, current_user, role, scale_efficiency, display_user)
     
     elif number_input: 
-        display_user = st.number_input("Number of Users:", value=20, key=f"number_input_{key}", disabled=True )
+        display_user = st.number_input("Number of Users:", value=20, key=f"number_input_{key}")
         func( start_date, end_date, current_user, role, display_user)
     
     elif hyper_threading: 
+        display_user = st.number_input("Number of Users:", value=20, key=f"number_input_{key}", disabled=True)
         func( start_date, end_date, current_user, role, hyper_threading)
     
     else: 
