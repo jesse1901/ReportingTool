@@ -612,14 +612,14 @@ class CreateFigures:
             y=percentile_df['Mean Efficiency'],
             mode='lines+markers',
             name='Mean CPU Efficiency',
-            line=dict(color='royalblue')
+            line=dict(color='royalblue'),
         ))
 
         # Add fill between the min and max efficiency for each percentile
         fig.add_trace(go.Scatter(
             x=pd.concat([percentile_df['Efficiency Percentile'], percentile_df['Efficiency Percentile'][::-1]]),
             y=pd.concat([percentile_df['Min Efficiency'], percentile_df['Max Efficiency'][::-1]]),
-            fill='to_self',
+            fill='toself',
             fillcolor='rgba(0,100,80,0.2)',
             line=dict(color='rgba(0,100,80,0)'),
             name='Efficiency Range'
