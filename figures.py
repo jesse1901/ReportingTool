@@ -175,6 +175,8 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata WHERE username = ?"""
             params = (current_user,)
+            st.write(f"Current User: {current_user}")
+            st.write(f"Params: {params}")
             df = pd.read_sql_query(base_query, _self.con, params=params)
             st.dataframe(df)
     
