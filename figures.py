@@ -192,14 +192,10 @@ class CreateFigures:
             st.write(df)
     
     @st.cache_data
-    def bar_char_by_user(_self, start_date, end_date, current_user, role) -> None:
+    def bar_char_by_user(_self, start_date, end_date, current_user, role, scale_efficiency, display_user) -> None:
         st.write('Total Lost CPU-Time per User')
 
         end_date += timedelta(days=1)
-
-        display_user = st.number_input(
-            'Anzahl User', value=20,
-        )
 
         if start_date and end_date:
             if start_date > end_date:
@@ -236,8 +232,6 @@ class CreateFigures:
 
             # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
             df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
-
-            scale_efficiency = st.checkbox("Hyperthreading Aus")
             if scale_efficiency:
                 df['total_job_time'] = np.where(df['avg_cpu_efficiency'] != 100, df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100), np.nan)
                 df['cpu_efficiency'] = df.apply(
@@ -378,11 +372,8 @@ class CreateFigures:
     #     st.line_chart(df.set_index('period'))
     
     @st.cache_data
-    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role):
+    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency):
         st.write('CPU Efficiency by Job duration')
-
-
-        scale_efficiency = st.checkbox("Hyperthreading")
 
         # Manage the button state using Streamlit session state
         if 'scale_efficiency' not in st.session_state:

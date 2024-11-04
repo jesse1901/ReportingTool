@@ -121,9 +121,9 @@ def main():
                 st.header("")
                 col9, col10 = st.columns(2)
                 with col9:
-                    date_slider_wrapper(create.bar_char_by_user, username, user_role, "bar_by_user")
+                    date_slider_wrapper(create.bar_char_by_user, username, user_role, "bar_by_user", hyper_threading=True, number_input=True)
                 with col10:
-                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role, "scatter")
+                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role, "scatter", hyper_threading=True)
 
         elif user_role == 'user':
             tab1, tab2 = st.tabs(["Tables", "Charts"]) 
