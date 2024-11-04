@@ -270,7 +270,6 @@ class GetStats:
             response = requests.get(prometheus_url, params=params)
             if response.status_code == 400:
                 while True:
-                    print("try")
                     step += 1
                     response = requests.get(prometheus_url, params=params)
                     print(response.raise_for_status())
