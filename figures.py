@@ -113,7 +113,7 @@ class CreateFigures:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
-
+        params = None
         st.write('All Data')
         if user_role == "admin":
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
