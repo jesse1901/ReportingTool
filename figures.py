@@ -126,7 +126,7 @@ class CreateFigures:
                             FROM reportdata ORDER BY start DESC LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con, params=params)
             st.dataframe(df)
-            
+
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
@@ -140,26 +140,10 @@ class CreateFigures:
                 st.error(f"Database connection issue: {e}")
     
     @st.cache_data
-    def frame_group_by_user(_self, current_user, user_role) -> None:
+    def frame_group_by_user(_self, start_date, end_date, current_user, user_role) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
-        if "admin" in st.session_state:
-            st.write('Data grouped by user')
-
-        else:
-            st.write('Your Data in Timerange:')
-        # Get start and end dates from Streamlit date input
-        default_range = [datetime.today() - timedelta(days=30), datetime.today()]
-
-        # Capture date input and handle single or double date selection
-        date_selection = st.date_input(
-            'Start Date - End Date', value=default_range
-        )
-        if len(date_selection) != 2:
-            st.stop()
-        
-        start_date, end_date = date_selection
 
         if start_date and end_date:
             if start_date > end_date:

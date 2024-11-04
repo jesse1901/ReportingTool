@@ -50,6 +50,21 @@ def authenticate(username, password):
         st.error(f"LDAP connection error: {e}")
         return False
 
+def date_slider_wrapper(func, _self, current_user, role):
+# Wrapper to handle Date-Selection with st.cache
+       
+    default_range = [datetime.today() - timedelta(days=30), datetime.today()]
+    st.write('Select time range')
+    date_selector = st.date_input(datetime.today() - timedelta(days=30), datetime.today())
+    
+    if len(date_selector) != 2:
+        st.stop()
+
+    start_date, end_date = date_selector
+
+    func(_self, start_date, end_date, current_user, role)
+
+
 def is_user_allowed(username):
     return username in ALLOWED_USERS
 
@@ -71,7 +86,7 @@ def main():
                 with col1:
                     create.frame_user_all(username, user_role)
                 with col2:
-                    create.frame_group_by_user(username, user_role)
+                    date_slider_wrapper(create.frame_group_by_user,  username, user_role)
 
             with tab2:
                 st.header("Job Data")
@@ -97,9 +112,9 @@ def main():
                 st.header("")
                 col9, col10 = st.columns(2)
                 with col9:
-                    create.bar_char_by_user()
+                    date_slider_wrapper(create.bar_char_by_user, username, user_role)
                 with col10:
-                    create.scatter_chart_data_cpu_gpu_eff()
+                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role)
 
         elif user_role == 'user':
             tab1, tab2 = st.tabs(["Tables", "Charts"]) 
