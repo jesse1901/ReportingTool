@@ -192,13 +192,9 @@ class CreateFigures:
             st.write(df)
     
     @st.cache_data
-    def bar_char_by_user(_self) -> None:
+    def bar_char_by_user(_self, start_date, end_date) -> None:
         st.write('Total Lost CPU-Time per User')
 
-        start_date, end_date = st.date_input(
-            'Start Date und End Date',
-            [datetime.today() - timedelta(days=30), datetime.today()],
-        )
         end_date += timedelta(days=1)
 
         display_user = st.number_input(
