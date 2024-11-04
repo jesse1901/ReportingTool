@@ -109,13 +109,13 @@ class CreateFigures:
     }
     
     @st.cache_data
-    def frame_user_all(_self, current_user, role) -> None:
+    def frame_user_all(_self, current_user, user_role) -> None:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
 
         st.write('All Data')
-        if role == "admin":
+        if user_role == "admin":
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
