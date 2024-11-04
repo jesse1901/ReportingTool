@@ -50,7 +50,7 @@ def authenticate(username, password):
         st.error(f"LDAP connection error: {e}")
         return False
 
-def date_slider_wrapper(func, current_user, role, key:str):
+def date_slider_wrapper(func, current_user, role, key:str, number_input=False, hyper_threading=False):
 # Wrapper to handle Date-Selection with st.cache
        
     default_range = [datetime.today() - timedelta(days=30), datetime.today()]
@@ -61,7 +61,17 @@ def date_slider_wrapper(func, current_user, role, key:str):
 
     start_date, end_date = date_selector
 
-    func( start_date, end_date, current_user, role)
+    if hyper_threading:
+        scale_efficiency = st.checkbox("Hyperthreading")
+
+        if 'scale_efficiency' not in st.session_state:
+            st.session_state.scale_efficiency = False 
+    
+    if number_input:
+        display_user = st.number_input("Number of Users:", value=20 )
+        func( start_date, end_date, current_user, role)
+    else: 
+        func( start_date, end_date, current_user, role)
 
 
 def is_user_allowed(username):
@@ -138,7 +148,7 @@ def main():
         username = form.text_input("Username")
         password = form.text_input("Password", type="password")
         try:
-            if form.form_submit_button("Login"):
+            if form.form_submit_button("Login"):                
                 if authenticate(username, password):
                     st.session_state['username'] = username
                     if is_user_admin(username):

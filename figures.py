@@ -381,24 +381,7 @@ class CreateFigures:
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role):
         st.write('CPU Efficiency by Job duration')
 
-        # Fetch the available date range from the database
-        date_query = """
-            SELECT MIN(start) AS min_date, MAX(end) AS max_date
-            FROM reportdata
-        """
-        date_range_df = pd.read_sql_query(date_query, _self.con)
-        min_date = pd.to_datetime(date_range_df['min_date'].values[0]).date()
-        max_date = pd.to_datetime(date_range_df['max_date'].values[0]).date()
-        max_date += timedelta(days=1)
 
-        # Create a slider for date range selection
-        start_date, end_date = st.slider(
-            "Select Date Range",
-            min_value=min_date,
-            max_value=max_date,
-            value=(min_date, max_date),
-            format="YYYY-MM-DD"
-        )
         scale_efficiency = st.checkbox("Hyperthreading")
 
         # Manage the button state using Streamlit session state
