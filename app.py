@@ -107,7 +107,7 @@ def main():
             with tab1:
                 col1, col2 = st.columns([3, 1])
                 with col1: 
-                    create.frame_user_all(username)
+                    create.frame_user_all(username, user_role)
                 with col2:
                     create.frame_group_by_user(username)
             with tab2:
