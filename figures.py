@@ -184,7 +184,7 @@ class CreateFigures:
                 st.error(f"Database connection issue: {e}")
     
     @st.cache_data
-    def frame_group_by_user(_self, current_user) -> None:
+    def frame_group_by_user(_self, current_user, user_role) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
         """
@@ -228,10 +228,10 @@ class CreateFigures:
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
             """ 
 
-            if 'admin' in st.session_state:    
+            if user_role =='admin':    
                 params = (start_date, end_date)
             
-            if 'user' in st.session_state:
+            if user_role == 'user':
                 base_query += " AND username = ?"
                 params = (start_date, end_date, current_user)
 

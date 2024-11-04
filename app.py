@@ -71,7 +71,7 @@ def main():
                 with col1:
                     create.frame_user_all(username, user_role)
                 with col2:
-                    create.frame_group_by_user(username)
+                    create.frame_group_by_user(username, user_role)
 
             with tab2:
                 st.header("Job Data")
@@ -109,7 +109,7 @@ def main():
                 with col1: 
                     create.frame_user_all(username, user_role)
                 with col2:
-                    create.frame_group_by_user(username)
+                    create.frame_group_by_user(username, user_role)
             with tab2:
                 col3, col4 = st.columns(2)
                 with col3:
