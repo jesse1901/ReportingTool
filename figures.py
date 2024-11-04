@@ -378,7 +378,7 @@ class CreateFigures:
     #     st.line_chart(df.set_index('period'))
     
     @st.cache_data
-    def scatter_chart_data_cpu_gpu_eff(_self):
+    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role):
         st.write('CPU Efficiency by Job duration')
 
         # Fetch the available date range from the database
