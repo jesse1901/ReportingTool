@@ -57,7 +57,7 @@ class time:
 
 
     def seconds_to_timestring(total_seconds):
-        if total_seconds is not None:    
+        if total_seconds is type(int):    
             # Create a timedelta object from the total seconds
             td = timedelta(seconds=total_seconds)
             # Extract days, hours, minutes, and seconds from timedelta
@@ -213,13 +213,13 @@ class CreateFigures:
             base_query = """
                 SELECT username,   
 
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END) /
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency,
+                    1 - (SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END) /
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS cpu_efficiency),
 
                     COUNT(jobID) AS job_count,
 
-                    SUM(real_time_sec * cores) / 
-                    SUM(lost_gpu_time_sec) AS gpu_efficency,
+                    1-(SUM(real_time_sec * cores) / 
+                    SUM(lost_gpu_time_sec)) AS gpu_efficency,
 
                     SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time,                     
                     SUM(lost_gpu_time_sec) AS total_lost_gpu_time
@@ -235,16 +235,6 @@ class CreateFigures:
 
             
             df = pd.read_sql_query(base_query + "GROUP BY username", _self.con, params=params)
-            
-            df['total_lost_cpu_time'] = pd.to_numeric(df['total_lost_cpu_time'], errors='coerce')
-            df['total_lost_gpu_time'] = pd.to_numeric(df['total_lost_gpu_time'], errors='coerce')
-
-            # Drop rows where the conversion failed
-            #df = df.fillna(0)
-
-            # Convert the columns to integers
-            df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-            df['total_lost_gpu_time'] = df['total_lost_gpu_time'].astype(int)
 
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
