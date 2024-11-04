@@ -50,19 +50,18 @@ def authenticate(username, password):
         st.error(f"LDAP connection error: {e}")
         return False
 
-def date_slider_wrapper(func, _self, current_user, role):
+def date_slider_wrapper(func, current_user, role):
 # Wrapper to handle Date-Selection with st.cache
        
     default_range = [datetime.today() - timedelta(days=30), datetime.today()]
-    st.write('Select time range')
-    date_selector = st.date_input(datetime.today() - timedelta(days=30), datetime.today())
+    date_selector = st.date_input("select timerange", default_range)
     
     if len(date_selector) != 2:
         st.stop()
 
     start_date, end_date = date_selector
 
-    func(_self, start_date, end_date, current_user, role)
+    func( start_date, end_date, current_user, role)
 
 
 def is_user_allowed(username):
@@ -86,7 +85,7 @@ def main():
                 with col1:
                     create.frame_user_all(username, user_role)
                 with col2:
-                    date_slider_wrapper(create.frame_group_by_user,  username, user_role)
+                    date_slider_wrapper(create.frame_group_by_user, username, user_role)
 
             with tab2:
                 st.header("Job Data")
