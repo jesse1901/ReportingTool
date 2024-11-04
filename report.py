@@ -194,7 +194,7 @@ class GetStats:
         # Retrieve the highest jobID currently in the reportdata table
         # cur.execute("SELECT MAX(end) FROM reportdata")
         # _self.latest_end = str(cur.fetchone()[0] or 0)
-        _self.latest_end = '2024-07-03T17:27:15'
+        _self.latest_end = '2024-10-20T17:27:15'
         
         # Create a list of job IDs to filter and load jobs
         _self.list_filter = round(time.time())
@@ -262,7 +262,8 @@ class GetStats:
         print(f"finished for loop NEW Jobs {datetime.now()}")
         # After processing the latest jobs, fill in gaps for jobs with end times earlier than the latest processed end time
         if earliest_end_time is not None:
-            _self.latest_end = earliest_end_time.isoformat('T', 'auto')
+            _self.latest_end = '2024-10-20T17:27:15'
+            #earliest_end_time.isoformat('T', 'auto')
             print(f'starting OLD jobs at {datetime.now()}')
             
             # Fill in gaps in the database
