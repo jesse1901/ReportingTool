@@ -275,14 +275,19 @@ class CreateFigures:
             params = start_date, end_date
 
             df = pd.read_sql_query("""
-                SELECT username, 
-                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) /
-                SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE NULL END) AS cpu_efficiency ,
+                SELECT username,   
 
-                
-                SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE NULL END) AS total_lost_cpu_time                     
-                               
-                FROM reportdata
+                    1 - SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) / 
+                    NULLIF(SUM(CASE WHEN gpu_efficiency IS NULL THEN real_time_sec * cores ELSE 0 END), 0) AS cpu_efficiency,
+
+                    COUNT(jobID) AS job_count,
+
+                    1 - SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN lost_gpu_time_sec ELSE 0 END) / 
+                    NULLIF(SUM(CASE WHEN gpu_efficiency IS NOT NULL THEN real_time_sec * cores ELSE 0 END), 0) AS gpu_efficiency,
+
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) AS total_lost_cpu_time,                     
+                    CAST(SUM(lost_gpu_time_sec) AS INTEGER) AS total_lost_gpu_time
+                FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
                 ORDER BY lost_cpu_time_sec DESC
