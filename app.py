@@ -56,87 +56,90 @@ def is_user_allowed(username):
 def is_user_admin(username):
     return username in ADMIN_USERS
 
+
 def main():
-    if 'admin' in st.session_state:
-        username = st.session_state['admin']
-        tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
-
-        with tab1:
-            st.header("User Data")
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                create.frame_user_all(username)
-            with col2:
-                create.frame_group_by_user(username)
-
-        with tab2:
-            st.header("Job Data")
-            col3, col4, col5 = st.columns(3)
-            with col3:
-                create.job_counts_by_log2()
-            with col4:
-                create.pie_chart_job_count()
-            with col5:
-                create.pie_chart_batch_inter()
-
-        with tab3:
-            st.header("Efficiency")
-            col6, col7, col8 = st.columns(3)
-            with col6:
-                create.pie_chart_by_session_state(username)
-            with col7:
-                create.pie_chart_by_job_count(username)
-            with col8:
-                create.efficiency_percentile_chart()
-            # create.chart_cpu_utilization()
-
-        with tab4:
-            st.header("")
-            col9, col10 = st.columns(2)
-            with col9:
-                create.bar_char_by_user()
-            with col10:
-                create.scatter_chart_data_cpu_gpu_eff()
-
-    elif 'user' in st.session_state:
-        username = st.session_state['user']
-        tab1, tab2 = st.tabs(["Tables", "Charts"]) 
+    if 'user_role' in st.session_state:
+        username = st.session_state['username']
+        user_role = st.session_state['user_role']
         
-        with tab1:
-            col1, col2 = st.columns([3, 1])
-            with col1: 
-                create.frame_user_all(username)
-            with col2:
-                create.frame_group_by_user(username)
-        with tab2:
-            col3, col4 = st.columns(2)
-            with col3:
-                create.pie_chart_by_session_state(username)
-            with col4:
-                create.pie_chart_by_job_count(username)
+        if user_role == 'admin':
+            tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
+
+            with tab1:
+                st.header("User Data")
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    create.frame_user_all(username, user_role)
+                with col2:
+                    create.frame_group_by_user(username)
+
+            with tab2:
+                st.header("Job Data")
+                col3, col4, col5 = st.columns(3)
+                with col3:
+                    create.job_counts_by_log2()
+                with col4:
+                    create.pie_chart_job_count()
+                with col5:
+                    create.pie_chart_batch_inter()
+
+            with tab3:
+                st.header("Efficiency")
+                col6, col7, col8 = st.columns(3)
+                with col6:
+                    create.pie_chart_by_session_state(username)
+                with col7:
+                    create.pie_chart_by_job_count(username)
+                with col8:
+                    create.efficiency_percentile_chart()
+
+            with tab4:
+                st.header("")
+                col9, col10 = st.columns(2)
+                with col9:
+                    create.bar_char_by_user()
+                with col10:
+                    create.scatter_chart_data_cpu_gpu_eff()
+
+        elif user_role == 'user':
+            tab1, tab2 = st.tabs(["Tables", "Charts"]) 
+            
+            with tab1:
+                col1, col2 = st.columns([3, 1])
+                with col1: 
+                    create.frame_user_all(username)
+                with col2:
+                    create.frame_group_by_user(username)
+            with tab2:
+                col3, col4 = st.columns(2)
+                with col3:
+                    create.pie_chart_by_session_state(username)
+                with col4:
+                    create.pie_chart_by_job_count(username)
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
+        
         # Show login form if user is not authenticated
         username = form.text_input("Username")
         password = form.text_input("Password", type="password")
         try:
             if form.form_submit_button("Login"):
                 if authenticate(username, password):
+                    st.session_state['username'] = username
                     if is_user_admin(username):
-                        st.session_state['admin'] = username
-                        st.success('success')
-                        st.rerun()
+                        st.session_state['user_role'] = 'admin'
                     elif is_user_allowed(username):        
-                        st.session_state['user'] = username
-                        st.success('success')
-                        st.rerun()
-                    
+                        st.session_state['user_role'] = 'user'
                     else:
-                        st.error("you are not authorized to login")    
+                        st.error("You are not authorized to login")
+                        return  # Exit if not authorized
+                    
+                    st.success('Login successful')
+                    st.rerun()  # Re-run to update session state
 
         except Exception as e:
-            st.error("")
+            st.error("An error occurred during login.")
 
 
 if __name__ == "__main__":

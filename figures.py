@@ -109,13 +109,13 @@ class CreateFigures:
     }
     
     @st.cache_data
-    def frame_user_all(_self, current_user) -> None:
+    def frame_user_all(_self, current_user, role) -> None:
         """
         Displays all job data.py from the reportdata table in the Streamlit app.
         """
 
         st.write('All Data')
-        if "admin" in st.session_state:
+        if role == "admin":
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
                             gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
                             gpu_nodes, start, end, job_name, partition
@@ -185,6 +185,7 @@ class CreateFigures:
         """
         if "admin" in st.session_state:
             st.write('Data grouped by user')
+
         else:
             st.write('Your Data in Timerange:')
         # Get start and end dates from Streamlit date input
