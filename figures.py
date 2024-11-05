@@ -403,8 +403,7 @@ class CreateFigures:
         df['real_time_sec'] = df['real_time_sec'].astype(int)
         df['real_time_sec'] = df['real_time_sec'].apply(time.seconds_to_timestring)
 
-        # Filter dataframe based on the checkbox
-        row_var = ['gpu_efficiency']
+        df['cpu_efficiency'] = df['cpu_efficiency'].clip(upper=100)
 
         # Scale CPU efficiency if the button is toggled
         if scale_efficiency:
