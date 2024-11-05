@@ -113,6 +113,12 @@ class CreateFigures:
         'NODE_FAIL': '#fcf76a'
     }
     
+    def get_job_script(_self):
+        jobid = st.text_input()
+        if jobid: 
+            job = pyslurm.db.Job.load(jobid, with_script=True)
+            st.code(job.script)
+
     @st.cache_data
     def frame_user_all(_self, current_user, user_role) -> None:
         """

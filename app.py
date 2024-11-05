@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 from streamlit_autorefresh import st_autorefresh
 from dataclasses import asdict
 from figures import CreateFigures
-
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 secrets = toml.load('.streamlit/secrets.toml')
 
@@ -104,6 +104,7 @@ def main():
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     create.frame_user_all(username, user_role)
+                    create.get_job_script()
                 with col2:
                     date_slider_wrapper(create.frame_group_by_user, username, user_role, "group_by_user")
 
