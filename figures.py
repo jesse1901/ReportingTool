@@ -296,7 +296,7 @@ class CreateFigures:
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
         job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
-        st.write(alt.Chart(job_counts).mark_bar().endcode(
+        st.write(alt.Chart(job_counts).mark_bar().encode(
             x=alt.X('runtime_interval', sort=None)
         ))
     @st.cache_data
