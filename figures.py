@@ -192,7 +192,7 @@ class CreateFigures:
 
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].replace("0T 0:0:0", None)
 
-            if 'user' in st.session_state:
+            if user_role == 'user':
                 df = df.T.reset_index()
                 df.columns = ["Metric", "Value"]
             st.write(df)
