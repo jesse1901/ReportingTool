@@ -309,7 +309,11 @@ class CreateFigures:
         st.write(alt.Chart(job_counts_df).mark_bar().encode(
             x=alt.X('runtime_interval:O', sort=None),  # Ensure to specify the data type
             y='job_count:Q',  # Use count for y-axis
-        ))
+        ).properties(
+        width=550,  # Adjust the width as needed
+        height=450  # Adjust the height as needed
+    )
+)
 
     @st.cache_data
     def pie_chart_job_count(_self) -> None:
