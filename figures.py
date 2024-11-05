@@ -305,9 +305,6 @@ class CreateFigures:
         job_counts_df = job_counts.reset_index()
         job_counts_df.columns = ['runtime_interval', 'job_count']  # Rename columns for clarity
 
-        # Display the job counts DataFrame
-        st.write(job_counts_df)
-
         # Use Altair to create the chart
         st.write(alt.Chart(job_counts_df).mark_bar().encode(
             x=alt.X('runtime_interval:O', sort=None),  # Ensure to specify the data type
