@@ -337,7 +337,7 @@ class CreateFigures:
 
         # Calculate bins for logarithmic intervals
         max_runtime = df['runtime_minutes'].max()
-        bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
+        bins = [0, 2] + [2 ** i for i in range(2, int(np.log2(max_runtime)) + 2)]
 
         # Assign each job to a runtime interval
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, include_lowest=True)
