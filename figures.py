@@ -224,9 +224,6 @@ class CreateFigures:
             # Ensure that total_lost_cpu_time is integer and formatted correctly
             df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
             df['formatted_lost_cpu_time'] = df['lost_cpu_time_sec'].apply(time.seconds_to_timestring)
-
-            # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
-            df = df.sort_values(by='lost_cpu_time_sec', ascending=False).head(display_user)
             
             usernames = df['username'].values
             lost_cpu_time = df['lost_cpu_time_sec'].fillna(0).values
@@ -248,14 +245,17 @@ class CreateFigures:
                 
                 result_df = pd.DataFrame({
                     'username': usernames,
-                    'lost_cpu_time':adjusted_lost_cpu_time}).groupby('username').sum().reset_index()
+                    'lost_cpu_time':adjusted_lost_cpu_time})
             else: 
                 
                 result_df = pd.DataFrame({
                     'username': usernames,
-                    'lost_cpu_time':lost_cpu_time}).groupby('username').sum().reset_index()
+                    'lost_cpu_time':lost_cpu_time})
             
-            
+            result_df = result_df.groupby('username').sum().reset_index()
+
+            result_df = result_df.sort_values(by='lost_cpu_time', ascending=False).head(display_user)
+
             # Define constant tick values for the y-axis (vertical chart)
             max_lost_time = result_df['lost_cpu_time'].max()
             tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
