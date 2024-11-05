@@ -62,7 +62,7 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
     start_date, end_date = date_selector
 
     if hyper_threading:
-        scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}")    
+        scale_efficiency = st.checkbox("Disable Hyperthreading Cores", key=f"checkbox_{key}")    
 
     
     if number_input and hyper_threading:

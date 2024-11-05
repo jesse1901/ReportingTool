@@ -239,9 +239,9 @@ class CreateFigures:
             # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
             df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
             if scale_efficiency:
-                df['total_job_time'] = np.where(df['avg_cpu_efficiency'] != 100, df['total_lost_cpu_time'] / ((100 - df['avg_cpu_efficiency']) / 100), np.nan)
+                df['total_job_time'] = np.where(df['cpu_efficiency'] != 100, df['total_lost_cpu_time'] / ((100 - df['cpu_efficiency']) / 100), np.nan)
                 df['cpu_efficiency'] = df.apply(
-                    lambda row: min(row['avg_cpu_efficiency'] * 2, 100) if row['avg_cpu_efficiency'] <= 100 else row['avg_cpu_efficiency'], axis=1)
+                    lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row['cpu_efficiency'], axis=1)
 
                 # Handle NaN in cpu_efficiency and total_job_time
                 df['cpu_efficiency'] = df['cpu_efficiency'].fillna(0)
