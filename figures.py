@@ -248,12 +248,14 @@ class CreateFigures:
                 
                 result_df = pd.DataFrame({
                     'username': usernames,
-                    'lost_cpu_time':adjusted_lost_cpu_time}).groupby('username').sum()
+                    'lost_cpu_time':adjusted_lost_cpu_time}).groupby('username').sum().reset_index()
             else: 
                 
                 result_df = pd.DataFrame({
                     'username': usernames,
-                    'lost_cpu_time':lost_cpu_time}).groupby('username').sum()
+                    'lost_cpu_time':lost_cpu_time}).groupby('username').sum().reset_index()
+            
+            
             # Define constant tick values for the y-axis (vertical chart)
             max_lost_time = result_df['lost_cpu_time'].max()
             tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
