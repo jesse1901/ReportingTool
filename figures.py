@@ -13,7 +13,7 @@ from dataclasses import asdict
 from config import get_config
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 import pyslurm
-
+import altair as alt
 
 class time:
     def timestring_to_seconds(timestring):
@@ -294,9 +294,11 @@ class CreateFigures:
         labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
 
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
-        job_counts = df['runtime_interval'].value_counts().reindex(labels)
+        job_counts = df['runtime_interval'].value_counts().sort_index()
         st.bar_chart(job_counts)
-
+        st.write(alt.Chart(job_counts).mark_bar().endcode(
+            x=alt.X('runtime_interval', sort=None)
+        ))
     @st.cache_data
     def pie_chart_job_count(_self) -> None:
         # Query to get runtime in minutes, lost CPU time, and job CPU time
