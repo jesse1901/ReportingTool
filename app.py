@@ -61,12 +61,12 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
 
     start_date, end_date = date_selector
 
-    if hyper_threading:
-        scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}")
 
-        if 'scale_efficiency' not in st.session_state:
+    if 'scale_efficiency' not in st.session_state:
             st.session_state.scale_efficiency = False 
-    
+
+    if hyper_threading:
+        scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}", value=st.session_state.scale_efficiency)    
 
     if number_input and hyper_threading:
         display_user = st.number_input("Number of Users:", value=20, key=f"number_input_{key}" )
@@ -143,6 +143,8 @@ def main():
                 col1, col2 = st.columns([3, 1])
                 with col1: 
                     create.frame_user_all(username, user_role)
+                    create.get_job_script()
+
                 with col2:
                     date_slider_wrapper(create.frame_group_by_user, username, user_role, "by_user")
             with tab2:
