@@ -121,6 +121,7 @@ class CreateFigures:
                 st.code(job.script)
             except Exception as e:
                 st.error(f"Error details: {e}")
+
     @st.cache_data
     def frame_user_all(_self, current_user, user_role) -> None:
         """
@@ -134,7 +135,7 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata ORDER BY start DESC LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con, params=params)
-            st.dataframe(df)
+            selected_id = st.dataframe(df, on_select="rerun", key="user_all")
             
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
