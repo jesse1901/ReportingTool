@@ -521,13 +521,8 @@ class CreateFigures:
         # Filter out rows where cpu_efficiency is 0
         df = df[df['cpu_efficiency'] != 0]
 
-        # Calculate the range for equal width bins
-        min_efficiency = df['cpu_efficiency'].min()
-        max_efficiency = df['cpu_efficiency'].max()
-        bin_edges = np.linspace(min_efficiency, max_efficiency, num=11)  # Create 10 equal-width bins
-
-        # Create a new column for the efficiency bins
-        df['efficiency_percentile'] = pd.cut(df['cpu_efficiency'], bins=bin_edges, labels=False, include_lowest=True)
+        # Use qcut to create 10 quantiles (percentiles)
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
@@ -585,3 +580,4 @@ class CreateFigures:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
+
