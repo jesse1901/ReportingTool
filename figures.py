@@ -381,15 +381,6 @@ class CreateFigures:
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency):
         st.write('CPU Efficiency by Job duration')
 
-        # Manage the button state using Streamlit session state
-        if 'scale_efficiency' not in st.session_state:
-            st.session_state.scale_efficiency = False
-
-
-        # Update session state based on button click
-        if scale_efficiency:
-            st.session_state.scale_efficiency = not st.session_state.scale_efficiency
-
         # Ensure start_date is not after end_date
         if start_date > end_date:
             st.error("Error: End date must be after start date.")
@@ -416,7 +407,7 @@ class CreateFigures:
         row_var = ['gpu_efficiency']
 
         # Scale CPU efficiency if the button is toggled
-        if st.session_state.scale_efficiency:
+        if scale_efficiency:
             # Calculate scaling factor based on cores, assuming hyperthreading
             df['cpu_efficiency'] = df.apply(
                 lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row[

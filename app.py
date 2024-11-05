@@ -62,8 +62,9 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
     start_date, end_date = date_selector
 
     if hyper_threading:
-        scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}", value=st.session_state.scale_efficiency)    
+        scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}")    
 
+    
     if number_input and hyper_threading:
         display_user = st.number_input("Number of Users:", value=20, key=f"number_input_{key}" )
         func( start_date, end_date, current_user, role, scale_efficiency, display_user)
@@ -74,7 +75,7 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
     
     elif hyper_threading: 
         st.markdown("<div style='visibility:hidden;height:42px;'></div>", unsafe_allow_html=True)
-        func( start_date, end_date, current_user, role, hyper_threading)
+        func( start_date, end_date, current_user, role, scale_efficiency)
     
     else: 
         func( start_date, end_date, current_user, role)
