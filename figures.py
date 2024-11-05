@@ -214,7 +214,7 @@ class CreateFigures:
                 SELECT username,   
 
                 1 - SUM( CASE WHEN gpu_efficiency IS NULL AND real_time_sec * cores != 0 THEN 
-                    lost_cpu_time_sec / (real_time_sec * cores) ELSE 0 END) AS cpu_efficiency
+                    lost_cpu_time_sec / (real_time_sec * cores) ELSE 0 END) AS cpu_efficiency,
                 
                     COUNT(jobID) AS job_count,
 
