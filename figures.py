@@ -211,15 +211,7 @@ class CreateFigures:
             params = start_date, end_date
 
             df = pd.read_sql_query("""
-                SELECT username,   
-
-                1 - SUM( CASE WHEN gpu_efficiency IS NULL AND real_time_sec * cores != 0 THEN 
-                    lost_cpu_time_sec / (real_time_sec * cores) ELSE 0 END) AS cpu_efficiency,
-                
-                    COUNT(jobID) AS job_count,
-
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) AS total_lost_cpu_time                     
-                    
+                SELECT username, lost_cpu_time_sec, cpu_efficiency, cores
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
                 GROUP BY username
@@ -227,7 +219,7 @@ class CreateFigures:
                 """, _self.con, params=(start_date, end_date))
 
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
-            df.fillna({'total_lost_cpu_time': 0, 'total_job_time': 0}, inplace=True)
+            df.fillna({'total_lost_cpu_time': 0, 'cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
 
             # Ensure that total_lost_cpu_time is integer and formatted correctly
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
@@ -236,26 +228,37 @@ class CreateFigures:
             # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
             df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
             
+            usernames = df['username'].values
+            lost_cpu_time = df['lost_cpu_time_sec'].fillna(0).values
+            efficiencies = df['cpu_efficiency'].fillna(0).values
+            cores = df['cores'].fillna(1).values
             
             if scale_efficiency:
-                df['total_job_time'] = np.where(df['cpu_efficiency'] != 100, df['total_lost_cpu_time'] / ((100 - df['cpu_efficiency']) / 100), np.nan)
-                df['cpu_efficiency'] = df.apply(
-                    lambda row: min(row['cpu_efficiency'] * 2, 100) if row['cpu_efficiency'] <= 100 else row['cpu_efficiency'], axis=1)
+                physical_cores = cores // 2
 
-                # Handle NaN in cpu_efficiency and total_job_time
-                df['cpu_efficiency'] = df['cpu_efficiency'].fillna(0)
-                df['total_lost_cpu_time'] = np.where(df['cpu_efficiency'] != 0, df['total_job_time'] / df['cpu_efficiency'], np.nan)
-                df['total_lost_cpu_time'] = df['total_lost_cpu_time'].fillna(0)
-
+                adjusted_efficiencies = np.where(
+                    efficiencies < 100,
+                    (efficiencies / 50) * 100,  # Scale to 100% without hyperthreading
+                    efficiencies )
+                
+                adjusted_lost_cpu_times = np.where(
+                adjusted_efficiencies >= 100, 0,  # Set to 0 if efficiency is at 100% without hyperthreading
+                lost_cpu_time * ((100 - adjusted_efficiencies) / 100)
+    )
+                
+            result_df = pd.DataFrame({
+                'username': usernames,
+                'lost_cpu_time':lost_cpu_time
+                    }).groupby('username').sum()
 
             # Define constant tick values for the y-axis (vertical chart)
-            max_lost_time = df['total_lost_cpu_time'].max()
+            max_lost_time = result_df['lost_cpu_time'].max()
             tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
             tick_text = [time.seconds_to_timestring(int(val)) for val in tick_vals]
 
 
             # Plot vertical bar chart using Plotly
-            fig = px.bar(df, x='username', y='total_lost_cpu_time')
+            fig = px.bar(result_df, x='username', y='total_lost_cpu_time')
 
             # Update the y-axis to display formatted time with constant tick values
             fig.update_layout(
