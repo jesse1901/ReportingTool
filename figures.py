@@ -218,7 +218,7 @@ class CreateFigures:
                 
                     COUNT(jobID) AS job_count,
 
-                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) AS total_lost_cpu_time,                     
+                    SUM(CASE WHEN gpu_efficiency IS NULL THEN lost_cpu_time_sec ELSE 0 END) AS total_lost_cpu_time                     
                     
                 FROM reportdata                
                 WHERE start >= ? AND end <= ? AND partition != 'jhub'
