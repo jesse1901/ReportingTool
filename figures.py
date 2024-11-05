@@ -227,7 +227,7 @@ class CreateFigures:
                 """, _self.con, params=(start_date, end_date))
 
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
-        #df.fillna({'total_lost_cpu_time': 0, 'avg_cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
+            df.fillna({'total_lost_cpu_time': 0, 'total_job_time': 0}, inplace=True)
 
             # Ensure that total_lost_cpu_time is integer and formatted correctly
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
