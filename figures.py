@@ -219,11 +219,11 @@ class CreateFigures:
                 """, _self.con, params=(start_date, end_date))
 
         # Convert total_lost_cpu_time to integer and format as DD T HH MM SS
-            df.fillna({'total_lost_cpu_time': 0, 'cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
+            df.fillna({'lost_cpu_time_sec': 0, 'cpu_efficiency': 0, 'total_job_time': 0}, inplace=True)
 
             # Ensure that total_lost_cpu_time is integer and formatted correctly
-            df['total_lost_cpu_time'] = df['total_lost_cpu_time'].astype(int)
-            df['formatted_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
+            df['lost_cpu_time_sec'] = df['lost_cpu_time_sec'].astype(int)
+            df['formatted_lost_cpu_time'] = df['lost_cpu_time_sec'].apply(time.seconds_to_timestring)
 
             # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
             df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
