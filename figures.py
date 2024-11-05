@@ -120,7 +120,7 @@ class CreateFigures:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
                 st.code(job.script)
             except Exception as e:
-                st.write(f"Error details: {e}")
+                st.error(f"Error details: {e}")
     @st.cache_data
     def frame_user_all(_self, current_user, user_role) -> None:
         """
