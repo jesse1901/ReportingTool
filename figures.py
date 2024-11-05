@@ -279,7 +279,6 @@ class CreateFigures:
             )
             
             st.plotly_chart(fig)
-            st.write(result_df)
 
 
     @st.cache_data
