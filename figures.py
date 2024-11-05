@@ -277,9 +277,10 @@ class CreateFigures:
                     ticktext=tick_text
                 )
             )
-
+            
             st.plotly_chart(fig)
-
+            st.write(result_df)
+            
     @st.cache_data
     def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
