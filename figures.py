@@ -281,25 +281,32 @@ class CreateFigures:
             st.plotly_chart(fig)
             st.write(result_df)
 
+
     @st.cache_data
     def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
+        
         df = pd.read_sql_query("""
-            SELECT partition, (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
+            SELECT (julianday(end) - julianday(start)) * 24 * 60 AS runtime_minutes
             FROM reportdata
             WHERE partition != 'jhub'
         """, _self.con)
 
         max_runtime = df['runtime_minutes'].max()
-        bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
-        labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
-    
-        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
+        
+        # Manually define the bins to include 0-2 and follow with logarithmic bins
+        bins = [0, 2] + [2 ** i for i in range(2, int(np.log2(max_runtime)) + 2)]
+        labels = [f"0-2 min"] + [f"{bins[i]}-{bins[i + 1]} min" for i in range(1, len(bins) - 1)]
+
+        # Assign the runtime intervals
+        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True, right=False)
         job_counts = df['runtime_interval'].value_counts().sort_index()
 
         job_counts_df = job_counts.reset_index()
         job_counts_df.columns = ['runtime_interval', 'job_count']  # Rename columns for clarity
-    
+
+        # Display the job counts DataFrame
+        st.write(job_counts_df)
 
         # Use Altair to create the chart
         st.write(alt.Chart(job_counts_df).mark_bar().encode(
