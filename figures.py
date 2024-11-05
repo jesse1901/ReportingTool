@@ -114,7 +114,7 @@ class CreateFigures:
     }
     
     def get_job_script(_self):
-        jobid = st.number_input("Paste JobID:", 0)
+        jobid = st.number_input("Paste JobID:", st.session_state.user_all)
         if jobid: 
             try:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
