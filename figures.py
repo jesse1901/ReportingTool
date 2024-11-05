@@ -546,7 +546,7 @@ class CreateFigures:
         # Add the number of jobs as a bar trace
         fig.add_trace(go.Bar(
             x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['job_percentage'],
+            y=percentile_df['Job Percentage'],  # Ensure we're referencing the correct column name
             name='Job Percentage',
             marker_color='rgba(0,100,200,0.6)'
         ))
@@ -580,3 +580,4 @@ class CreateFigures:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
+
