@@ -280,7 +280,7 @@ class CreateFigures:
             
             st.plotly_chart(fig)
             st.write(result_df)
-            
+
     @st.cache_data
     def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
@@ -294,7 +294,7 @@ class CreateFigures:
         labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
 
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
-        job_counts = df['runtime_interval'].value_counts().sort_index()
+        job_counts = df['runtime_interval'].value_counts().reindex(labels)
         st.bar_chart(job_counts)
 
     @st.cache_data
