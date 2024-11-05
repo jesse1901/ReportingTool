@@ -510,7 +510,6 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-
     @st.cache_data
     def efficiency_percentile_chart(_self):
         # Fetch the data from the database
@@ -522,15 +521,8 @@ class CreateFigures:
         # Filter out rows where cpu_efficiency is 0
         df = df[df['cpu_efficiency'] != 0]
 
-        # Sort the dataframe by cpu_efficiency
-        df = df.sort_values(by='cpu_efficiency')
-
-        # Determine total number of jobs
-        total_jobs = df.shape[0]
-
-        # Create bins with exactly 10% of jobs in each
-        percentiles = [i * total_jobs // 10 for i in range(11)]  # Create boundaries for 10 groups
-        df['efficiency_percentile'] = pd.cut(df.index, bins=percentiles, labels=False, include_lowest=True)
+        # Use qcut to create 10 quantiles (percentiles)
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
@@ -540,7 +532,8 @@ class CreateFigures:
             total_jobs=('jobID', 'count')
         ).reset_index()
 
-        # Calculate the percentage of total jobs in each percentile (which should now be 10% each)
+        # Calculate the percentage of total jobs in each percentile
+        total_jobs = percentile_df['total_jobs'].sum()
         percentile_df['job_percentage'] = (percentile_df['total_jobs'] / total_jobs) * 100
 
         # Rename columns for better readability
@@ -587,3 +580,4 @@ class CreateFigures:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
+
