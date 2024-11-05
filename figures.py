@@ -514,15 +514,20 @@ class CreateFigures:
     def efficiency_percentile_chart(_self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
-                   SELECT cpu_efficiency, jobID
-                   FROM reportdata WHERE partition != 'jhub'
-               """, _self.con)
+                SELECT cpu_efficiency, jobID
+                FROM reportdata WHERE partition != 'jhub'
+            """, _self.con)
 
         # Filter out rows where cpu_efficiency is 0
         df = df[df['cpu_efficiency'] != 0]
 
-        # Calculate percentiles for 'cpu_efficiency'
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
+        # Calculate the range for equal width bins
+        min_efficiency = df['cpu_efficiency'].min()
+        max_efficiency = df['cpu_efficiency'].max()
+        bin_edges = np.linspace(min_efficiency, max_efficiency, num=11)  # Create 10 equal-width bins
+
+        # Create a new column for the efficiency bins
+        df['efficiency_percentile'] = pd.cut(df['cpu_efficiency'], bins=bin_edges, labels=False, include_lowest=True)
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
@@ -538,7 +543,7 @@ class CreateFigures:
 
         # Rename columns for better readability
         percentile_df.columns = ['Efficiency Percentile', 'Mean Efficiency', 'Min Efficiency', 'Max Efficiency',
-                                 'Total Jobs', 'Job Percentage']
+                                'Total Jobs', 'Job Percentage']
 
         # Create the figure
         fig = go.Figure()
