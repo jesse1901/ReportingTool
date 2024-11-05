@@ -61,10 +61,6 @@ def date_slider_wrapper(func, current_user, role, key:str, number_input=False, h
 
     start_date, end_date = date_selector
 
-
-    if 'scale_efficiency' not in st.session_state:
-            st.session_state.scale_efficiency = False 
-
     if hyper_threading:
         scale_efficiency = st.checkbox("Hyperthreading", key=f"checkbox_{key}", value=st.session_state.scale_efficiency)    
 
