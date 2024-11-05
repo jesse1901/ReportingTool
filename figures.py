@@ -241,22 +241,24 @@ class CreateFigures:
                     (efficiencies / 50) * 100,  # Scale to 100% without hyperthreading
                     efficiencies )
                 
-                adjusted_lost_cpu_times = np.where(
+                adjusted_lost_cpu_time = np.where(
                 adjusted_efficiencies >= 100, 0,  # Set to 0 if efficiency is at 100% without hyperthreading
                 lost_cpu_time * ((100 - adjusted_efficiencies) / 100)
     )
                 
-            result_df = pd.DataFrame({
-                'username': usernames,
-                'lost_cpu_time':lost_cpu_time
-                    }).groupby('username').sum()
-
+                result_df = pd.DataFrame({
+                    'username': usernames,
+                    'lost_cpu_time':adjusted_lost_cpu_time}).groupby('username').sum()
+            else: 
+                
+                result_df = pd.DataFrame({
+                    'username': usernames,
+                    'lost_cpu_time':lost_cpu_time}).groupby('username').sum()
             # Define constant tick values for the y-axis (vertical chart)
             max_lost_time = result_df['lost_cpu_time'].max()
             tick_vals = np.nan_to_num(np.linspace(0, max_lost_time, num=10), nan=0)        
             tick_text = [time.seconds_to_timestring(int(val)) for val in tick_vals]
-
-
+            
             # Plot vertical bar chart using Plotly
             fig = px.bar(result_df, x='username', y='total_lost_cpu_time')
 
