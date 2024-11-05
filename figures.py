@@ -116,9 +116,11 @@ class CreateFigures:
     def get_job_script(_self):
         jobid = st.number_input("Paste JobID:", 0)
         if jobid: 
-            job = pyslurm.db.Job.load(jobid, with_script=True)
-            st.code(job.script)
-
+            try:
+                job = pyslurm.db.Job.load(jobid, with_script=True)
+                st.code(job.script)
+            except Exception as e:
+                st.write(f"Error details: {e}")
     @st.cache_data
     def frame_user_all(_self, current_user, user_role) -> None:
         """
