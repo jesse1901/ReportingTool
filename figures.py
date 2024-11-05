@@ -121,31 +121,42 @@ class CreateFigures:
                 st.code(job.script)
             except Exception as e:
                 st.error(f"Error details: {e}")
-
     @st.cache_data
+    def fetch_all_data(_self, current_user, user_role):
+        """
+        Retrieves data from the reportdata table based on user role.
+        """
+        if user_role == "admin":
+            query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
+                    gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
+                    gpu_nodes, start, end, job_name, partition
+                    FROM reportdata ORDER BY start DESC LIMIT 100000"""
+            params = None
+        else:
+            query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
+                    gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
+                    gpu_nodes, start, end, job_name, partition
+                    FROM reportdata WHERE username = ?"""
+            params = (current_user,)
+
+        # Fetch the data from the database
+        return pd.read_sql_query(query, _self.con, params=params)
+
     def frame_user_all(_self, current_user, user_role) -> None:
         """
-        Displays all job data.py from the reportdata table in the Streamlit app.
+        Displays all job data from the reportdata table in the Streamlit app.
         """
-        params = None
         st.write('All Data')
+
+        # Use the cached function to fetch data
+        df = CreateFigures.fetch_all_data(_self, current_user, user_role)
+        
+        # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
-                            gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
-                            gpu_nodes, start, end, job_name, partition
-                            FROM reportdata ORDER BY start DESC LIMIT 100000"""
-            df = pd.read_sql_query(base_query, _self.con, params=params)
             selected_id = st.dataframe(df, on_select="rerun", key="user_all")
-            
         else:
-            base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
-                            gpu_efficiency, lost_gpu_time, real_time, job_cpu_time, state, 
-                            gpu_nodes, start, end, job_name, partition
-                            FROM reportdata WHERE username = ?"""
-            params = (current_user,)
-            df = pd.read_sql_query(base_query, _self.con, params=params)
             st.dataframe(df)
-    
+
     @st.cache_data
     def frame_group_by_user(_self, start_date, end_date, current_user, user_role) -> None:
         """
