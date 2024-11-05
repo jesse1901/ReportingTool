@@ -114,7 +114,7 @@ class CreateFigures:
     }
     
     def get_job_script(_self):
-        jobid = st.number_input("Paste JobID:", st.session_state.user_all.JobID)
+        jobid = st.number_input("Paste JobID:", st.session_state.user_all)
         if jobid: 
             try:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
@@ -154,6 +154,7 @@ class CreateFigures:
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
             selected_id = st.dataframe(df, on_select="rerun", key="user_all")
+            st.write(st.session_state.user_all)
         else:
             st.dataframe(df)
 
