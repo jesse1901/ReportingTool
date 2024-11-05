@@ -126,7 +126,7 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata ORDER BY start DESC LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con, params=params)
-            st.write(df)
+            st.dataframe(df)
             
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
