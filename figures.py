@@ -226,7 +226,7 @@ class CreateFigures:
             df['formatted_lost_cpu_time'] = df['lost_cpu_time_sec'].apply(time.seconds_to_timestring)
 
             # Sort DataFrame by total_lost_cpu_time in descending order and limit to top 20 users
-            df = df.sort_values(by='total_lost_cpu_time', ascending=False).head(display_user)
+            df = df.sort_values(by='lost_cpu_time_sec', ascending=False).head(display_user)
             
             usernames = df['username'].values
             lost_cpu_time = df['lost_cpu_time_sec'].fillna(0).values
