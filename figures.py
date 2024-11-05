@@ -262,7 +262,7 @@ class CreateFigures:
             tick_text = [time.seconds_to_timestring(int(val)) for val in tick_vals]
             
             # Plot vertical bar chart using Plotly
-            fig = px.bar(result_df, x='username', y='total_lost_cpu_time')
+            fig = px.bar(result_df, x='username', y='lost_cpu_time')
 
             # Update the y-axis to display formatted time with constant tick values
             fig.update_layout(
