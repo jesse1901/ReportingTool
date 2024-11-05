@@ -519,10 +519,10 @@ class CreateFigures:
             """, _self.con)
 
         # Filter out rows where cpu_efficiency is 0
-        df = df[df['cpu_efficiency'] != 0]
+        df = df[df['cpu_efficiency'] > 0]
 
-        # Use qcut to create 10 quantiles (percentiles)
-        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False, duplicates='drop')
+        # Use qcut to create exactly 10 equal-sized bins based on cpu_efficiency
+        df['efficiency_percentile'] = pd.qcut(df['cpu_efficiency'], 10, labels=False)
 
         # Aggregate the data by these percentiles
         percentile_df = df.groupby('efficiency_percentile').agg(
@@ -533,7 +533,7 @@ class CreateFigures:
         ).reset_index()
 
         # Calculate the percentage of total jobs in each percentile
-        total_jobs = percentile_df['total_jobs'].sum()
+        total_jobs = df.shape[0]
         percentile_df['job_percentage'] = (percentile_df['total_jobs'] / total_jobs) * 100
 
         # Rename columns for better readability
@@ -546,7 +546,7 @@ class CreateFigures:
         # Add the number of jobs as a bar trace
         fig.add_trace(go.Bar(
             x=percentile_df['Efficiency Percentile'],
-            y=percentile_df['Job Percentage'],
+            y=percentile_df['job_percentage'],
             name='Job Percentage',
             marker_color='rgba(0,100,200,0.6)'
         ))
@@ -574,10 +574,9 @@ class CreateFigures:
         fig.update_layout(
             title='Distribution of Jobs and CPU Efficiency Percentiles',
             xaxis_title='Efficiency Percentile',
-            yaxis_title='Percentage / CPU Efficiency / Std Dev',
+            yaxis_title='Percentage of Jobs / CPU Efficiency',
             template='plotly_white'
         )
 
         # Display the chart in Streamlit
         st.plotly_chart(fig)
-
