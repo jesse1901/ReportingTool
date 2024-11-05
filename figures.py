@@ -289,16 +289,24 @@ class CreateFigures:
             FROM reportdata
             WHERE partition != 'jhub'
         """, _self.con)
+
         max_runtime = df['runtime_minutes'].max()
         bins = [2 ** i for i in range(int(np.log2(max_runtime)) + 2)]
         labels = [f"{bins[i]}-{bins[i + 1]} min" for i in range(len(bins) - 1)]
-
+    
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, labels=labels, include_lowest=True)
         job_counts = df['runtime_interval'].value_counts().sort_index()
-        st.bar_chart(job_counts)
-        st.write(alt.Chart(job_counts).mark_bar().encode(
-            x=alt.X('runtime_interval', sort=None)
+
+        job_counts_df = job_counts.reset_index()
+        job_counts_df.columns = ['runtime_interval', 'job_count']  # Rename columns for clarity
+    
+
+        # Use Altair to create the chart
+        st.write(alt.Chart(job_counts_df).mark_bar().encode(
+            x=alt.X('runtime_interval:O', sort=None),  # Ensure to specify the data type
+            y='job_count:Q',  # Use count for y-axis
         ))
+
     @st.cache_data
     def pie_chart_job_count(_self) -> None:
         # Query to get runtime in minutes, lost CPU time, and job CPU time
