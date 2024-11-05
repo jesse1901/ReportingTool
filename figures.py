@@ -126,27 +126,7 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata ORDER BY start DESC LIMIT 100000"""
             df = pd.read_sql_query(base_query, _self.con, params=params)
-            
-            gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_pagination(paginationAutoPageSize=True)  # Enables pagination
-            gb.configure_selection('single', use_checkbox=True, pre_selected_rows=[])
-            
-            grid_options = gb.build()
-            
-            grid_response = AgGrid(
-                df,
-                gridOptions=grid_options,
-                update_mode=GridUpdateMode.SELECTION_CHANGED,
-                theme='streamlit',  # Choose from streamlit, light, dark, etc.
-                height=400,
-                enable_enterprise_modules=False
-            )
-            if grid_response['selected_rows'] and len(grid_response['selected_rows']) > 0:
-                selected_row = grid_response['selected_rows'][0]
-                selected_id=selected_row['jobID']
-                job_details = pyslurm.db.Job.load(selected_row, with_script=True)
-                with st.expander(f"Job Detail for ID {selected_id}", expanded=True):
-                        st.write(f"Script: {job_details.script}")
+            st.write(df)
             
         else:
             base_query = """SELECT jobID, username, account, cpu_efficiency, lost_cpu_time, 
@@ -154,11 +134,8 @@ class CreateFigures:
                             gpu_nodes, start, end, job_name, partition
                             FROM reportdata WHERE username = ?"""
             params = (current_user,)
-            try:    
-                df = pd.read_sql_query(base_query, _self.con, params=params)
-                st.dataframe(df)
-            except Exception as e:
-                st.error(f"Database connection issue: {e}")
+            df = pd.read_sql_query(base_query, _self.con, params=params)
+            st.dataframe(df)
     
     @st.cache_data
     def frame_group_by_user(_self, start_date, end_date, current_user, user_role) -> None:
