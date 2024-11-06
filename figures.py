@@ -154,8 +154,10 @@ class CreateFigures:
         
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all")
-            st.write(event.selection)
+            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all",     use_container_width=True,
+    hide_index=True)
+            st.write(event.selection.rows)
+            filered_df = df.iloc[jobID]
         else:
             st.dataframe(df)
 
