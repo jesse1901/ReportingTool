@@ -114,7 +114,7 @@ class CreateFigures:
     }
 
     def get_job_script(_self, jobid):
-        if jobid is not type(int): 
+        if jobid is type(int): 
             try:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
                 st.code(job.script)
