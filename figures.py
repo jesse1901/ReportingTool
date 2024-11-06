@@ -114,7 +114,7 @@ class CreateFigures:
     }
 
     def get_job_script(_self, jobid):
-        if jobid: 
+        if jobid is not None: 
             try:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
                 st.code(job.script)
