@@ -156,7 +156,7 @@ class CreateFigures:
         
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            selected_id = st.dataframe(df, on_select="callback", key="user_all")
+            selected_id = st.dataframe(df, on_select=callback, key="user_all")
             st.write(st.session_state.user_all)
         else:
             st.dataframe(df)
