@@ -112,9 +112,7 @@ class CreateFigures:
         'PREEMPTED': '#2ca02c',     # Light Green
         'NODE_FAIL': '#fcf76a'
     }
-    def callback():
-        with st.sidebar:
-            st.write(st.session_state.user_all)
+
     def get_job_script(_self):
         jobid = st.number_input("Paste JobID:", st.session_state.user_all)
         if jobid: 
@@ -156,8 +154,8 @@ class CreateFigures:
         
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            selected_id = st.dataframe(df, on_select=callback, key="user_all")
-            st.write(st.session_state.user_all)
+            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all")
+            st.write(event.selection)
         else:
             st.dataframe(df)
 
