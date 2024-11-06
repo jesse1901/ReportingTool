@@ -113,8 +113,7 @@ class CreateFigures:
         'NODE_FAIL': '#fcf76a'
     }
 
-    def get_job_script(_self):
-        jobid = st.number_input("Paste JobID:")
+    def get_job_script(_self, jobid):
         if jobid: 
             try:
                 job = pyslurm.db.Job.load(jobid, with_script=True)
@@ -158,7 +157,7 @@ class CreateFigures:
     hide_index=True)
             row = event.selection.rows
             filtered_df = df.iloc[row]
-            st.write(filtered_df)
+            CreateFigures.get_job_script(filtered_df.jobID)
         else:
             st.dataframe(df)
 
