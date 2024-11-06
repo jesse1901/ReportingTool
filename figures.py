@@ -120,6 +120,7 @@ class CreateFigures:
                 st.code(job.script)
             except Exception as e:
                 st.error(f"Error details: {e}")
+        
     
     @st.cache_data(ttl=3600)
     def fetch_all_data(_self, current_user, user_role):
@@ -157,7 +158,8 @@ class CreateFigures:
     hide_index=True)
             row = event.selection.rows
             filtered_df = df.iloc[row]
-            CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
+            if filtered_df.jobID.iloc[0]:
+                CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
         else:
             st.dataframe(df)
 
