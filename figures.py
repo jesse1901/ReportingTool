@@ -156,8 +156,8 @@ class CreateFigures:
         if user_role == "admin":
             event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all",     use_container_width=True,
     hide_index=True)
-            st.write(event.selection.rows)
-            filered_df = df.iloc[jobID]
+            row = event.selection.rows
+            filered_df = df.iloc['row']
         else:
             st.dataframe(df)
 
