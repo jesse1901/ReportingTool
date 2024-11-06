@@ -206,6 +206,7 @@ class CreateFigures:
             # Apply the conversion functions
             df['total_lost_cpu_time'] = df['total_lost_cpu_time'].apply(time.seconds_to_timestring)
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].apply(time.seconds_to_timestring)
+            df['cpu_efficiency'] = df['cpu_efficiency'].clip(lower=0)
 
             df['total_lost_gpu_time'] = df['total_lost_gpu_time'].replace("0T 0:0:0", None)
 
