@@ -158,7 +158,7 @@ class CreateFigures:
     hide_index=True)
             row = event.selection.rows
             filtered_df = df.iloc[row]
-            if filtered_df.jobID.iloc[0]:
+            if not filtered_df.empty:
                 CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
         else:
             st.dataframe(df)
