@@ -153,7 +153,8 @@ def main():
         
         # Show login form if user is not authenticated
         username = form.text_input("Username")
-        password = form.text_input("Password", type="password")
+        password = form.text_input("Password", typ            st.dataframe(df)
+e="password")
         try:
             if form.form_submit_button("Login"):                
                 if authenticate(username, password):
@@ -167,7 +168,8 @@ def main():
                         return  # Exit if not authorized
                     
                     st.success('Login successful')
-                    st.rerun()  # Re-run to update session state
+                    with st.spinner('Loading data...'):
+                        st.rerun()  # Re-run to update session state
 
         except Exception as e:
             st.error("An error occurred during login.")
