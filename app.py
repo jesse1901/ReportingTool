@@ -140,8 +140,6 @@ def main():
                 col1, col2 = st.columns([3, 1])
                 with col1: 
                     create.frame_user_all(username, user_role)
-                    create.get_job_script()
-
                 with col2:
                     date_slider_wrapper(create.frame_group_by_user, username, user_role, "by_user")
             with tab2:
