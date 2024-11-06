@@ -153,8 +153,7 @@ def main():
         
         # Show login form if user is not authenticated
         username = form.text_input("Username")
-        password = form.text_input("Password", typ            st.dataframe(df)
-e="password")
+        password = form.text_input("Password", type="password")
         try:
             if form.form_submit_button("Login"):                
                 if authenticate(username, password):
