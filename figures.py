@@ -157,9 +157,7 @@ class CreateFigures:
     hide_index=True)
             row = event.selection.rows
             filtered_df = df.iloc[row]
-            CreateFigures.get_job_script(_self, jobid=filtered_df.jobID)
-            
-            st.write(type(filtered_df.jobID))
+            CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
         else:
             st.dataframe(df)
 
