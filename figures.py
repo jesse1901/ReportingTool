@@ -153,15 +153,19 @@ class CreateFigures:
         
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all",     use_container_width=True,
+            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all_admin",     use_container_width=True,
     hide_index=True)
             row = event.selection.rows
             filtered_df = df.iloc[row]
             if len(filtered_df) > 0:
                 CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
         else:
-            st.dataframe(df)
-
+            event = st.dataframe(df,  on_select="rerun",selection_mode="single-row" ,key="user_all_user",     use_container_width=True,
+    hide_index=True)
+            row = event.selection.rows
+            filtered_df = df.iloc[row]
+            if len(filtered_df) > 0:
+                CreateFigures.get_job_script(_self, jobid=filtered_df.jobID.iloc[0])
     @st.cache_data(ttl=3600)
     def frame_group_by_user(_self, start_date, end_date, current_user, user_role) -> None:
         """
