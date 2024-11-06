@@ -112,7 +112,9 @@ class CreateFigures:
         'PREEMPTED': '#2ca02c',     # Light Green
         'NODE_FAIL': '#fcf76a'
     }
-    
+    def callback():
+        with st.sidebar:
+            st.write(st.session_state.user_all)
     def get_job_script(_self):
         jobid = st.number_input("Paste JobID:", st.session_state.user_all)
         if jobid: 
@@ -121,7 +123,8 @@ class CreateFigures:
                 st.code(job.script)
             except Exception as e:
                 st.error(f"Error details: {e}")
-    @st.cache_data
+    
+    @st.cache_data(ttl=3600)
     def fetch_all_data(_self, current_user, user_role):
         """
         Retrieves data from the reportdata table based on user role.
@@ -153,12 +156,12 @@ class CreateFigures:
         
         # Display the data using st.dataframe with on_select outside the cached function
         if user_role == "admin":
-            selected_id = st.dataframe(df, on_select="rerun", key="user_all")
+            selected_id = st.dataframe(df, on_select="callback", key="user_all")
             st.write(st.session_state.user_all)
         else:
             st.dataframe(df)
 
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def frame_group_by_user(_self, start_date, end_date, current_user, user_role) -> None:
         """
         Displays average efficiency and job count grouped by username in the Streamlit app
@@ -210,7 +213,7 @@ class CreateFigures:
                 df.columns = ["Metric", "Value"]
             st.write(df)
     
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def bar_char_by_user(_self, start_date, end_date, current_user, role, scale_efficiency, display_user) -> None:
         st.write('Total Lost CPU-Time per User')
 
@@ -294,7 +297,7 @@ class CreateFigures:
             st.plotly_chart(fig)
 
 
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def job_counts_by_log2(_self) -> None:
         st.write('Job Count by Job Time')
         
@@ -327,7 +330,7 @@ class CreateFigures:
     )
 )
 
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def pie_chart_job_count(_self) -> None:
         # Query to get runtime in minutes, lost CPU time, and job CPU time
         df = pd.read_sql_query("""
@@ -368,7 +371,7 @@ class CreateFigures:
 
         st.plotly_chart(fig)
 
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def pie_chart_batch_inter(_self) -> None:
         # Fetch data from the database
         df = pd.read_sql_query("""
@@ -414,7 +417,7 @@ class CreateFigures:
     #     """, _self.con)
     #     st.line_chart(df.set_index('period'))
     
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency):
         st.write('CPU Efficiency by Job duration')
 
@@ -464,7 +467,7 @@ class CreateFigures:
         fig.update_traces(marker=dict(size=3))
         st.plotly_chart(fig, theme=None)
     
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def pie_chart_by_session_state(_self, current_user, user_role):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
@@ -493,6 +496,7 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
+    @st.cache_data(ttl=3600)
     def pie_chart_by_job_count(_self, current_user, user_role):
         # Prüfen, ob die Gruppierung im Session-State gesetzt ist
 
@@ -523,7 +527,7 @@ class CreateFigures:
         # Pie-Chart in Streamlit anzeigen
         st.plotly_chart(fig)
 
-    @st.cache_data
+    @st.cache_data(ttl=3600)
     def efficiency_percentile_chart(_self):
         # Fetch the data from the database
         df = pd.read_sql_query("""
