@@ -167,7 +167,6 @@ def main():
                         return  # Exit if not authorized
                     
                     st.success('Login successful')
-                    st.empty
                     st.rerun()  # Re-run to update session state
 
         except Exception as e:
