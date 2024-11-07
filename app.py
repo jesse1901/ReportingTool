@@ -95,58 +95,58 @@ def main():
         
         if user_role == 'admin':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
+            with st.spinner("loading...")
+                with tab1:
+                    st.header("User Data")
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        create.frame_user_all(username, user_role)
+                    with col2:
+                        date_slider_wrapper(create.frame_group_by_user, username, user_role, "group_by_user")
 
-            with tab1:
-                st.header("User Data")
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    create.frame_user_all(username, user_role)
-                with col2:
-                    date_slider_wrapper(create.frame_group_by_user, username, user_role, "group_by_user")
+                with tab2:
+                    st.header("Job Data")
+                    col3, col4, col5 = st.columns(3)
+                    with col3:
+                        create.job_counts_by_log2()
+                    with col4:
+                        create.pie_chart_job_count()
+                    with col5:
+                        create.pie_chart_batch_inter()
 
-            with tab2:
-                st.header("Job Data")
-                col3, col4, col5 = st.columns(3)
-                with col3:
-                    create.job_counts_by_log2()
-                with col4:
-                    create.pie_chart_job_count()
-                with col5:
-                    create.pie_chart_batch_inter()
+                with tab3:
+                    st.header("Efficiency")
+                    col6, col7, col8 = st.columns(3)
+                    with col6:
+                        create.pie_chart_by_session_state(username, user_role)
+                    with col7:
+                        create.pie_chart_by_job_count(username, user_role)
+                    with col8:
+                        create.efficiency_percentile_chart()
 
-            with tab3:
-                st.header("Efficiency")
-                col6, col7, col8 = st.columns(3)
-                with col6:
-                    create.pie_chart_by_session_state(username, user_role)
-                with col7:
-                    create.pie_chart_by_job_count(username, user_role)
-                with col8:
-                    create.efficiency_percentile_chart()
-
-            with tab4:
-                st.header("")
-                col9, col10 = st.columns(2)
-                with col9:
-                    date_slider_wrapper(create.bar_char_by_user, username, user_role, "bar_by_user", hyper_threading=True, number_input=True)
-                with col10:
-                    date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role, "scatter", hyper_threading=True)
+                with tab4:
+                    st.header("")
+                    col9, col10 = st.columns(2)
+                    with col9:
+                        date_slider_wrapper(create.bar_char_by_user, username, user_role, "bar_by_user", hyper_threading=True, number_input=True)
+                    with col10:
+                        date_slider_wrapper(create.scatter_chart_data_cpu_gpu_eff, username, user_role, "scatter", hyper_threading=True)
 
         elif user_role == 'user':
             tab1, tab2 = st.tabs(["Tables", "Charts"]) 
-            
-            with tab1:
-                col1, col2 = st.columns([3, 1])
-                with col1: 
-                    create.frame_user_all(username, user_role)
-                with col2:
-                    date_slider_wrapper(create.frame_group_by_user, username, user_role, "by_user")
-            with tab2:
-                col3, col4 = st.columns(2)
-                with col3:
-                    create.pie_chart_by_session_state(username, user_role)
-                with col4:
-                    create.pie_chart_by_job_count(username, user_role)
+            with st.spinner("loading"):
+                with tab1:
+                    col1, col2 = st.columns([3, 1])
+                    with col1: 
+                        create.frame_user_all(username, user_role)
+                    with col2:
+                        date_slider_wrapper(create.frame_group_by_user, username, user_role, "by_user")
+                with tab2:
+                    col3, col4 = st.columns(2)
+                    with col3:
+                        create.pie_chart_by_session_state(username, user_role)
+                    with col4:
+                        create.pie_chart_by_job_count(username, user_role)
     else:
         st.title("Login Max-Reports")
         form = st.form(key="login_form")
@@ -167,8 +167,8 @@ def main():
                         return  # Exit if not authorized
                     
                     st.success('Login successful')
-                    with st.spinner('Loading data...'):
-                        st.rerun()  # Re-run to update session state
+                    st.empty
+                    st.rerun()  # Re-run to update session state
 
         except Exception as e:
             st.error("An error occurred during login.")
