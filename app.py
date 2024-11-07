@@ -95,7 +95,7 @@ def main():
         
         if user_role == 'admin':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data", "Efficiency", "Total"])
-            with st.spinner("loading...")
+            with st.spinner("loading..."):
                 with tab1:
                     st.header("User Data")
                     col1, col2 = st.columns([3, 1])
