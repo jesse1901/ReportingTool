@@ -559,6 +559,9 @@ class CreateFigures:
             params.append(partition_selector)
 
         df = pd.read_sql_query(query, _self.con, params=params)
+        if df.empty:
+            st.warning("No data available for the selected date range.")
+            return
 
         df['Category'] = df.apply(
             lambda row: 'Jupyterhub' if row['JobName'] == 'spawner-jupyterhub'
@@ -619,6 +622,11 @@ class CreateFigures:
             params.append(partition_selector)
 
         df = pd.read_sql_query(query + " ORDER BY Elapsed ASC;", _self.con, params=params)
+
+        if df.empty:
+            st.warning("No data available for the selected date range.")
+            return
+        
         df['GpuUtil'] = df['GpuUtil'] * 100
         
         df = df.dropna(subset=['Elapsed'])
