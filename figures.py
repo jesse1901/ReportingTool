@@ -485,7 +485,7 @@ class CreateFigures:
 
         df = pd.read_sql_query(query, _self.con, params=params)
 
-        if df.empty or df2.empty:
+        if df.empty:
             st.warning("No data available for the selected date range.")
             return
         
@@ -505,6 +505,10 @@ class CreateFigures:
         st.plotly_chart(fig)
 
         df2 = pd.read_sql_query(query2, _self.con, params=params)
+
+        if df2.empty:
+            st.warning("No data available for the selected date range.")
+            return
 
         df2['cluster_efficiency'] = (df2['total_cpu_days'] - df2['lost_cpu_days']) / df2['total_cpu_days'] * 100
 
