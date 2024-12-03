@@ -596,7 +596,7 @@ class CreateFigures:
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None):
-        st.markdown('CPU Efficiency by Job Duration', help='Partition "jhub" and Interactive Jobs are excluded')
+        st.markdown('CPU & GPU Efficiency by Job Duration', help='Partition "jhub" and Interactive Jobs are excluded')
         if start_date > end_date:
             st.error("Error: End date must be after start date.")
             return
