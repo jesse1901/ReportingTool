@@ -71,7 +71,7 @@ def input_controls():
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
 
-        partition_selector = st.selectbox("select partition", ["All available partitions", "allcpu","allgpu","cfel","cfel-cdi","hzg","maxcpu","cssbgpu","exfel"
+        partition_selector = st.selectbox("select partition", ["All available partitions", "allcpu","allgpu","cfel","cfel-cdi","hzg","maxcpu","maxgpu","cssbgpu","exfel"
                                                                 ,"upex","cdcs","cfel-cmi","cfel-ux","com","cssbcpu","exfel-th",
                                                                 "exfel-theory","exfel-wp72","jhub","livcpu","livgpu","mcpu","mpa",
                                                                 "mpaj","p06","p10","p11","petra4","ponline","ponline_p11",
