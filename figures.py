@@ -648,7 +648,7 @@ class CreateFigures:
         )
 
         custom_color_scale = [
-            [0.0, "blue"],  
+            [0.0, "CornflowerBlue"],  
             [0.25, "cyan"],
             [0.5, "green"],     
             [0.75, "orange"],  
