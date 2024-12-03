@@ -127,7 +127,7 @@ def main():
             with st.spinner("loading..."):
                 with tab1:
                     col_num, _ = st.columns([1, 2])
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
                                                                                                                             Column sorting is disabled for values above 150k!""")
@@ -172,7 +172,7 @@ def main():
             with st.spinner("loading"):
                 with tab1:
                     col_num, _ = st.columns([1, 2])
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
                                                                                                                             Column sorting is disabled for values above 150k!""")
@@ -202,7 +202,7 @@ def main():
             with st.spinner("loading"):
                 with tab1:
                     col_num, _ = st.columns([1, 2])
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
                                                                                                                             Column sorting is disabled for values above 150k!""")
