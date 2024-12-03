@@ -71,15 +71,15 @@ def input_controls():
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
 
-        partition_selector = st.selectbox("select partition", ["All available partitions", "allcpu","allgpu","cfel","cfel-cdi","hzg","maxcpu","maxgpu","cssbgpu","exfel"
-                                                                ,"upex","cdcs","cfel-cmi","cfel-ux","com","cssbcpu","exfel-th",
-                                                                "exfel-theory","exfel-wp72","jhub","livcpu","livgpu","mcpu","mpa",
-                                                                "mpaj","p06","p10","p11","petra4","ponline","ponline_p11",
-                                                                "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short",
-                                                                "topfgpu","uhhxuv","ukecpu","upex-beamtime","upex-high",
-                                                                "upex-middle","xfel-guest","xfel-sim"],
-                                                key=f"partition_selector"
-                                                )
+        partition_selector = st.selectbox("select partition", 
+
+
+ ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
+"cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
+"jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
+"pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
+"ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
+"ukecpu","upex","upex-beamtime","upex-high","upex-middle","xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
 
         if partition_selector == "All available partitions":
                 partition_selector = None
