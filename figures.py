@@ -434,8 +434,7 @@ class CreateFigures:
                             WHEN CPUeff < 0.5 THEN CPUeff * 2
                             ELSE 1
                         END))
-                    END, 1) AS lost_cpu_days,
-                    CPUTime 
+                    END, 1) AS lost_cpu_days
                 FROM allocations
                 WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
@@ -451,6 +450,7 @@ class CreateFigures:
                             ELSE 1
                         END))
                     END)) AS INTEGER) AS lost_cpu_days
+
             FROM allocations
             WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
@@ -460,8 +460,7 @@ class CreateFigures:
             query = """
                 SELECT
                     (End - Start) / 60 AS runtime_minutes,
-                    ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days,
-                    CPUTime 
+                    ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days         
                 FROM allocations
                 WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
@@ -513,7 +512,6 @@ class CreateFigures:
         df2.loc['cluster efficiency', 'Time in days'] = f"{df2.loc['cluster efficiency', 'Time in days']:.2f}%"
         df2.loc['total CPU days booked', 'Time in days'] = f"{int(df2.loc['total CPU days booked', 'Time in days']):,}"
         df2.loc['total CPU days lost', 'Time in days'] = f"{int(df2.loc['total CPU days lost', 'Time in days']):,}"
-        
         st.dataframe(df2)
 
     @st.cache_data(ttl=3600, show_spinner=False)
