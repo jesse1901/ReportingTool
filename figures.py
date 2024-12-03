@@ -397,6 +397,10 @@ class CreateFigures:
 
         df = pd.read_sql_query(query, _self.con, params=params)
         
+        if df.empty:
+            st.warning("No data available for the selected date range.")
+            return
+
         df['runtime_minutes'] = df['runtime_minutes'].fillna(0)
         max_runtime = df['runtime_minutes'].max()
         
