@@ -278,7 +278,7 @@ class CreateFigures:
 
             df = pd.read_sql_query(base_query + " GROUP BY eff.User", _self.con, params=params)
             if df.empty:
-                st.warning("No data available for the selected date range.")
+                st.warning("No data available for the selected date range or partition.")
                 return
 
             if user_role == 'user':
@@ -398,7 +398,7 @@ class CreateFigures:
         df = pd.read_sql_query(query, _self.con, params=params)
         
         if df.empty:
-            st.warning("No data available for the selected date range.")
+            st.warning("No data available for the selected date range or partition.")
             return
 
         df['runtime_minutes'] = df['runtime_minutes'].fillna(0)
@@ -486,7 +486,7 @@ class CreateFigures:
         df = pd.read_sql_query(query, _self.con, params=params)
 
         if df.empty:
-            st.warning("No data available for the selected date range.")
+            st.warning("No data available for the selected date range or partition.")
             return
         
         max_runtime = df['runtime_minutes'].max()
@@ -507,7 +507,7 @@ class CreateFigures:
         df2 = pd.read_sql_query(query2, _self.con, params=params)
 
         if df2.empty:
-            st.warning("No data available for the selected date range.")
+            st.warning("No data available for the selected date range or partition.")
             return
 
         df2['cluster_efficiency'] = (df2['total_cpu_days'] - df2['lost_cpu_days']) / df2['total_cpu_days'] * 100
@@ -564,7 +564,7 @@ class CreateFigures:
 
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
-            st.warning("No data available for the selected date range.")
+            st.warning("No data available for the selected date range or partition.")
             return
 
         df['Category'] = df.apply(
@@ -628,7 +628,7 @@ class CreateFigures:
         df = pd.read_sql_query(query + " ORDER BY Elapsed ASC;", _self.con, params=params)
 
         if df.empty:
-            st.warning("No data available for the selected date range.")
+            st.warning("No data available for the selected date range or partition.")
             return
         
         df['GpuUtil'] = df['GpuUtil'] * 100
