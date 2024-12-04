@@ -111,7 +111,7 @@ def main():
             view_options = ["User View"]
         
         with st.sidebar:
-            selected_view = st.selectbox("Select View", view_options, key="view_select")
+            selected_view = st.selectbox("select view", view_options, key="view_select")
 
         if selected_view == "Admin View":
             user_role = 'admin'
@@ -154,7 +154,7 @@ def main():
                     with col6: 
                         create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col7:
-                        create.pie_chart_batch_inter(start_date, end_date, scale_efficiency, partition_selector)
+                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
 
             with tab4:
@@ -181,12 +181,13 @@ def main():
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
                 with tab2:
-                    col3, col4 = st.columns([1,1])
+                    col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
                         create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                     with col4: 
                         create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
-                
+                    with col4_5:
+                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab3:
                     col_num2, _ = st.columns([1, 2])
                     col5, col6 = st.columns([1,1])
@@ -211,12 +212,13 @@ def main():
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
                 with tab2:
-                    col3, col4 = st.columns([1,1])
+                    col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
                         create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                     with col4: 
                         create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
-                
+                    with col4_5:
+                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab3:
                     col1,col2 = st.columns([1,1])
                     with col1:

@@ -527,7 +527,7 @@ class CreateFigures:
         st.dataframe(df2)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_batch_inter(_self, start_date, end_date, scale_efficiency=True, partition_selector=None) -> None:
+    def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None) -> None:
         if scale_efficiency:
             query = """
                 SELECT
@@ -561,6 +561,14 @@ class CreateFigures:
         if partition_selector:
             query += " AND Partition = ?"
             params.append(partition_selector)
+        
+        if user_role == 'admin':
+            pass
+        elif user_role == 'exfel':
+            query += " AND Account IN ('exfel', 'upex')"
+        elif user_role == 'user':
+            query += " AND User = ?"
+            params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
