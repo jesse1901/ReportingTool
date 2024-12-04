@@ -126,13 +126,17 @@ def main():
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
             with st.spinner("loading..."):
                 with tab1:
-                    col_num, _ = st.columns([1, 2])
+                    col_num, col_username, col_jobid, _ = st.columns([1, 1, 1, 2])
                     col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-                                                                                                                            Column sorting is disabled for values above 150k!""")
+                                                                                                                                Column sorting is disabled for values above 150k!""")
+                    with col_jobid:
+                        filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
+                    with col_username:
+                        filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector)
+                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
@@ -171,13 +175,17 @@ def main():
             tab1, tab2, tab3 = st.tabs(["Tables", "Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
-                    col_num, _ = st.columns([1, 2])
+                    col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
                     col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-                                                                                                                            Column sorting is disabled for values above 150k!""")
+                                                                                                                                Column sorting is disabled for values above 150k!""")
+                    with col_jobid:
+                        filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
+                    with col_username:
+                        filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector)
+                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
                 with tab2:
@@ -202,13 +210,16 @@ def main():
             tab1, tab2, tab3 = st.tabs(["Tables", "Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
-                    col_num, _ = st.columns([1, 2])
+                    col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
                     col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-                                                                                                                            Column sorting is disabled for values above 150k!""")
+                                                                                                                                Column sorting is disabled for values above 150k!""")
+                    with col_jobid:
+                        filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter_user", placeholder="<jobID>")
+
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector)
+                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None)
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
                 with tab2:

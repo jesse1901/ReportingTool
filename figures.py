@@ -133,41 +133,89 @@ class CreateFigures:
     }
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def fetch_all_data(_self, current_user, user_role, number=None, partition_selector=None):
+    def fetch_all_data(_self, current_user, user_role, number=None, partition_selector=None, filter_jobid=None, filter_user=None):
         """
         Retrieves data from the reportdata table based on user role.
         """
-        query = """SELECT jobID, JobName, User, Account, State, 
-        ROUND(Elapsed / 60,1) AS Elapsed_hours,
-        Start, End,  Partition, NodeList, AllocCPUS,  
-        ROUND((CPUTime / 3600),2) AS CPU_hours, ROUND((TotalCPU / 3600),2) AS CPU_hours_used, 
-        ROUND((CPUTime- TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 1) AS CPUEff, NGPUS AS AllocGPUS, ROUND(GpuUtil*100,1) AS GPUEff, 
-        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, SubmitLine FROM allocations"""
+        query = """SELECT jobID, JobName, User, Account, State, \
+        ROUND(Elapsed / 60,1) AS Elapsed_hours, \
+        Start, End,  Partition, NodeList, AllocCPUS,  \
+        ROUND((CPUTime / 3600),2) AS CPU_hours, ROUND((TotalCPU / 3600),2) AS CPU_hours_used, \
+        ROUND((CPUTime - TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 1) AS CPUEff, \
+        NGPUS AS AllocGPUS, ROUND(GpuUtil*100,1) AS GPUEff, \
+        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, SubmitLine \
+        FROM allocations """
+
+        conditions = []
         params = []
 
+        # Add filter for JobID
+        if filter_jobid:
+            conditions.append("JobID = ?")
+            params.append(filter_jobid)
+
+        # Add filter for User
+        if filter_user:
+            conditions.append("User = ?")
+            params.append(filter_user)
+
+        # Add filter based on user role
         if user_role == "admin":
-            pass
+            pass  # Admins see all data
         elif user_role == "exfel":
-            query += " WHERE Account IN ('exfel', 'upex')"
-        else:   
-            query += " WHERE User = ?"
+            conditions.append("Account IN ('exfel', 'upex')")
+        else:
+            conditions.append("User = ?")
             params.append(current_user)
 
+        # Add filter for Partition
         if partition_selector:
-            if user_role == "admin":
-                query += " WHERE Partition = ?"
-            else:
-                query += " AND Partition = ?"
+            conditions.append("Partition = ?")
             params.append(partition_selector)
 
+        # Combine conditions into a WHERE clause
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        # Add ORDER BY and LIMIT
         query += " ORDER BY End DESC LIMIT ?"
         params.append(int(number))
+
         return pd.read_sql_query(query, _self.con, params=params)
     
-    def frame_user_all(_self, current_user, user_role, number ,partition_selector) -> None:
+    def frame_user_all(_self, current_user, user_role, number ,partition_selector, filter_jobid, filter_user) -> None:
         """
         Displays all job data from the reportdata table in the Streamlit app.
         """
+        st.markdown("""
+                <html>
+                    <head>
+                    <style>
+                        ::-webkit-scrollbar {
+                            width: 10px;
+                            }
+
+                            /* Track */
+                            ::-webkit-scrollbar-track {
+                            background: #f1f1f1;
+                            }
+
+                            /* Handle */
+                            ::-webkit-scrollbar-thumb {
+                            background: #888;
+                            }
+
+                            /* Handle on hover */
+                            ::-webkit-scrollbar-thumb:hover {
+                            background: #555;
+                            }
+                    </style>
+                    </head>
+                    <body>
+                    </body>
+                </html>
+            """, unsafe_allow_html=True)
+
         col1, _ = st.columns([1,2])
 
 
@@ -190,7 +238,7 @@ class CreateFigures:
                 )
 
 
-        df = CreateFigures.fetch_all_data(_self, current_user, user_role, number, partition_selector)
+        df = CreateFigures.fetch_all_data(_self, current_user, user_role, number, partition_selector, filter_jobid, filter_user)
 
         berlin_tz = pytz.timezone('Europe/Berlin')
 
@@ -231,7 +279,7 @@ class CreateFigures:
                     COUNT(eff.JobID) AS JobCount,
                     ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400, 1) AS Lost_CPU_days,
                     ROUND(SUM(slurm.CPUTime) / 86400, 1) AS cpu_days,
-                    printf("%2.0f%%", 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,
+                    printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,
                     ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400, 1) AS GPU_Days,
                     ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400, 1) AS Lost_GPU_Days,
                     iif(SUM(eff.NGPUs), printf("%2.0f%%", 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / SUM(eff.Elapsed * eff.NGPUs)), NULL) AS GPUEff,
@@ -258,8 +306,11 @@ class CreateFigures:
                                                         END))
                                                     END), 1) AS Lost_CPU_days,""")
                 
-                base_query = base_query.replace("printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,",
-                                                "printf('%2.0f%%', LEAST((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)*2), 100)) AS CPUEff,")
+                base_query = base_query.replace(
+                    "printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,",
+                    "printf('%2.0f%%', iif((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2 > 100, 100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2)) AS CPUEff,"
+                )
+
                 base_query = base_query.replace("ROUND(SUM(slurm.CPUTime) / 86400, 1) AS cpu_days,",
                                                 "ROUND(SUM(slurm.CPUTime) / 2 / 86400, 1) AS cpu_days,"
 )
@@ -285,7 +336,7 @@ class CreateFigures:
                 df = df.T.reset_index()
                 df.columns = ["Metric", "Value"]
             
-            st.markdown("<div style='height: 64px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 81px;'></div>", unsafe_allow_html=True)
             st.markdown("Data Grouped by User", help='Partition "jhub" and Interactive Jobs are excluded')
             st.dataframe(df)
 
@@ -686,6 +737,8 @@ class CreateFigures:
 
         st.plotly_chart(fig, theme=None)
 
+
+
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None):
         if scale_efficiency:
@@ -747,6 +800,7 @@ class CreateFigures:
         df_grouped = df_grouped.sort_values(by='lost_cpu_days', ascending=False)
 
         st.dataframe(df_grouped, hide_index=True)
+
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None):
