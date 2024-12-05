@@ -69,7 +69,8 @@ def get_gpu_data(cur, row, step):
         }
         try:
             response = requests.get(prometheus_url, params=params)
-            response.raise_for_status() 
+            response.raise_for_status()
+            request_url = response.url
             response = response.json()
 
             if 'data' in response and 'result' in response['data'] and len(response['data']['result']) > 0:
@@ -83,10 +84,11 @@ def get_gpu_data(cur, row, step):
                         value_count += 1  
 
                 gpu_eff = (total_sum / value_count) if value_count > 0 else 0
-                with open('/var/www/max-reports/ReportingTool/gpu_requests.log', 'a') as log_file:
+            
+            with open('/var/www/max-reports/ReportingTool/gpu_requests.log', 'a') as log_file:
                     log_file.write(f"JobID: {jobID}\n")
-                    log_file.write(f"Request URL: {response.url}\n")
-                    log_file.write(f"Response: {response.text}\n")
+                    log_file.write(f"Request URL: {request_url}\n")
+                    log_file.write(f"Response: {response}\n")
                     log_file.write("\n")
 
         except requests.exceptions.HTTPError as http_err:
