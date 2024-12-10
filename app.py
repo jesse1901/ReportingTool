@@ -187,7 +187,7 @@ def main():
                     with col1:
                         create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
-                        create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
+                        create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab2:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
@@ -221,7 +221,7 @@ def main():
                     with col1:
                         create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None)
                     with col2:
-                        create.frame_group_by_user( start_date, end_date, username, user_role, partition_selector)
+                        create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab2:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:

@@ -141,9 +141,9 @@ class CreateFigures:
         ROUND(Elapsed / 60,1) AS Elapsed_hours, \
         Start, End,  Partition, NodeList, AllocCPUS,  \
         ROUND((CPUTime / 3600),2) AS CPU_hours, ROUND((TotalCPU / 3600),2) AS CPU_hours_used, \
-        ROUND((CPUTime - TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 1) AS CPUEff, \
-        NGPUS AS AllocGPUS, ROUND(GpuUtil*100,1) AS GPUEff, \
-        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, SubmitLine \
+        ROUND((CPUTime - TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 2) AS CPUEff, \
+        NGPUS AS AllocGPUS, ROUND(GpuUtil*100,2) AS GPUEff,\
+        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, Comment, SubmitLine \
         FROM allocations """
 
         conditions = []

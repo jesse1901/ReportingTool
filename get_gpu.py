@@ -22,7 +22,7 @@ def get_rows_without_gpu(con):
             data = cur.fetchall()
             if not data:
                 if jobs_processed > 0:
-                    print(f"All {jobs_processed} jobs were successfully updated with GPU data.")
+                    print(f"{jobs_processed} jobs were successfully updated with GPU data.")
                 else:
                     print("No jobs to process.")
                 break
@@ -36,7 +36,7 @@ def get_rows_without_gpu(con):
                         print(f"Failed to process JobID {row[4]}: {e}")
 
             step += 1
-            if step > 3:
+            if step > 10:
                 print(f"No response for {len(data)} jobs remaining.")
                 break
 
