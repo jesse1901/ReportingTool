@@ -296,24 +296,31 @@ class CreateFigures:
             params = [start_date, end_date]
 
             if scale_efficiency: 
-                base_query = base_query.replace("ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400, 1) AS Lost_CPU_days,", 
-                                                """ ROUND(SUM(CASE 
-                                                        WHEN eff.CPUeff >= 1 THEN 0
-                                                        WHEN eff.CPUeff = 0 THEN (eff.cpu_s_reserved - eff.cpu_s_used) / 86400 / 2
-                                                        ELSE (slurm.CPUTime / 2 / 86400) * ((1 - CASE 
-                                                            WHEN eff.CPUeff < 0.5 THEN eff.CPUeff * 2
-                                                            ELSE 1
-                                                        END))
-                                                    END), 1) AS Lost_CPU_days,""")
-                
-                base_query = base_query.replace(
-                    "printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,",
-                    "printf('%2.0f%%', iif((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2 > 100, 100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2)) AS CPUEff,"
-                )
+                base_query = """
+                SELECT
+                    eff.User,
+                    eff.Account,
+                    COUNT(eff.JobID) AS JobCount,
 
-                base_query = base_query.replace("ROUND(SUM(slurm.CPUTime) / 86400, 1) AS cpu_days,",
-                                                "ROUND(SUM(slurm.CPUTime) / 2 / 86400, 1) AS cpu_days,"
-)
+                    ROUND(SUM((eff.cpu_s_reserved / 2) - eff.cpu_s_used) / 86400, 1) AS Lost_CPU_days,
+                    
+                    ROUND(SUM(slurm.CPUTime) / 86400 / 2, 1) AS cpu_days,
+
+                    printf('%2.0f%%', iif((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2 > 100, 100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2)) AS CPUEff,
+                    
+                    ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400, 1) AS GPU_Days,
+                    ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400, 1) AS Lost_GPU_Days,
+                    iif(SUM(eff.NGPUs), printf("%2.0f%%", 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / SUM(eff.Elapsed * eff.NGPUs)), NULL) AS GPUEff,
+                    ROUND(SUM(eff.TotDiskRead / 1048576) / SUM(eff.Elapsed), 2) AS read_MiBps,
+                    ROUND(SUM(eff.TotDiskWrite / 1048576) / SUM(eff.Elapsed), 2) AS write_MiBps
+                FROM eff
+                JOIN slurm ON eff.JobID = slurm.JobID
+                WHERE eff.Start >= ? 
+                AND eff.End <= ? 
+                AND eff.End IS NOT NULL 
+                AND slurm.Partition != 'jhub'
+                AND slurm.JobName != 'interactive'
+            """
 
             if user_role == 'admin':
                 pass
@@ -328,6 +335,8 @@ class CreateFigures:
                 params.append(partition_selector)
 
             df = pd.read_sql_query(base_query + " GROUP BY eff.User", _self.con, params=params)
+            
+            df['Lost_CPU_days'] = df['Lost_CPU_days'].clip(lower=0)
             if df.empty:
                 st.warning("No data available for the selected date range or partition.")
                 return
@@ -335,6 +344,7 @@ class CreateFigures:
             if user_role == 'user':
                 df = df.T.reset_index()
                 df.columns = ["Metric", "Value"]
+            
             
             st.markdown("<div style='height: 81px;'></div>", unsafe_allow_html=True)
             st.markdown("Data Grouped by User", help='Partition "jhub" and Interactive Jobs are excluded')
@@ -354,14 +364,7 @@ class CreateFigures:
                 SELECT 
                     eff.User,
                     COUNT(eff.JobID) AS job_count,
-                    ROUND(SUM(CASE 
-                        WHEN eff.CPUeff >= 1 THEN 0
-                        WHEN eff.CPUeff = 0 THEN (eff.cpu_s_reserved - eff.cpu_s_used) / 86400 / 2
-                        ELSE (slurm.CPUTime / 2 / 86400) * ((1 - CASE 
-                            WHEN eff.CPUeff < 0.5 THEN eff.CPUeff * 2
-                            ELSE 1
-                        END))
-                    END), 1) AS lost_cpu_days,
+                    ROUND(SUM((eff.cpu_s_reserved / 2) - eff.cpu_s_used) / 86400, 1) AS lost_cpu_days,
                     eff.Account
                 FROM eff
                 JOIN slurm ON eff.JobID = slurm.JobID
@@ -402,7 +405,7 @@ class CreateFigures:
         query += " GROUP BY eff.User ORDER BY lost_cpu_days DESC"
 
         result_df = pd.read_sql_query(query, _self.con, params=params)
-
+        result_df['lost_cpu_days'] = result_df['lost_cpu_days'].clip(lower=0)
         result_df = result_df.sort_values(by='lost_cpu_days', ascending=False).head(number)
 
         max_lost_time = result_df['lost_cpu_days'].max()
