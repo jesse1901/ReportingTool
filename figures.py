@@ -549,7 +549,7 @@ class CreateFigures:
         st.plotly_chart(fig)
 
         df2 = pd.read_sql_query(query2, _self.con, params=params)
-        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
+        df2['lost_cpu_days'] = df2['lost_cpu_days'].clip(lower=0)
         if df2.empty:
             st.warning("No data available for the selected date range or partition.")
             return
@@ -569,20 +569,13 @@ class CreateFigures:
         df2.loc['total CPU days booked', 'Time in days'] = f"{int(df2.loc['total CPU days booked', 'Time in days']):,}"
         df2.loc['total CPU days lost', 'Time in days'] = f"{int(df2.loc['total CPU days lost', 'Time in days']):,}"
         st.dataframe(df2)
-
+#######################################################
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None) -> None:
         if scale_efficiency:
             query = """
                 SELECT
-                    ROUND(CASE 
-                        WHEN CPUeff >= 1 THEN 0
-                        WHEN CPUeff = 0 THEN (CPUTime - TotalCPU) / 86400 / 2
-                        ELSE (CPUTime / 2 / 86400) * ((1 - CASE 
-                            WHEN CPUeff < 0.5 THEN CPUeff * 2
-                            ELSE 1
-                        END))
-                    END) AS lost_cpu_days,
+                    ROUND(((CPUTime / 2) - TotalCPU) / 86400, 1) AS lost_cpu_days
                     JobName, 
                     Partition 
                 FROM allocations 
@@ -738,16 +731,7 @@ class CreateFigures:
             query = """
                 SELECT 
                     IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                    CAST(ROUND(SUM(
-                        CASE 
-                            WHEN CPUeff >= 1 THEN 0
-                            WHEN CPUeff = 0 THEN (CPUTime - TotalCPU) / 86400 / 2
-                            ELSE (CPUTime / 2 / 86400) * ((1 - CASE 
-                                WHEN CPUeff < 0.5 THEN CPUeff * 2
-                                ELSE 1
-                            END))
-                        END
-                    )) AS INTEGER) AS lost_cpu_days
+                    CAST(ROUND(SUM((CPUTime / 2) - TotalCPU) / 86400, 1) AS INTEGER) AS lost_cpu_days
                 FROM allocations
                 WHERE Partition != 'jhub' AND State IS NOT 'PENDING' AND State IS NOT 'RUNNING' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
