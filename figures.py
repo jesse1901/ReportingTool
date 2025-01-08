@@ -137,14 +137,16 @@ class CreateFigures:
         """
         Retrieves data from the reportdata table based on user role.
         """
-        query = """SELECT jobID, JobName, User, Account, State, \
-        ROUND(Elapsed / 60,1) AS Elapsed_hours, \
-        Start, End,  Partition, NodeList, AllocCPUS,  \
-        ROUND((CPUTime / 3600),2) AS CPU_hours, ROUND((TotalCPU / 3600),2) AS CPU_hours_used, \
-        ROUND((CPUTime - TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 2) AS CPUEff, \
-        NGPUS AS AllocGPUS, ROUND(GpuUtil*100,2) AS GPUEff,\
-        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, Comment, SubmitLine \
+        query = """SELECT jobID, JobName, User, Account, State, 
+        ROUND(Elapsed / 60,1) AS Elapsed_hours, 
+        Start, End,  Partition, NodeList, AllocCPUS,  
+        ROUND((CPUTime / 3600),2) AS CPU_hours, ROUND((TotalCPU / 3600),2) AS CPU_hours_used, 
+        ROUND((CPUTime - TotalCPU)/3600,2) AS CPU_hours_lost, ROUND(CPUEff*100, 2) AS CPUEff, 
+        NGPUS AS AllocGPUS, ROUND(GpuUtil*100,2) AS GPUEff,
+        ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, Comment, SubmitLine 
         FROM allocations """
+
+
 
         conditions = []
         params = []
@@ -306,7 +308,7 @@ class CreateFigures:
                     
                     ROUND(SUM(slurm.CPUTime) / 86400 / 2, 1) AS cpu_days,
 
-                    printf('%2.0f%%', iif((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2 > 100, 100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2)) AS CPUEff,
+                    ROUND(iif((100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2 > 100, 100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) * 2), 1) AS CPUEff,
                     
                     ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400, 1) AS GPU_Days,
                     ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400, 1) AS Lost_GPU_Days,
@@ -428,7 +430,6 @@ class CreateFigures:
             )
         )
 
-        # Display the chart in Streamlit
         st.plotly_chart(fig)
     
     @st.cache_data(ttl=3600, show_spinner=False)
@@ -485,35 +486,22 @@ class CreateFigures:
             query = """
                 SELECT
                     (End - Start) / 60 AS runtime_minutes,
-                    ROUND(CASE 
-                        WHEN CPUeff >= 1 THEN 0
-                        WHEN CPUeff = 0 THEN (CPUTime - TotalCPU) / 86400 / 2
-                        ELSE (CPUTime / 2 / 86400) * ((1 - CASE 
-                            WHEN CPUeff < 0.5 THEN CPUeff * 2
-                            ELSE 1
-                        END))
-                    END, 1) AS lost_cpu_days
-                FROM allocations
+                   ROUND(((CPUTime / 2) - TotalCPU) / 86400, 1) AS lost_cpu_days
+
+                   FROM allocations
                 WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
-            
+
             query2 = """
             SELECT 
                 CAST(ROUND(SUM(CPUTime / 86400) / 2) AS INTEGER) AS total_cpu_days,
-                CAST(ROUND(SUM(CASE 
-                        WHEN CPUeff >= 1 THEN 0
-                        WHEN CPUeff = 0 THEN (CPUTime - TotalCPU) / 86400 / 2
-                        ELSE (CPUTime / 2 / 86400) * ((1 - CASE 
-                            WHEN CPUeff < 0.5 THEN CPUeff * 2
-                            ELSE 1
-                        END))
-                    END)) AS INTEGER) AS lost_cpu_days
+                CAST(ROUND(SUM((CPUTime / 2) - TotalCPU) / 86400, 1) AS INTEGER) AS lost_cpu_days
 
             FROM allocations
             WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
             params=[start_date, end_date]
-        
+
         else:
             query = """
                 SELECT
@@ -530,6 +518,7 @@ class CreateFigures:
                 FROM allocations
                 WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'
             """
+
             params = [start_date, end_date]
 
         if partition_selector:
@@ -538,6 +527,7 @@ class CreateFigures:
             params.append(partition_selector)
 
         df = pd.read_sql_query(query, _self.con, params=params)
+        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
 
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
@@ -559,7 +549,7 @@ class CreateFigures:
         st.plotly_chart(fig)
 
         df2 = pd.read_sql_query(query2, _self.con, params=params)
-
+        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
         if df2.empty:
             st.warning("No data available for the selected date range or partition.")
             return
