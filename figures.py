@@ -312,7 +312,7 @@ class CreateFigures:
                     
                     ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400, 1) AS GPU_Days,
                     ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400, 1) AS Lost_GPU_Days,
-                    iif(SUM(eff.NGPUs), printf("%2.0f%%", 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / SUM(eff.Elapsed * eff.NGPUs)), NULL) AS GPUEff,
+                    iif(SUM(eff.NGPUs), 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / SUM(eff.Elapsed * eff.NGPUs)), NULL) AS GPUEff,
                     ROUND(SUM(eff.TotDiskRead / 1048576) / SUM(eff.Elapsed), 2) AS read_MiBps,
                     ROUND(SUM(eff.TotDiskWrite / 1048576) / SUM(eff.Elapsed), 2) AS write_MiBps
                 FROM eff
@@ -568,14 +568,15 @@ class CreateFigures:
         df2.loc['cluster efficiency', 'Time in days'] = f"{df2.loc['cluster efficiency', 'Time in days']:.2f}%"
         df2.loc['total CPU days booked', 'Time in days'] = f"{int(df2.loc['total CPU days booked', 'Time in days']):,}"
         df2.loc['total CPU days lost', 'Time in days'] = f"{int(df2.loc['total CPU days lost', 'Time in days']):,}"
+        st.write('Cluster Efficiency')
         st.dataframe(df2)
-#######################################################
+
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None) -> None:
         if scale_efficiency:
             query = """
                 SELECT
-                    ROUND(((CPUTime / 2) - TotalCPU) / 86400, 1) AS lost_cpu_days
+                    ROUND(((CPUTime / 2) - TotalCPU) / 86400, 1) AS lost_cpu_days,
                     JobName, 
                     Partition 
                 FROM allocations 
@@ -759,7 +760,8 @@ class CreateFigures:
             params.append(partition_selector)
 
         df = pd.read_sql_query(query + " GROUP BY Category", _self.con, params=params)
-
+        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
+        
         fig = px.pie(
             df,
             names='Category',
