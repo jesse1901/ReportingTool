@@ -165,7 +165,8 @@ class CreateFigures:
         if user_role == "admin":
             pass  # Admins see all data
         elif user_role == "exfel":
-            conditions.append("Account IN ('exfel', 'upex')")
+            pass
+            #conditions.append("Account IN ('exfel', 'upex')")
         else:
             conditions.append("User = ?")
             params.append(current_user)
@@ -328,7 +329,8 @@ class CreateFigures:
             if user_role == 'admin':
                 pass
             elif user_role == 'exfel':
-                base_query += " AND eff.Account IN ('exfel', 'upex')"
+                pass
+                #base_query += " AND eff.Account IN ('exfel', 'upex')"
             elif user_role == 'user':
                 base_query += " AND eff.User = ?"
                 params.append(current_user)
@@ -396,7 +398,8 @@ class CreateFigures:
             """
 
         if user_role == 'exfel':
-            query += " AND eff.Account IN ('exfel', 'upex')"
+            pass
+            #query += " AND eff.Account IN ('exfel', 'upex')"
         elif user_role == 'user':
             query += " AND eff.User = ?"
             params.append(current_user)
@@ -604,7 +607,8 @@ class CreateFigures:
         if user_role == 'admin':
             pass
         elif user_role == 'exfel':
-            query += " AND Account IN ('exfel', 'upex')"
+            pass
+            #query += " AND Account IN ('exfel', 'upex')"
         elif user_role == 'user':
             query += " AND User = ?"
             params.append(current_user)
@@ -663,7 +667,8 @@ class CreateFigures:
         if user_role == "admin":
             query += "AND Elapsed > 100 "
         elif user_role == "exfel":
-            query += "AND Account IN ('exfel', 'upex')"
+            pass
+            #query += "AND Account IN ('exfel', 'upex')"
         elif user_role == "user":
             query += "AND User == ?"
             params.append(current_user)
@@ -751,7 +756,8 @@ class CreateFigures:
         if user_role == "admin":
             pass
         elif user_role == "exfel":
-            query += " AND Account IN ('exfel', 'upex')"
+            pass
+            #query += " AND Account IN ('exfel', 'upex')"
         elif user_role == "user":
             query += " AND User == ?"
             params.append(current_user)
@@ -795,7 +801,8 @@ class CreateFigures:
         if user_role == 'admin':    
             pass
         elif user_role == 'exfel':
-            query += " AND Account IN ('exfel', 'upex')"
+            pass
+            #query += " AND Account IN ('exfel', 'upex')"
         elif user_role == 'user':
             query += " AND User = ?"
             params.append(current_user)
