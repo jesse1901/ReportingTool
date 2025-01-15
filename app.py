@@ -182,7 +182,7 @@ def main():
                     create.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
         elif user_role == 'exfel':
-            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview"]) 
+            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
