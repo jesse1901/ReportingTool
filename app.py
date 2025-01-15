@@ -74,8 +74,7 @@ def input_controls(user_role=None):
              partition_selector = st.selectbox("select partition", 
 
 
-    ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","ponline","ponline_p09","ponline_p11",
-    "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu", "upex","upex-beamtime","upex-high","upex-middle",
+    ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", "upex","upex-beamtime","upex-high","upex-middle",
     "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
         else:
             partition_selector = st.selectbox("select partition", 
