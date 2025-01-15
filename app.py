@@ -51,7 +51,7 @@ def is_user_admin(username):
 def is_user_xfel(username):
     return username in XFEL_USERS
 
-def input_controls():
+def input_controls(user_role=None):
     
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
                     you can click on the checkbox to include hyperthreading cores into the calculations"""
@@ -70,16 +70,26 @@ def input_controls():
         start_date = int(datetime.combine(start_date, datetime.min.time()).timestamp())
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
+        if user_role == 'exfel':
+             partition_selector = st.selectbox("select partition", 
 
-        partition_selector = st.selectbox("select partition", 
+
+    ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","ponline","ponline_p09","ponline_p11",
+    "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu", "upex","upex-beamtime","upex-high","upex-middle",
+    "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
+        else:
+            partition_selector = st.selectbox("select partition", 
 
 
- ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
-"cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
-"jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
-"pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
-"ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
-"ukecpu","upex","upex-beamtime","upex-high","upex-middle","xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
+    ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
+    "cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
+    "jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
+    "pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
+    "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
+    "ukecpu","upex","upex-beamtime","upex-high","upex-middle","xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
+
+
+
 
         if partition_selector == "All available partitions":
                 partition_selector = None
@@ -120,7 +130,7 @@ def main():
         else:
             user_role = 'user'
 
-        start_date, end_date, scale_efficiency, partition_selector = input_controls()
+        start_date, end_date, scale_efficiency, partition_selector = input_controls(user_role)
 
         if user_role == 'admin':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
@@ -172,7 +182,7 @@ def main():
                     create.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
         elif user_role == 'exfel':
-            tab1, tab2, tab3 = st.tabs(["Tables", "Charts", "Overview"]) 
+            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
@@ -188,7 +198,19 @@ def main():
                         create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
                         create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                
                 with tab2:
+                    col_num2, _ = st.columns([1, 2])
+                    col3,col4 = st.columns([1,1])
+                    
+                    with col_num2:
+                        number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
+                    with col3:
+                        create.job_counts_by_log2(start_date, end_date, number2, partition_selector)
+                    with col4:
+                        create.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)                
+                
+                with tab3:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
                         create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
@@ -196,7 +218,7 @@ def main():
                         create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col4_5:
                         create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-                with tab3:
+                with tab4:
                     col_num2, _ = st.columns([1, 2])
                     col5, col6 = st.columns([1,1])
                     with col_num2:
