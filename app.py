@@ -41,6 +41,15 @@ def authenticate(username, password):
     except Exception as e:
         st.error(f"LDAP connection error: {e}")
         return False
+    
+def login():
+    if not st.experimental_user.is_logged_in:
+        if st.button("Log in with Keycloak"):
+            st.login()
+        st.stop()
+    else:
+        st.logout()
+
 
 def is_user_allowed(username):
     return username in ALLOWED_USERS
