@@ -6,16 +6,16 @@ from datetime import timedelta, datetime
 import numpy as np
 import sqlite3
 import toml
-from ldap3 import Server, Connection, ALL
+#from ldap3 import Server, Connection, ALL
 from dataclasses import asdict
 from figures import CreateFigures
 
 secrets = toml.load('.streamlit/secrets.toml')
 
 # LDAP Configuration
-LDAP_SERVER = secrets['ldap']['server_path']
-SEARCH_BASE = secrets['ldap']['search_base']
-USE_SSL = secrets['ldap']['use_ssl']
+#LDAP_SERVER = secrets['ldap']['server_path']
+#SEARCH_BASE = secrets['ldap']['search_base']
+#USE_SSL = secrets['ldap']['use_ssl']
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
@@ -269,26 +269,21 @@ def main():
         _ , col1, _ = st.columns([1, 2, 1])    
         with col1:    
             st.title("Login Max-Reports")
-            form = st.form(key="login_form")
-            
-            # Show login form if user is not authenticated
-            username = form.text_input("Username")
-            password = form.text_input("Password", type="password")
+            login()
+            st.write("works!!!")
             try:
-                if form.form_submit_button("Login"):                
-                    if authenticate(username, password):
-                        st.session_state['username'] = username
-                        if is_user_admin(username):
-                            st.session_state['user_role'] = 'admin'
-                        elif is_user_xfel(username):
-                            st.session_state['user_role'] = 'exfel'
-                        elif is_user_allowed(username):        
-                            st.session_state['user_role'] = 'user'
-                        else:
-                            st.error("You are not authorized to login")
-                            return  # Exit if not authorized
-                        
-                        st.rerun()  # Re-run to update session state
+                st.session_state['username'] = st.experimental_user
+                if is_user_admin(username):
+                    st.session_state['user_role'] = 'admin'
+                elif is_user_xfel(username):
+                    st.session_state['user_role'] = 'exfel'
+                elif is_user_allowed(username):        
+                    st.session_state['user_role'] = 'user'
+                else:
+                    st.error("You are not authorized to login")
+                    return  # Exit if not authorized
+                
+                st.rerun()  # Re-run to update session state
 
             except Exception as e:
                 st.error("An error occurred during login.")
