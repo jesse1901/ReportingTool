@@ -1,46 +1,14 @@
 import streamlit as st
-import pandas as pd
-import time
-from config import get_config
 from datetime import timedelta, datetime
-import numpy as np
 import sqlite3
 import toml
-from ldap3 import Server, Connection, ALL
-from dataclasses import asdict
 from figures import CreateFigures
 
 secrets = toml.load('.streamlit/secrets.toml')
 
-# LDAP Configuration
-#LDAP_SERVER = secrets['ldap']['server_path']
-#SEARCH_BASE = secrets['ldap']['search_base']
-#USE_SSL = secrets['ldap']['use_ssl']
-
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
-
-# def authenticate(username, password):
-#     if not password:
-#         st.error("Password cannot be empty")
-#         return False
-
-#     try:
-#         server = Server(LDAP_SERVER, use_ssl=USE_SSL, get_info=ALL)
-
-#         user = f"uid={username},ou=people,ou=rgy,o=desy,c=de"
-
-#         conn = Connection(server, user=user, password=password.strip())  
-        
-#         if conn.bind():
-#             return True  
-#         else:
-#             st.error("Invalid username or password") 
-#             return False  
-#     except Exception as e:
-#         st.error(f"LDAP connection error: {e}")
-#         return False
     
 def login():
     if not st.experimental_user.is_logged_in:
@@ -128,6 +96,8 @@ def main():
             view_options = ["User View"]
         
         with st.sidebar:
+            if st.button("Logout"):
+                st.logout()
             selected_view = st.selectbox("select view", view_options, key="view_select")
 
         if selected_view == "Admin View":
