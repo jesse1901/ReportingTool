@@ -4,11 +4,9 @@ from datetime import datetime, timedelta, date
 import numpy as np
 import sqlite3
 import plotly.express as px
-import altair as alt
 import subprocess
 import pytz
 
- #CHECK : hover Account, cataldi??? , upex into exfel, button change view, 
 class timeUtils:
     def timestring_to_seconds(timestring):
         if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':

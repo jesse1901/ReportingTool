@@ -2,13 +2,16 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
-from figures import CreateFigures
+from src.figures import CreateFigures
 
 secrets = toml.load('.streamlit/secrets.toml')
+
+
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
+
     
 def login():
     if not st.experimental_user.is_logged_in:
