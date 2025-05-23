@@ -474,15 +474,38 @@ class CreateFigures:
         job_counts_df = job_counts.reset_index()
         job_counts_df.columns = ['runtime_interval', 'job_count']
 
-        st.write(alt.Chart(job_counts_df).mark_bar().encode(
-            x=alt.X('runtime_interval:O', sort=None),
-            y=alt.Y('job_count:Q', title=None),
-        ).properties(
-            width=550, 
-            height=450  
-        ).configure_axis(
-            labelFontSize=15
-        ))
+        # st.write(alt.Chart(job_counts_df).mark_bar().encode(
+        #     x=alt.X('runtime_interval:O', sort=None),
+        #     y=alt.Y('job_count:Q', title=None),
+        # ).properties(
+        #     width=550, 
+        #     height=450  
+        # ).configure_axis(
+        #     labelFontSize=15
+        # ))
+
+
+        # assume job_counts_df has columns "runtime_interval" and "job_count"
+        fig = px.bar(
+            job_counts_df,
+            x="runtime_interval",
+            y="job_count",
+            width=550,
+            height=450,
+        )
+
+        # remove the y-axis title and bump up the x-axis label font
+        fig.update_layout(
+            xaxis_tickangle=-90,   # oder 90, je nach Ausrichtung
+            yaxis_title=None,
+            xaxis=dict(
+                title=None,
+                tickfont=dict(size=15),
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+        )
+
+        st.plotly_chart(fig, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None) -> None:

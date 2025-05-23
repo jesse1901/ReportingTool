@@ -13,42 +13,41 @@ from figures import CreateFigures
 secrets = toml.load('.streamlit/secrets.toml')
 
 # LDAP Configuration
-LDAP_SERVER = secrets['ldap']['server_path']
-SEARCH_BASE = secrets['ldap']['search_base']
-USE_SSL = secrets['ldap']['use_ssl']
+#LDAP_SERVER = secrets['ldap']['server_path']
+#SEARCH_BASE = secrets['ldap']['search_base']
+#USE_SSL = secrets['ldap']['use_ssl']
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
 
-def authenticate(username, password):
-    if not password:
-        st.error("Password cannot be empty")
-        return False
+# def authenticate(username, password):
+#     if not password:
+#         st.error("Password cannot be empty")
+#         return False
 
-    try:
-        server = Server(LDAP_SERVER, use_ssl=USE_SSL, get_info=ALL)
+#     try:
+#         server = Server(LDAP_SERVER, use_ssl=USE_SSL, get_info=ALL)
 
-        user = f"uid={username},ou=people,ou=rgy,o=desy,c=de"
+#         user = f"uid={username},ou=people,ou=rgy,o=desy,c=de"
 
-        conn = Connection(server, user=user, password=password.strip())  
+#         conn = Connection(server, user=user, password=password.strip())  
         
-        if conn.bind():
-            return True  
-        else:
-            st.error("Invalid username or password") 
-            return False  
-    except Exception as e:
-        st.error(f"LDAP connection error: {e}")
-        return False
+#         if conn.bind():
+#             return True  
+#         else:
+#             st.error("Invalid username or password") 
+#             return False  
+#     except Exception as e:
+#         st.error(f"LDAP connection error: {e}")
+#         return False
     
 def login():
     if not st.experimental_user.is_logged_in:
         if st.button("Log in with Keycloak"):
             st.login()
         st.stop()
-    else:
-        st.logout()
+
 
 
 def is_user_allowed(username):
@@ -269,25 +268,23 @@ def main():
         _ , col1, _ = st.columns([1, 2, 1])    
         with col1:    
             st.title("Login Max-Reports")
-            form = st.form(key="login_form")
-            username = form.text_input("Username")
-            password = form.text_input("Password", type="password")
-            try:
-                if form.form_submit_button("Login"):                
 
-                    if authenticate(username, password):
-                        st.session_state['username'] = username
-                        if is_user_admin(username):
-                            st.session_state['user_role'] = 'admin'
-                        elif is_user_xfel(username):
-                            st.session_state['user_role'] = 'exfel'
-                        elif is_user_allowed(username):        
-                            st.session_state['user_role'] = 'user'
-                        else:
-                            st.error("You are not authorized to login")
-                            return  # Exit if not authorized
-                        
-                        st.rerun()  # Re-run to update session state
+
+            try:
+                login()
+                username = st.experimental_user.preferred_username
+                st.session_state['username'] = username
+                if is_user_admin(username):
+                    st.session_state['user_role'] = 'admin'
+                elif is_user_xfel(username):
+                    st.session_state['user_role'] = 'exfel'
+                elif is_user_allowed(username):        
+                    st.session_state['user_role'] = 'user'
+                else:
+                    st.error("You are not authorized to login")
+                    return  # Exit if not authorized
+                
+                st.rerun()  # Re-run to update session state
 
             except Exception as e:
                 st.error("An error occurred during login.")
