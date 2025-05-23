@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
-from src.figures import CreateFigures
+from figures import CreateFigures
 
 secrets = toml.load('.streamlit/secrets.toml')
 
