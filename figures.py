@@ -253,7 +253,7 @@ class CreateFigures:
         
         
         event = st.dataframe(df, on_select="rerun",selection_mode="single-row" ,key="user_all",    
-                            use_container_width=True, hide_index=True)
+                            use_container_width=False, hide_index=True)
 
         row = event.selection.rows
         filtered_df = df.iloc[row]
@@ -347,7 +347,7 @@ class CreateFigures:
             
             st.markdown("<div style='height: 81px;'></div>", unsafe_allow_html=True)
             st.markdown("Data Grouped by User", help='Partition "jhub" and Interactive Jobs are excluded')
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(df, use_container_width=False)
 
 
     @st.cache_data(ttl=3600, show_spinner=False)
@@ -590,7 +590,7 @@ class CreateFigures:
         df2.loc['total CPU days booked', 'Time in days'] = f"{int(df2.loc['total CPU days booked', 'Time in days']):,}"
         df2.loc['total CPU days lost', 'Time in days'] = f"{int(df2.loc['total CPU days lost', 'Time in days']):,}"
         st.write('Cluster Efficiency')
-        st.dataframe(df2, use_container_width=True)
+        st.dataframe(df2, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None) -> None:
@@ -660,7 +660,7 @@ class CreateFigures:
         )
         st.markdown('Lost CPU Time by Job Category', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
-        st.dataframe(aggregated_df, hide_index=True, use_container_width=True)
+        st.dataframe(aggregated_df, hide_index=True, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None):
@@ -802,7 +802,7 @@ class CreateFigures:
 
         df_grouped = df_grouped.sort_values(by='lost_cpu_days', ascending=False)
 
-        st.dataframe(df_grouped, hide_index=True, use_container_width=True)
+        st.dataframe(df_grouped, hide_index=True, use_container_width=False)
 
 
     @st.cache_data(ttl=3600, show_spinner=False)
@@ -847,4 +847,4 @@ class CreateFigures:
 
         df_grouped = df_grouped.sort_values(by='JobCount', ascending=False)
 
-        st.dataframe(df_grouped, hide_index=True, use_container_width=True)
+        st.dataframe(df_grouped, hide_index=True, use_container_width=False)
