@@ -3,3 +3,5 @@ venv/
 .streamlit/
 
 *.sqlite3
+
+__pycache__/
