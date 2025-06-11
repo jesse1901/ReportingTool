@@ -33,7 +33,7 @@ def get_available_gpus_per_node(prom_base_url):
     print("GPU counts saved to gpu_node_data.py.txt")
 
 
-def get_rows_without_gpu(con):
+def get_rows_without_gpu(con, prom_base_url):
     cur = con.cursor()
     step = 1
     jobs_processed = 0  # Counter for successfully processed jobs
@@ -58,7 +58,7 @@ def get_rows_without_gpu(con):
             for row in data:
                 if row[0] and row[1]:  # Ensure Start and End are not None
                     try:
-                        get_gpu_data(cur, row, step)
+                        get_gpu_data(cur, row, step, prom_base_url=prom_base_url)
                         jobs_processed += 1  # Increment the processed jobs counter
                     except Exception as e:
                         print(f"Failed to process JobID {row[4]}: {e}")
