@@ -124,7 +124,7 @@ def main():
                     with col_username:
                         filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date)
                     with col2:
                         frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
@@ -173,7 +173,7 @@ def main():
                     with col_username:
                         filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date)
                     with col2:
                         frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 
@@ -219,7 +219,7 @@ def main():
                         filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter_user", placeholder="<jobID>")
 
                     with col1:
-                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None, start_date=start_date, end_date=end_date)
                     with col2:
                         frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab2:
