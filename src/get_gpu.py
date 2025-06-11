@@ -1,5 +1,4 @@
 import requests
-from datetime import datetime
 import sqlite3
 import hostlist
 import gpu_node_data

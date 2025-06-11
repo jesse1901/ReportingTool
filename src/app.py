@@ -2,7 +2,12 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
-from figures import CreateFigures
+
+from charts.bar import BarCharts
+from charts.pie import PieCharts
+from charts.scatter import ScatterCharts
+from charts.frames import DataFrames
+
 
 secrets = toml.load('.streamlit/secrets.toml')
 
@@ -50,11 +55,9 @@ def input_controls(user_role=None):
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
         if user_role == 'exfel':
-             partition_selector = st.selectbox("select partition", 
-
-
-    ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", "upex","upex-beamtime","upex-high","upex-middle",
-    "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
+             partition_selector = st.selectbox("select partition",  
+                                               ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", "upex","upex-beamtime","upex-high","upex-middle",
+                                                "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
         else:
             partition_selector = st.selectbox("select partition", 
 
@@ -66,9 +69,7 @@ def input_controls(user_role=None):
     "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
     "ukecpu","upex","upex-beamtime","upex-high","upex-middle","xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
 
-
-
-
+            
         if partition_selector == "All available partitions":
                 partition_selector = None
 
@@ -126,9 +127,9 @@ def main():
                     with col_username:
                         filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
-                        create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
                 with tab2:
                     col_num2, _ = st.columns([1, 2])
@@ -137,18 +138,18 @@ def main():
                     with col_num2:
                         number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
                     with col3:
-                        create.job_counts_by_log2(start_date, end_date, number2, partition_selector)
+                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector)
                     with col4:
-                        create.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)
+                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)
 
                 with tab3:
                     col5, col6, col7 = st.columns([1,1,1])
                     with col5:
-                        create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                     with col6: 
-                        create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
+                        pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col7:
-                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
 
             with tab4:
@@ -157,9 +158,9 @@ def main():
                 with col_num3:
                     number3 = st.number_input("select number of user:", min_value=0, value=20)
                 with col8:
-                    create.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector)
+                    bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector)
                 with col9:    
-                    create.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                    scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
         elif user_role == 'exfel':
             tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
@@ -175,9 +176,9 @@ def main():
                     with col_username:
                         filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user)
                     with col2:
-                        create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 
                 with tab2:
                     col_num2, _ = st.columns([1, 2])
@@ -186,27 +187,27 @@ def main():
                     with col_num2:
                         number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
                     with col3:
-                        create.job_counts_by_log2(start_date, end_date, number2, partition_selector)
+                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector)
                     with col4:
-                        create.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)                
+                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)                
                 
                 with tab3:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
-                        create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                     with col4: 
-                        create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
+                        pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col4_5:
-                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab4:
                     col_num2, _ = st.columns([1, 2])
                     col5, col6 = st.columns([1,1])
                     with col_num2:
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
                     with col5:
-                        create.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector)
+                        bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector)
                     with col6:    
-                        create.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 
         elif user_role == 'user':    
             tab1, tab2, tab3 = st.tabs(["Tables", "Charts", "Overview"]) 
@@ -221,21 +222,21 @@ def main():
                         filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter_user", placeholder="<jobID>")
 
                     with col1:
-                        create.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None)
+                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user=None)
                     with col2:
-                        create.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab2:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
-                        create.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                     with col4: 
-                        create.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
+                        pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col4_5:
-                        create.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                        pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab3:
                     col1,col2 = st.columns([1,1])
                     with col1:
-                            create.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+                            scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
     else:
         _ , col1, _ = st.columns([1, 2, 1])    
@@ -244,9 +245,13 @@ def main():
 
 
             try:
-                login()
-                username = st.experimental_user.preferred_username
+                #login()
+                #username = st.user.preferred_username
+                username = "schuetzj"
                 st.session_state['username'] = username
+
+                st.session_state['user_role'] = 'admin'
+
                 if is_user_admin(username):
                     st.session_state['user_role'] = 'admin'
                 elif is_user_xfel(username):
@@ -270,4 +275,10 @@ if __name__ == "__main__":
 )
     con = sqlite3.connect('max-reports-slurm.sqlite3')
     create = CreateFigures(con)
+
+    frames = DataFrames(con)
+    bar = BarCharts(con)
+    pie = PieCharts(con)
+    scatter = ScatterCharts(con)
+
     main()
