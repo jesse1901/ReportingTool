@@ -43,7 +43,9 @@ class DataFrames:
         number: int = None, 
         partition_selector: str = None, 
         filter_jobid: str = None, 
-        filter_user: str = None
+        filter_user: str = None,
+        start_date: str = None,
+        end_date: str = None
     ) -> pd.DataFrame:
         """
         Retrieves data from the reportdata table based on user role.
@@ -55,6 +57,8 @@ class DataFrames:
             partition_selector: Filter by partition
             filter_jobid: Filter by specific job ID
             filter_user: Filter by specific user
+            start_date: Start date for filtering (YYYY-MM-DD format)
+            end_date: End date for filtering (YYYY-MM-DD format)
             
         Returns:
             DataFrame with job allocation data
@@ -100,6 +104,15 @@ class DataFrames:
             conditions.append("Partition = ?")
             params.append(partition_selector)
 
+        # Add date filtering
+        if start_date:
+            conditions.append("Start >= ?")
+            params.append(start_date)
+
+        if end_date:
+            conditions.append("End <= ?")
+            params.append(end_date)
+
         # Construct final query
         if conditions:
             base_query += " WHERE " + " AND ".join(conditions)
@@ -118,8 +131,9 @@ class DataFrames:
         number: int,
         partition_selector: str, 
         filter_jobid: str, 
-        filter_user: str
-    ) -> None:
+        filter_user: str,
+        start_date: str,
+        end_date: str) -> None:
         """
         Displays all job data from the reportdata table in the Streamlit app.
         
@@ -140,7 +154,7 @@ class DataFrames:
             st.markdown(
                 'User Data',
                 help="""
-                There may be delays of a few hours when updating the GPU data.  
+                There may be delays of a up to one hour when updating the GPU data.  
                 Furthermore, the hyperthreading option is not applied to this data frame, therefore   
                 all columns and calculations in this DataFrame contain the hyperthreading cores,  
                 no matter which option is selected
@@ -161,7 +175,7 @@ class DataFrames:
 
         # Fetch and process data
         df = self.fetch_all_data(
-            current_user, user_role, number, partition_selector, filter_jobid, filter_user
+            current_user, user_role, number, partition_selector, filter_jobid, filter_user, start_date, end_date
         )
         
         df = helpers.convert_timestamps_to_berlin_time(df)
