@@ -9,16 +9,18 @@ from ldap3 import Server, Connection, ALL
 
 # Load secrets from TOML file
 secrets = toml.load('.streamlit/secrets.toml')
-smtp_server = "smtp.desy.de"
-smtp_port = 25
-from_email = "maxwell.service@desy.de"
+smtp_server = ['mail']['smtp_server']
+smtp_port = ['mail']['smtp_port']
+from_email = secrets['mail']['from_email']
+
+
 
 # Get list of allowed users (emails)
 #ALLOWED_USERS = secrets['users']['allowed_users']
 
-LDAP_SERVER = 'ldap://ldap.desy.de'
-SEARCH_BASE = "ou=people,ou=rgy,o=desy,c=de"
-USE_SSL = False
+LDAP_SERVER = ['mail' ]['ldap_server']
+SEARCH_BASE = ['mail']['search_base']
+USE_SSL = True
 
 def get_month_range():
     month = datetime.now().month
@@ -87,7 +89,7 @@ def send_email(to_email, subject, body):
         server.sendmail(from_email, to_email, msg.as_string())
 
 def get_sql_data(user, first_day_unix, last_day_unix):
-    con = sqlite3.connect('max-reports-slurm.sqlite3')
+    con = sqlite3.connect('/var/www/max-reports/ReportingTool/src/max-reports-slurm.sqlite3')
     cur = con.cursor()
     userx = 'akorol'
     cur.execute("""                    

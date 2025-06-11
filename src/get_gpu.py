@@ -1,7 +1,36 @@
 import requests
 import sqlite3
 import hostlist
+import toml
 import gpu_node_data
+from collections import defaultdict
+
+
+def get_available_gpus_per_node(prom_base_url):
+    url = f"{prom_base_url}/api/v1/query?query=nvidia_smi_gpu_info"
+
+    r = requests.get(url)
+    r = r.json()
+
+    gpu_d = r["data"]["result"]
+
+    gpu_count = defaultdict(int)
+    list = []
+
+    for i in gpu_d:
+        instance = i["metric"]["instance"]
+        gpu_count[instance] += 1
+
+    for node, count in gpu_count.items():
+        list.append((node , count))
+
+    # Ergebnisse speichern
+    with open("gpu_node_data.py", "w") as f:
+        f.write(f"""def hostlist_gpu(): 
+                              gpu_nodes = {list}
+                              return gpu_nodes""")
+
+    print("GPU counts saved to gpu_node_data.py.txt")
 
 
 def get_rows_without_gpu(con):
@@ -47,7 +76,7 @@ def get_rows_without_gpu(con):
             break
 
 
-def get_gpu_data(cur, row, step):
+def get_gpu_data(cur, row, step, prom_base_url):
     start = row[0]
     end = row[1]
     nodelist = row[2]
@@ -70,7 +99,7 @@ def get_gpu_data(cur, row, step):
 
     if gpu_nodes:
         join_nodes = '|'.join([node for node in gpu_nodes])
-        prometheus_url = 'http://max-infra008.desy.de:9090/api/v1/query_range'
+        prometheus_url = f'{prom_base_url}/api/v1/query_range'
         params = {
             'query': f'nvidia_smi_utilization_gpu_ratio{{instance=~"{join_nodes}"}}',
             'start': f'{start}',
@@ -110,5 +139,10 @@ def get_gpu_data(cur, row, step):
 
 
 if __name__ == "__main__":
+    secrets = toml.load('.streamlit/secrets.toml')
+
+    prom_base_url = secrets['urls']['prometheus']
+
     con = sqlite3.connect('max-reports-slurm.sqlite3')
-    get_rows_without_gpu(con)
+    get_available_gpus_per_node(prom_base_url)
+    get_rows_without_gpu(con, prom_base_url)
