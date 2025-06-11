@@ -143,6 +143,6 @@ if __name__ == "__main__":
 
     prom_base_url = secrets['urls']['prometheus']
 
-    con = sqlite3.connect('max-reports-slurm.sqlite3')
+    con = sqlite3.connect('/var/www/max-reports/ReportingTool/src/max-reports-slurm.sqlite3')
     get_available_gpus_per_node(prom_base_url)
     get_rows_without_gpu(con, prom_base_url)
