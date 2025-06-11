@@ -8,10 +8,7 @@ from charts.pie import PieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
 
-
 secrets = toml.load('.streamlit/secrets.toml')
-
-
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
@@ -273,7 +270,7 @@ if __name__ == "__main__":
     page_title="max-reports"
     #initial_sidebar_state="collapsed"
 )
-    con = sqlite3.connect('max-reports-slurm.sqlite3')
+    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm.sqlite3')
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)
