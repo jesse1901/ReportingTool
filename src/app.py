@@ -274,8 +274,6 @@ if __name__ == "__main__":
     #initial_sidebar_state="collapsed"
 )
     con = sqlite3.connect('max-reports-slurm.sqlite3')
-    create = CreateFigures(con)
-
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)
