@@ -181,7 +181,7 @@ class DataFrames:
         if selected_rows:
             filtered_df = df.iloc[selected_rows]
             if len(filtered_df) > 0:
-                helpers.get_job_script(self, jobid=filtered_df.JobID.iloc[0])
+                helpers.get_job_script(jobid=filtered_df.JobID.iloc[0])
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def frame_group_by_user(
