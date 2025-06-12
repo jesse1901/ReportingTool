@@ -274,7 +274,7 @@ def main():
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide",
-    page_title="max-reports"
+    page_title="max-reports",
     page_icon=ICON_URL
     #initial_sidebar_state="collapsed"
 )
