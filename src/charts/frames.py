@@ -66,7 +66,7 @@ class DataFrames:
         base_query = """
         SELECT 
             jobID, JobName, User, Account, State, 
-            ROUND(Elapsed / 3600, 1) AS Elapsed_hours, 
+            ROUND(Elapsed / 3600, 2) AS Elapsed_hours, 
             Start, End, Partition, NodeList, AllocCPUS,  
             ROUND((CPUTime / 3600), 2) AS CPU_hours, 
             ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
@@ -280,7 +280,7 @@ class DataFrames:
         if user_role == 'admin':
             pass  # Admins see all data
         elif user_role == 'exfel':
-            pass  # EXFEL users see all data
+            pass  # EXFEL users gets filtered based on partion not here
         elif user_role == 'user':
             base_query += " AND eff.User = ?"
             params.append(current_user)

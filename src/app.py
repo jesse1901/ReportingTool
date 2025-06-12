@@ -13,7 +13,12 @@ secrets = toml.load('.streamlit/secrets.toml')
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
-
+LOGO_URL = secrets['urls']['logo']
+st.logo(
+    LOGO_URL,
+    link="https://streamlit.io/gallery",
+    icon_image=LOGO_URL_SMALL,
+)
     
 def login():
     if not st.experimental_user.is_logged_in:

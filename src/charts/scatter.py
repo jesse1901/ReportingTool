@@ -95,7 +95,7 @@ class ScatterCharts:
             xaxis=dict(showgrid=False, title='Elapsed Time'),
             yaxis=dict(showgrid=False, title='CPU Efficiency (%)'),
             plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',  
         )
 
         st.plotly_chart(fig, theme=None)
