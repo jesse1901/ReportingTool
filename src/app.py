@@ -14,12 +14,15 @@ ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
 LOGO_URL = secrets['urls']['logo']
+ICON_URL = secrets['urls']['icon']
 st.logo(
     LOGO_URL,
     link="https://streamlit.io/gallery",
-    icon_image=LOGO_URL_SMALL,
+    icon_image=LOGO_URL,
 )
-    
+
+st.html()
+
 def login():
     if not st.experimental_user.is_logged_in:
         if st.button("Log in with Keycloak"):
@@ -269,12 +272,37 @@ def main():
             except Exception as e:
                 st.error("An error occurred during login.")
 
-
 if __name__ == "__main__":
-    st.set_page_config(layout="wide", 
+    st.set_page_config(layout="wide",
     page_title="max-reports"
+    page_icon=ICON_URL
     #initial_sidebar_state="collapsed"
 )
+    st.logo(
+    LOGO_URL,
+    icon_image=LOGO_URL,
+    size="large"
+)
+
+    st.html("""
+        <style>
+
+        /* Alternative - alle Logo-Images */
+        img[data-testid*="logo"], 
+        div[data-testid="stSidebarHeader"] img,
+        div[data-testid="stAppViewContainer"] img {
+            height: 8rem !important;
+            width: auto !important;
+            max-width: none !important;
+        }
+
+        /* Sidebar Header Container anpassen */
+        [data-testid="stSidebarHeader"] {
+            height: auto !important;
+            padding: 1rem 1rem 2rem 1rem !important;
+        }
+        </style>
+        """)
     con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm.sqlite3')
     frames = DataFrames(con)
     bar = BarCharts(con)
