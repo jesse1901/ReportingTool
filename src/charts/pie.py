@@ -59,6 +59,9 @@ class PieCharts:
         query += " GROUP BY Category"
         
         df = pd.read_sql_query(query, _self.con, params=params)
+        if df.empty:
+            st.warning("No data available for the selected date range or partition.")
+            return
         df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
         
         fig = px.pie(
@@ -104,6 +107,10 @@ class PieCharts:
         query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
         
         df = pd.read_sql_query(query, _self.con, params=params)
+        
+        if df.empty:
+            st.warning("No data available for the selected date range or partition.")
+            return
 
         fig = px.pie(
             df,
@@ -242,6 +249,7 @@ class PieCharts:
             params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
+
         
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
