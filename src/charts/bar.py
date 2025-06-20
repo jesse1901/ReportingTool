@@ -145,7 +145,7 @@ class BarCharts:
         if not bins or bins[0] > min_runtime:
             bins.insert(0, min_runtime)
         if bins[-1] < max_runtime:
-            bins.append(max_runtime)
+            bins.append(int(max_runtime) + 1)
         
         # Create intervals more efficiently
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, include_lowest=True, right=False)
