@@ -134,17 +134,7 @@ class DataFrames:
         filter_user: str,
         start_date: str,
         end_date: str) -> None:
-        """
-        Displays all job data from the reportdata table in the Streamlit app.
-        
-        Args:
-            current_user: Current user identifier
-            user_role: Role of the user
-            number: Number of records to display
-            partition_selector: Partition filter
-            filter_jobid: Job ID filter
-            filter_user: User filter
-        """
+
         # Apply custom CSS for scrollbars
         st.markdown(self.SCROLLBAR_CSS, unsafe_allow_html=True)
 
@@ -153,12 +143,13 @@ class DataFrames:
         with col1:
             st.markdown(
                 'User Data',
-                help="""
-                There may be delays of a up to one hour when updating the GPU data.  
-                Furthermore, the hyperthreading option is not applied to this data frame, therefore   
-                all columns and calculations in this DataFrame contain the hyperthreading cores,  
-                no matter which option is selected
-                """
+                help=
+"""
+There may be delays of a up to one hour when updating the GPU data.  
+Furthermore, the hyperthreading option is not applied to this data frame, therefore   
+all columns and calculations in this DataFrame contain the hyperthreading cores,  
+no matter which option is selected
+"""
             )
             
             with st.expander("🛈 Job script"):
@@ -207,17 +198,8 @@ class DataFrames:
         scale_efficiency: bool, 
         partition_selector: str = None
     ) -> None:
-        """
-        Display user data grouped by user for a given date range.
         
-        Args:
-            start_date: Start date for data filtering
-            end_date: End date for data filtering
-            current_user: Current user identifier
-            user_role: Role of the user
-            scale_efficiency: Whether to apply hyperthreading scaling
-            partition_selector: Optional partition filter
-        """
+    
         # Validate date range
         if not (start_date and end_date):
             return
