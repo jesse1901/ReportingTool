@@ -134,7 +134,7 @@ class PieCharts:
 
  
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
+    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, allowed_groups=None, user_role=None, current_user=None) -> None:
         # Common WHERE conditions to avoid duplication
         query = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]

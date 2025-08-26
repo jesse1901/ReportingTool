@@ -164,9 +164,9 @@ def main():
                     with col_num2:
                         number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
                     with col3:
-                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector)
+                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector, user_role, username)
                     with col4:
-                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)
+                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector, user_role, username)
 
                 with tab3:
                     col5, col6, col7 = st.columns([1,1,1])
