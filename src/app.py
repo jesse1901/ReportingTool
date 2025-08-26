@@ -37,7 +37,7 @@ def is_user_xfel(username):
     return username in XFEL_USERS
 
 def is_user_uhh(username):
-    return username in UHH-USERS
+    return username in UHH_USERS
 
 def input_controls(user_role=None):
     
