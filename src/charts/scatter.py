@@ -32,7 +32,7 @@ class ScatterCharts:
         # Streamlined role-based filtering
         if user_role == "admin":
             query += " AND Elapsed > 100"
-        elif user_role = "uhh":
+        elif user_role == "uhh":
             query += "  AND Account IN ({})".format(','.join('?' for _ in allowed_groups))
             params.extend(allowed_groups)
         elif user_role == "user":

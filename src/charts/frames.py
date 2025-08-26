@@ -265,7 +265,7 @@ no matter which option is selected
         base_query = base_query_scaled if scale_efficiency else base_query_normal
         params = [start_date, end_date]
 
-        base_query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+        base_query, params = helpers.build_conditions(base_query, params, partition_selector, allowed_groups)
 
 
         # Execute query

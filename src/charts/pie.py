@@ -120,7 +120,7 @@ class PieCharts:
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         # Common WHERE conditions to avoid duplication
-        base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
+        query = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
         
         base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
