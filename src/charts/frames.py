@@ -45,7 +45,8 @@ class DataFrames:
         filter_jobid: str = None, 
         filter_user: str = None,
         start_date: str = None,
-        end_date: str = None
+        end_date: str = None, 
+        allowed_groups=None
     ) -> pd.DataFrame:
         """
         Retrieves data from the reportdata table based on user role.
@@ -104,7 +105,11 @@ class DataFrames:
             conditions.append("Partition = ?")
             params.append(partition_selector)
 
-        # Add date filtering
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            conditions.append(f"Account IN ({placeholders})")
+            params.extend(allowed_groups)
+
         if start_date:
             conditions.append("Start >= ?")
             params.append(start_date)
@@ -133,7 +138,8 @@ class DataFrames:
         filter_jobid: str, 
         filter_user: str,
         start_date: str,
-        end_date: str) -> None:
+        end_date: str,
+        allowed_groups=None) -> None:
 
         # Apply custom CSS for scrollbars
         st.markdown(self.SCROLLBAR_CSS, unsafe_allow_html=True)
@@ -196,7 +202,8 @@ no matter which option is selected
         current_user: str, 
         user_role: str, 
         scale_efficiency: bool, 
-        partition_selector: str = None
+        partition_selector: str = None,
+        allowed_groups=None
     ) -> None:
         
     
@@ -258,19 +265,8 @@ no matter which option is selected
         base_query = base_query_scaled if scale_efficiency else base_query_normal
         params = [start_date, end_date]
 
-        # Apply role-based filtering
-        if user_role == 'admin':
-            pass  # Admins see all data
-        elif user_role == 'exfel':
-            pass  # EXFEL users gets filtered based on partion not here
-        elif user_role == 'user':
-            base_query += " AND eff.User = ?"
-            params.append(current_user)
+        base_query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
-        # Apply partition filtering
-        if partition_selector:
-            base_query += " AND slurm.Partition = ?"
-            params.append(partition_selector)
 
         # Execute query
         df = pd.read_sql_query(base_query + " GROUP BY eff.User", _self.con, params=params)

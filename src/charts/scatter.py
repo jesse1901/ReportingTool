@@ -8,7 +8,7 @@ class ScatterCharts:
         self.con = connection
     
     @st.cache_data(ttl=3600, show_spinner=False)
-    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None):
+    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
         st.markdown('CPU & GPU Efficiency by Job Duration', help='Partition "jhub" and Interactive Jobs are excluded')
         
         if start_date > end_date:
@@ -32,6 +32,9 @@ class ScatterCharts:
         # Streamlined role-based filtering
         if user_role == "admin":
             query += " AND Elapsed > 100"
+        elif user_role = "uhh":
+            query += "  AND Account IN ({})".format(','.join('?' for _ in allowed_groups))
+            params.extend(allowed_groups)
         elif user_role == "user":
             query += " AND User = ?"
             params.append(current_user)

@@ -9,7 +9,7 @@ class BarCharts:
         self.con = connection
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None) -> None:
+    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         st.markdown('Total Lost CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded')
 
         # Set parameters for the SQL query
@@ -51,15 +51,8 @@ class BarCharts:
             """
 
         # Add role-based filtering
-        if user_role == 'user':
-            query += " AND eff.User = ?"
-            params.append(current_user)
-
-        # Add partition filtering
-        if partition_selector:
-            query += " AND slurm.Partition = ?"
-            params.append(partition_selector)
-
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+        
         # Add grouping and ordering with LIMIT in SQL if number is specified
         if number:
             query += f" GROUP BY eff.User ORDER BY lost_cpu_days DESC LIMIT {number}"
@@ -106,7 +99,7 @@ class BarCharts:
         st.plotly_chart(fig)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def job_counts_by_log2(_self, start_date, end_date, number, partition_selector) -> None:
+    def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, allowed_groups=None) -> None:
         st.markdown('Job Count by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
         
         min_runtime = max(0, number)        
@@ -123,9 +116,7 @@ class BarCharts:
         """
         params = [min_runtime, start_date, end_date]
 
-        if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
         df = pd.read_sql_query(query, _self.con, params=params)
         

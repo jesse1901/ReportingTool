@@ -17,7 +17,7 @@ class PieCharts:
     }
         
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None):
+    def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
         # Common base query parts
         base_conditions = """
             WHERE Partition != 'jhub' 
@@ -47,13 +47,7 @@ class PieCharts:
         params = [start_date, end_date]
 
         # Streamlined role filtering
-        if user_role == "user":
-            query += " AND User = ?"
-            params.append(current_user)
-
-        if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
         # Add GROUP BY to the base query
         query += " GROUP BY Category"
@@ -80,7 +74,7 @@ class PieCharts:
         st.dataframe(df_sorted, hide_index=True, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None):
+    def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
         query = """
             SELECT
                 IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category, 
@@ -95,13 +89,7 @@ class PieCharts:
         params = [start_date, end_date]
 
         # Streamlined role filtering
-        if user_role == 'user':
-            query += " AND User = ?"
-            params.append(current_user)
-
-        if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
         # GROUP BY the Category (not State) to properly aggregate CANCELLED entries
         query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
@@ -130,14 +118,13 @@ class PieCharts:
 
  
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None) -> None:
+    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         # Common WHERE conditions to avoid duplication
         base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
         
-        if partition_selector:
-            base_conditions += " AND Partition = ?"
-            params.append(partition_selector)
+        base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+
 
         if scale_efficiency:
             # Combined query to get both pie chart data and summary stats in one call
@@ -212,7 +199,7 @@ class PieCharts:
         st.dataframe(df2, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None) -> None:
+    def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         # Build query with optimized conditions
         if scale_efficiency:
             query = """
@@ -240,13 +227,8 @@ class PieCharts:
         params = [start_date, end_date]
 
         # Add filters efficiently
-        if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
-        
-        if user_role == 'user':
-            query += " AND User = ?"
-            params.append(current_user)
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+
 
         df = pd.read_sql_query(query, _self.con, params=params)
 

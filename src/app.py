@@ -13,6 +13,9 @@ secrets = toml.load('.streamlit/secrets.toml')
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
+UHH-USERS = secrets['users']['uhh_users']
+
+UHH-
 LOGO_URL = secrets['urls']['logo']
 ICON_URL = secrets['urls']['icon']
 
@@ -34,6 +37,9 @@ def is_user_admin(username):
 def is_user_xfel(username):
     return username in XFEL_USERS
 
+def is_user_uhh(username):
+    return username in UHH-USERS
+
 def input_controls(user_role=None):
     
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
@@ -45,7 +51,8 @@ def input_controls(user_role=None):
         
         default_range = [datetime.today() - timedelta(days=30), datetime.today()]
         date_selector = st.date_input("select timerange", default_range, key=f"date_slider")
-        
+        allowed_groups = None
+
         if len(date_selector) != 2:
             st.stop()
 
@@ -57,6 +64,13 @@ def input_controls(user_role=None):
              partition_selector = st.selectbox("select partition",  
                                                ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", "upex","upex-beamtime","upex-high","upex-middle",
                                                 "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
+        
+        elif user_role == 'uhh':
+            partition_selector = st.selectbox("select partition", 
+            ["acc-uhh","allcpu","allgpu"],   key=f"partition_selector")
+
+            allowed_groups = ['i02', 'unihh2']
+
         else:
             partition_selector = st.selectbox("select partition", 
 
@@ -92,9 +106,11 @@ def main():
         user_role = st.session_state['user_role']
         
         if user_role == 'admin':
-            view_options = ["Admin View", "XFEL View", "User View"]
+            view_options = ["Admin View", "XFEL View", "User View", "UHH View"]
         elif user_role == 'exfel':
             view_options = ["XFEL View", "User View"]
+        elif user_role == 'uhh':
+            view_options = ["UHH View", "User View"]
         else:
             view_options = ["User View"]
         
@@ -107,12 +123,14 @@ def main():
             user_role = 'admin'
         elif selected_view == "XFEL View":
             user_role = 'exfel'
+        elif selected_view == "UHH View":
+            user_role = 'uhh'
         else:
             user_role = 'user'
 
         start_date, end_date, scale_efficiency, partition_selector = input_controls(user_role)
 
-        if user_role == 'admin':
+        if user_role == 'admin' or user_role == 'uhh':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
             with st.spinner("loading..."):
                 with tab1:
