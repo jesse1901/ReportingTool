@@ -108,10 +108,6 @@ def main():
         user_role = st.session_state['user_role']
 
 
-        if user_role == 'admin' and search_user:
-            username = search_user            
-        elif user_role == 'admin' and not search_user:
-            username = None
         
         if user_role == 'admin':
             view_options = ["Admin View", "XFEL View", "User View", "UHH View"]
@@ -138,6 +134,12 @@ def main():
 
         start_date, end_date, scale_efficiency, partition_selector, allowed_groups = input_controls(user_role)
 
+        if user_role == 'admin' and search_user:
+            username = search_user            
+        elif user_role == 'admin' and not search_user:
+            username = None
+
+        
         if user_role == 'admin':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
             with st.spinner("loading..."):
