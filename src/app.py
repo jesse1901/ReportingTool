@@ -15,7 +15,6 @@ ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
 UHH-USERS = secrets['users']['uhh_users']
 
-UHH-
 LOGO_URL = secrets['urls']['logo']
 ICON_URL = secrets['urls']['icon']
 
