@@ -44,10 +44,13 @@ def input_controls(user_role=None):
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
                     you can click on the checkbox to include hyperthreading cores into the calculations"""
     
-    
+    search_user = None
     
     with st.sidebar:
         
+        #if user_role == 'admin':
+        #    search_user = st.text_input("search for User", value="", key="username_filter_sidebar", placeholder="<username>")
+
         default_range = [datetime.today() - timedelta(days=30), datetime.today()]
         date_selector = st.date_input("select timerange", default_range, key=f"date_slider")
         allowed_groups = None
@@ -103,6 +106,12 @@ def main():
     if 'user_role' in st.session_state:
         username = st.session_state['username']
         user_role = st.session_state['user_role']
+
+
+        if user_role == 'admin' and search_user:
+            username = search_user            
+        elif user_role == 'admin' and not search_user:
+            username = None
         
         if user_role == 'admin':
             view_options = ["Admin View", "XFEL View", "User View", "UHH View"]
