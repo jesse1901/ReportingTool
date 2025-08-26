@@ -266,12 +266,12 @@ def main():
 
                 st.session_state['username'] = username
 
-                st.session_state['user_role'] = 'admin'
-
                 if is_user_admin(username):
                     st.session_state['user_role'] = 'admin'
                 elif is_user_xfel(username):
                     st.session_state['user_role'] = 'exfel'
+                elif is_user_uhh(username):
+                    st.session_state['user_role'] = 'uhh'
                 elif is_user_allowed(username):        
                     st.session_state['user_role'] = 'user'
                 else:
