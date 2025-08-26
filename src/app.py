@@ -66,7 +66,7 @@ def input_controls(user_role=None):
         
         elif user_role == 'uhh':
             partition_selector = st.selectbox("select partition", 
-            ["acc-uhh","allcpu","allgpu", "maxgpu", "maxcpu"],   key=f"partition_selector")
+            ["allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"],   key=f"partition_selector")
 
             allowed_groups = ['i02', 'unihh2']
 

@@ -92,12 +92,7 @@ class DataFrames:
             conditions.append("User = ?")
             params.append(filter_user)
 
-        # Apply role-based access control
-        if user_role == "admin":
-            pass  # Admins see all data
-        elif user_role == "exfel":
-            pass  
-        else:  # Regular users only see their own data
+        if user_role == 'user'   # Regular users only see their own data
             conditions.append("User = ?")
             params.append(current_user)
 
@@ -105,7 +100,7 @@ class DataFrames:
             conditions.append("Partition = ?")
             params.append(partition_selector)
 
-        if allowed_groups is not None and user_role in ['uhh']:
+        if allowed_groups is not None and user_role == 'uhh':
             placeholders = ','.join('?' for _ in allowed_groups)
             conditions.append(f"Account IN ({placeholders})")
             params.extend(allowed_groups)
