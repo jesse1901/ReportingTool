@@ -273,7 +273,7 @@ no matter which option is selected
             params.append(current_user)
 
         if user_role == 'admin' and current_user:
-            query += " AND eff.User = ?"
+            base_query += " AND eff.User = ?"
             params.append(current_user)
 
         if allowed_groups:
