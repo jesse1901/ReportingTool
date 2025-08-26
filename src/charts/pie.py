@@ -17,8 +17,13 @@ class PieCharts:
     }
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
-        # Common base query parts
-        base_conditions = """
+        # Query to get raw data for proper aggregation
+        query = """
+            SELECT 
+                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
+                CPUTime,
+                TotalCPU
+            FROM allocations
             WHERE Partition != 'jhub' 
             AND State NOT IN ('PENDING', 'RUNNING') 
             AND Start >= ? 
@@ -26,19 +31,9 @@ class PieCharts:
             AND JobName != 'interactive'
         """
         
-        # Query to get raw data for proper aggregation
-        query = f"""
-            SELECT 
-                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                CPUTime,
-                TotalCPU
-            FROM allocations
-            {base_conditions}
-        """
-        
         params = [start_date, end_date]
 
-        # Streamlined role filtering
+        # Streamlined role filtering - match the parameter order from other methods
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
         df = pd.read_sql_query(query, _self.con, params=params)
@@ -55,11 +50,20 @@ class PieCharts:
         # Apply scaling consistently
         if scale_efficiency:
             grouped['lost_cpu_days'] = ((grouped['CPUTime'] * 0.5) - grouped['TotalCPU']) / 86400
+            total_lost_cpu_days = ((df['CPUTime'] * 0.5) - df['TotalCPU']).sum() / 86400
         else:
             grouped['lost_cpu_days'] = (grouped['CPUTime'] - grouped['TotalCPU']) / 86400
+            total_lost_cpu_days = (df['CPUTime'] - df['TotalCPU']).sum() / 86400
         
-        # Clip negative values and round
-        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0).round(1).astype(int)
+        # If total lost CPU days is negative (over-efficient), set all categories to 0
+        if total_lost_cpu_days <= 0:
+            grouped['lost_cpu_days'] = 0
+        else:
+            # Only clip individual negative values if total is positive
+            grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0)
+        
+        # Round
+        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].round(1)
         
         fig = px.pie(
             grouped,
@@ -75,6 +79,7 @@ class PieCharts:
         # Sort by lost_cpu_days for display
         df_sorted = grouped.sort_values(by='lost_cpu_days', ascending=False)
         st.dataframe(df_sorted[['Category', 'lost_cpu_days']], hide_index=True, use_container_width=False)
+
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
