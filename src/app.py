@@ -13,7 +13,7 @@ secrets = toml.load('.streamlit/secrets.toml')
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
 XFEL_USERS = secrets['users']['xfel_users']
-UHH-USERS = secrets['users']['uhh_users']
+UHH_USERS = secrets['users']['uhh_users']
 
 LOGO_URL = secrets['urls']['logo']
 ICON_URL = secrets['urls']['icon']
