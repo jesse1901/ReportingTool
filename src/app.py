@@ -314,7 +314,7 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3')
+    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm.sqlite3')
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)

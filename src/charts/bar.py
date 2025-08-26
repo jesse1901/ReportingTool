@@ -52,7 +52,7 @@ class BarCharts:
 
         # Add role-based filtering
         if partition_selector:
-            query += " AND eff.Partition = ?"
+            query += " AND slurm.Partition = ?"
             params.append(partition_selector)
 
         if user_role == 'user' and current_user:
