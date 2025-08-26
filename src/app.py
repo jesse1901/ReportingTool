@@ -66,7 +66,7 @@ def input_controls(user_role=None):
         
         elif user_role == 'uhh':
             partition_selector = st.selectbox("select partition", 
-            ["acc-uhh","allcpu","allgpu"],   key=f"partition_selector")
+            ["acc-uhh","allcpu","allgpu", "maxgpu", "maxcpu"],   key=f"partition_selector")
 
             allowed_groups = ['i02', 'unihh2']
 
@@ -261,9 +261,9 @@ def main():
 
 
             try:
-                #login()
-                #username = st.user.preferred_username
-                username = "schuetzj"
+                login()
+                username = st.user.preferred_username
+
                 st.session_state['username'] = username
 
                 st.session_state['user_role'] = 'admin'
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm.sqlite3')
+    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3')
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)
