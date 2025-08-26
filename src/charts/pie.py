@@ -160,10 +160,11 @@ class PieCharts:
         # Pre-calculate summary statistics from the main dataset
         if scale_efficiency:
             total_cpu_days = int(round(df['CPUTime'].sum() / 86400 * 0.5))
-            lost_cpu_days_total = max(0, int(round(((df['CPUTime'] * 0.5) - df['TotalCPU']).sum() / 86400)))
         else:
             total_cpu_days = int(round(df['CPUTime'].sum() / 86400))
-            lost_cpu_days_total = max(0, int(round((df['CPUTime'] - df['TotalCPU']).sum() / 86400)))
+
+        lost_cpu_days_total = int(round(df['lost_cpu_days'].sum()))
+
         
         # Calculate efficiency
         cluster_efficiency = (total_cpu_days - lost_cpu_days_total) / total_cpu_days * 100 if total_cpu_days > 0 else 0
