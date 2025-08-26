@@ -133,6 +133,10 @@ class BarCharts:
 
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
+
         df = pd.read_sql_query(query, _self.con, params=params)
         
         if df.empty:

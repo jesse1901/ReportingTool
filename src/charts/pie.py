@@ -35,6 +35,10 @@ class PieCharts:
 
         # Streamlined role filtering - match the parameter order from other methods
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
         
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
@@ -99,6 +103,10 @@ class PieCharts:
         # Streamlined role filtering
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
+
         # GROUP BY the Category (not State) to properly aggregate CANCELLED entries
         query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
         
@@ -132,6 +140,10 @@ class PieCharts:
         params = [start_date, end_date]
 
         base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
 
         # Query without rounding for consistent processing in Python
         combined_query = f"""
@@ -235,6 +247,9 @@ class PieCharts:
         # Add filters efficiently
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
 

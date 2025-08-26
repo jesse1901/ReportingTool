@@ -96,6 +96,10 @@ class DataFrames:
             conditions.append("User = ?")
             params.append(current_user)
 
+        if user_role == 'admin' and current_user:
+            conditions.append("User = ?")
+            params.append(current_user)
+
         if partition_selector:
             conditions.append("Partition = ?")
             params.append(partition_selector)
@@ -266,6 +270,10 @@ no matter which option is selected
 
         if user_role == 'user' and current_user:
             base_query += " AND eff.User = ?"
+            params.append(current_user)
+
+        if user_role == 'admin' and current_user:
+            query += " AND eff.User = ?"
             params.append(current_user)
 
         if allowed_groups:
