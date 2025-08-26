@@ -92,7 +92,7 @@ class DataFrames:
             conditions.append("User = ?")
             params.append(filter_user)
 
-        if user_role == 'user'   # Regular users only see their own data
+        if user_role == 'user':   # Regular users only see their own data
             conditions.append("User = ?")
             params.append(current_user)
 
