@@ -88,7 +88,7 @@ class ScatterCharts:
             range_color=[0, 100],
             color='GpuUtil',
             color_continuous_scale=custom_color_scale,
-            hover_data={'JobID': True, 'User': True, 'lost_cpu_days': True, 'CPUEff': True},
+            hover_data={'JobID': True, 'User': True, 'lost_cpu_days': False, 'CPUEff': True},
             labels={'Elapsed': 'Elapsed Time', 'CPUEff': 'CPU Efficiency (%)'}
         )
         
