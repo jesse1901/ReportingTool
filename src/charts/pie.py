@@ -136,13 +136,13 @@ class PieCharts:
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, user_role=None, current_user=None, allowed_groups=None) -> None:
         # Common WHERE conditions to avoid duplication
-        query = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
+        base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
 
         base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
         if user_role == 'admin' and current_user:
-            query += " AND User = ?"
+            base_conditions += " AND User = ?"
             params.append(current_user)
 
         # Query without rounding for consistent processing in Python
