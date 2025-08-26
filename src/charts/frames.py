@@ -265,7 +265,18 @@ no matter which option is selected
         base_query = base_query_scaled if scale_efficiency else base_query_normal
         params = [start_date, end_date]
 
-        base_query, params = helpers.build_conditions(base_query, params, partition_selector, allowed_groups)
+        if partition_selector:
+            query += " AND slurm.Partition = ?"
+            params.append(partition_selector)
+
+        if user_role == 'user' and current_user:
+            query += " AND eff.User = ?"
+            params.append(current_user)
+
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f" AND eff.Account IN ({placeholders})"
+            params.extend(allowed_groups)
 
 
         # Execute query

@@ -51,7 +51,18 @@ class BarCharts:
             """
 
         # Add role-based filtering
-        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+        if partition_selector:
+            query += " AND eff.Partition = ?"
+            params.append(partition_selector)
+
+        if user_role == 'user' and current_user:
+            query += " AND eff.User = ?"
+            params.append(current_user)
+
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f" AND eff.Account IN ({placeholders})"
+            params.extend(allowed_groups)
         
         # Add grouping and ordering with LIMIT in SQL if number is specified
         if number:

@@ -139,7 +139,7 @@ class helpers:
             return df
 
 
-    def build_conditions(query, params, partition_selector=None, allowed_groups=None, user_role=None, current_user=None ):
+    def build_conditions(query, params, partition_selector=None, allowed_groups=None,user_role=None, current_user=None, ):
 
         if partition_selector:
             query += " AND Partition = ?"
@@ -151,7 +151,7 @@ class helpers:
 
         if allowed_groups:
             placeholders = ','.join('?' for _ in allowed_groups)
-            query += f" AND eff.Account IN ({placeholders})"
+            query += f" AND Account IN ({placeholders})"
             params.extend(allowed_groups)
 
         return query, params
