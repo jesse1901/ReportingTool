@@ -139,7 +139,7 @@ class PieCharts:
         base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
 
-        base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+        base_conditions, params = helpers.build_conditions(base_conditions, params, partition_selector, allowed_groups)
 
         if user_role == 'admin' and current_user:
             base_conditions += " AND User = ?"
