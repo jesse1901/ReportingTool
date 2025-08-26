@@ -266,16 +266,16 @@ no matter which option is selected
         params = [start_date, end_date]
 
         if partition_selector:
-            query += " AND slurm.Partition = ?"
+            base_query += " AND slurm.Partition = ?"
             params.append(partition_selector)
 
         if user_role == 'user' and current_user:
-            query += " AND eff.User = ?"
+            base_query += " AND eff.User = ?"
             params.append(current_user)
 
         if allowed_groups:
             placeholders = ','.join('?' for _ in allowed_groups)
-            query += f" AND eff.Account IN ({placeholders})"
+            base_query += f" AND eff.Account IN ({placeholders})"
             params.extend(allowed_groups)
 
 
