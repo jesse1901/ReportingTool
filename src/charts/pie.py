@@ -135,7 +135,7 @@ class PieCharts:
 
         # Query without rounding for consistent processing in Python
         combined_query = f"""
-            SELECT
+            SELECT  
                 (End - Start) / 60 AS runtime_minutes,
                 CPUTime,
                 TotalCPU
@@ -233,7 +233,7 @@ class PieCharts:
         params = [start_date, end_date]
 
         # Add filters efficiently
-        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
 
         df = pd.read_sql_query(query, _self.con, params=params)
