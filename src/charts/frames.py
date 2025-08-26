@@ -105,7 +105,7 @@ class DataFrames:
             conditions.append("Partition = ?")
             params.append(partition_selector)
 
-        if allowed_groups:
+        if allowed_groups is not None and user_role in ['uhh']:
             placeholders = ','.join('?' for _ in allowed_groups)
             conditions.append(f"Account IN ({placeholders})")
             params.extend(allowed_groups)
