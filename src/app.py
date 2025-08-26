@@ -43,11 +43,13 @@ def input_controls(user_role=None):
     
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
                     you can click on the checkbox to include hyperthreading cores into the calculations"""
-    
-    
-    
-    with st.sidebar:
         
+    with st.sidebar:
+        search_user = None
+
+        if user_role == 'admin':
+            search_user = st.text_input("search for User", value="", key="username_filter_sidebar", placeholder="<username>")
+
         default_range = [datetime.today() - timedelta(days=30), datetime.today()]
         date_selector = st.date_input("select timerange", default_range, key=f"date_slider")
         allowed_groups = None
@@ -97,12 +99,14 @@ def input_controls(user_role=None):
 
 
 
-    return start_date, end_date, scale_efficiency, partition_selector, allowed_groups
+    return start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user
 
 def main():
     if 'user_role' in st.session_state:
         username = st.session_state['username']
         user_role = st.session_state['user_role']
+
+
         
         if user_role == 'admin':
             view_options = ["Admin View", "XFEL View", "User View", "UHH View"]
@@ -127,8 +131,14 @@ def main():
         else:
             user_role = 'user'
 
-        start_date, end_date, scale_efficiency, partition_selector, allowed_groups = input_controls(user_role)
+        start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user = input_controls(user_role)
 
+        if user_role == 'admin' and search_user:
+            username = search_user            
+        elif user_role == 'admin' and not search_user:
+            username = None
+
+        
         if user_role == 'admin':
             tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
             with st.spinner("loading..."):
@@ -154,9 +164,9 @@ def main():
                     with col_num2:
                         number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
                     with col3:
-                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector)
+                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector, user_role, username)
                     with col4:
-                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector)
+                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector, user_role, username)
 
                 with tab3:
                     col5, col6, col7 = st.columns([1,1,1])

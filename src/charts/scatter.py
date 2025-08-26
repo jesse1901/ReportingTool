@@ -38,6 +38,10 @@ class ScatterCharts:
         elif user_role == "user":
             query += " AND User = ?"
             params.append(current_user)
+        
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
 
         if partition_selector:
             query += " AND Partition = ?"

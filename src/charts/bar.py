@@ -58,6 +58,10 @@ class BarCharts:
         if user_role == 'user' and current_user:
             query += " AND eff.User = ?"
             params.append(current_user)
+        
+        if user_role == 'admin' and current_user:
+            query += " AND eff.User = ?"
+            params.append(current_user)
 
         if allowed_groups:
             placeholders = ','.join('?' for _ in allowed_groups)
@@ -110,7 +114,7 @@ class BarCharts:
         st.plotly_chart(fig)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, allowed_groups=None) -> None:
+    def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, user_role, current_user, allowed_groups=None) -> None:
         st.markdown('Job Count by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
         
         min_runtime = max(0, number)        
@@ -128,6 +132,10 @@ class BarCharts:
         params = [min_runtime, start_date, end_date]
 
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
         

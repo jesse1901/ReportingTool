@@ -35,6 +35,10 @@ class PieCharts:
 
         # Streamlined role filtering - match the parameter order from other methods
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
         
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
@@ -99,6 +103,10 @@ class PieCharts:
         # Streamlined role filtering
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
+
         # GROUP BY the Category (not State) to properly aggregate CANCELLED entries
         query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
         
@@ -126,12 +134,16 @@ class PieCharts:
 
  
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
+    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, user_role=None, current_user=None, allowed_groups=None) -> None:
         # Common WHERE conditions to avoid duplication
-        query = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
+        base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
 
-        base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
+        base_conditions, params = helpers.build_conditions(base_conditions, params, partition_selector, allowed_groups)
+
+        if user_role == 'admin' and current_user:
+            base_conditions += " AND User = ?"
+            params.append(current_user)
 
         # Query without rounding for consistent processing in Python
         combined_query = f"""
@@ -235,6 +247,9 @@ class PieCharts:
         # Add filters efficiently
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
+        if user_role == 'admin' and current_user:
+            query += " AND User = ?"
+            params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
 
