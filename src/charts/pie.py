@@ -15,7 +15,6 @@ class PieCharts:
         'PREEMPTED': '#ffe312',     # Light Green
         'NODE_FAIL': '#566573'
     }
-        
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
         # Common base query parts
@@ -27,39 +26,43 @@ class PieCharts:
             AND JobName != 'interactive'
         """
         
-        if scale_efficiency:
-            query = f"""
-                SELECT 
-                    IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                    CAST(ROUND(SUM((CPUTime * 0.5) - TotalCPU) / 86400, 1) AS INTEGER) AS lost_cpu_days
-                FROM allocations
-                {base_conditions}
-            """
-        else:
-            query = f"""
-                SELECT 
-                    IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                    CAST(ROUND(SUM((CPUTime - TotalCPU) / 86400)) AS INTEGER) AS lost_cpu_days
-                FROM allocations
-                {base_conditions}
-            """
+        # Query to get raw data for proper aggregation
+        query = f"""
+            SELECT 
+                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
+                CPUTime,
+                TotalCPU
+            FROM allocations
+            {base_conditions}
+        """
         
         params = [start_date, end_date]
 
         # Streamlined role filtering
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
-
-        # Add GROUP BY to the base query
-        query += " GROUP BY Category"
         
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
-        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
+        
+        # Group by Category and sum CPUTime and TotalCPU
+        grouped = df.groupby('Category').agg({
+            'CPUTime': 'sum',
+            'TotalCPU': 'sum'
+        }).reset_index()
+        
+        # Apply scaling consistently
+        if scale_efficiency:
+            grouped['lost_cpu_days'] = ((grouped['CPUTime'] * 0.5) - grouped['TotalCPU']) / 86400
+        else:
+            grouped['lost_cpu_days'] = (grouped['CPUTime'] - grouped['TotalCPU']) / 86400
+        
+        # Clip negative values and round
+        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0).round(1).astype(int)
         
         fig = px.pie(
-            df,
+            grouped,
             names='Category',
             values='lost_cpu_days',
             color='Category',
@@ -69,9 +72,9 @@ class PieCharts:
         st.markdown('Lost CPU Time by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
         
-        # Since df is already grouped by Category, we can directly sort without regrouping
-        df_sorted = df.sort_values(by='lost_cpu_days', ascending=False)
-        st.dataframe(df_sorted, hide_index=True, use_container_width=False)
+        # Sort by lost_cpu_days for display
+        df_sorted = grouped.sort_values(by='lost_cpu_days', ascending=False)
+        st.dataframe(df_sorted[['Category', 'lost_cpu_days']], hide_index=True, use_container_width=False)
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
@@ -195,41 +198,27 @@ class PieCharts:
         st.write('Cluster Efficiency')
         st.dataframe(df2, use_container_width=False)
 
-
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
-        # Build query with optimized conditions
-        if scale_efficiency:
-            query = """
-                SELECT
-                    ROUND(((CPUTime * 0.5) - TotalCPU) / 86400, 1) AS lost_cpu_days,
-                    JobName
-                FROM allocations 
-                WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ?
-                AND JobName != 'interactive'
-            """
-        else:
-            query = """
-                SELECT             
-                    ROUND((CPUTime - TotalCPU) / 86400) AS lost_cpu_days,
-                    JobName
-                FROM allocations 
-                WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ? 
-                AND JobName != 'interactive'
-            """
+        # Build query to get raw data for proper aggregation
+        query = """
+            SELECT
+                CPUTime,
+                TotalCPU,
+                JobName
+            FROM allocations 
+            WHERE Partition != 'jhub' 
+            AND Start >= ? 
+            AND End <= ?
+            AND JobName != 'interactive'
+        """
         
         params = [start_date, end_date]
 
         # Add filters efficiently
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
-
         df = pd.read_sql_query(query, _self.con, params=params)
-
         
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
@@ -244,9 +233,20 @@ class PieCharts:
         choices = ['Jupyterhub', 'Interactive', 'Batch']
         df['Category'] = np.select(conditions, choices, default='None')
 
-        # Group and aggregate efficiently
-        aggregated_df = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
-        aggregated_df['lost_cpu_days'] = aggregated_df['lost_cpu_days'].clip(lower=0)
+        # Group by Category and sum CPUTime and TotalCPU
+        grouped = df.groupby('Category').agg({
+            'CPUTime': 'sum',
+            'TotalCPU': 'sum'
+        }).reset_index()
+        
+        # Apply scaling consistently
+        if scale_efficiency:
+            grouped['lost_cpu_days'] = ((grouped['CPUTime'] * 0.5) - grouped['TotalCPU']) / 86400
+        else:
+            grouped['lost_cpu_days'] = (grouped['CPUTime'] - grouped['TotalCPU']) / 86400
+        
+        # Clip negative values
+        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0).round(1)
         
         # Pre-defined color mapping
         color_map = {
@@ -258,7 +258,7 @@ class PieCharts:
 
         # Create pie chart
         fig = px.pie(
-            aggregated_df,
+            grouped,
             names='Category',
             values='lost_cpu_days',
             color='Category',
@@ -267,4 +267,4 @@ class PieCharts:
         
         st.markdown('Lost CPU Time by Job Category', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
-        st.dataframe(aggregated_df, hide_index=True, use_container_width=False)
+        st.dataframe(grouped[['Category', 'lost_cpu_days']], hide_index=True, use_container_width=False)
