@@ -122,16 +122,15 @@ class PieCharts:
         # Common WHERE conditions to avoid duplication
         query = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
         params = [start_date, end_date]
-        
+
         base_conditions, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
-
+        # Query without rounding for consistent processing in Python
         if scale_efficiency:
-            # Combined query to get both pie chart data and summary stats in one call
             combined_query = f"""
                 SELECT
                     (End - Start) / 60 AS runtime_minutes,
-                    ROUND(((CPUTime * 0.5) - TotalCPU) / 86400, 1) AS lost_cpu_days,
+                    ((CPUTime * 0.5) - TotalCPU) / 86400 AS lost_cpu_days,
                     CPUTime,
                     TotalCPU
                 FROM allocations
@@ -141,63 +140,64 @@ class PieCharts:
             combined_query = f"""
                 SELECT
                     (End - Start) / 60 AS runtime_minutes,
-                    ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days,
+                    (CPUTime - TotalCPU) / 86400 AS lost_cpu_days,
                     CPUTime,
                     TotalCPU
                 FROM allocations
                 {base_conditions}
             """
 
+        # Load query result into DataFrame
         df = pd.read_sql_query(combined_query, _self.con, params=params)
-        
+
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Clip negative values early
-        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0)
-        
+        # Clip negative values to zero and round consistently
+        df['lost_cpu_days'] = df['lost_cpu_days'].clip(lower=0).round(1)
+
         # Pre-calculate summary statistics from the main dataset
         if scale_efficiency:
-            total_cpu_days = int(round(df['CPUTime'].sum() / 86400 * 0.5))
+            total_cpu_days = int(round((df['CPUTime'].sum() * 0.5) / 86400))
+            lost_cpu_days_total = int(round(max(0, ((df['CPUTime'] * 0.5) - df['TotalCPU']).sum() / 86400)))
         else:
             total_cpu_days = int(round(df['CPUTime'].sum() / 86400))
+            lost_cpu_days_total = int(round(max(0, ((df['CPUTime'] - df['TotalCPU']).sum() / 86400))))
 
-        lost_cpu_days_total = int(round(df['lost_cpu_days'].sum()))
-
-        
-        # Calculate efficiency
+        # Calculate cluster efficiency
         cluster_efficiency = (total_cpu_days - lost_cpu_days_total) / total_cpu_days * 100 if total_cpu_days > 0 else 0
-        
-        # Optimize bin creation
+
+        # Create runtime bins dynamically based on max runtime
         max_runtime = df['runtime_minutes'].max()
         predefined_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
         bins = [b for b in predefined_bins if b <= max_runtime] + [max_runtime]
         bins = sorted(set(bins))  # Remove duplicates and sort
 
-        # Create intervals and group efficiently
+        # Assign intervals and group by them
         df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins)
         cpu_time_by_interval = df.groupby('runtime_interval', observed=True)['lost_cpu_days'].sum().reset_index()
         cpu_time_by_interval['runtime_interval'] = cpu_time_by_interval['runtime_interval'].apply(helpers.format_interval_label)
 
-        # Create pie chart
+        # Create pie chart for lost CPU days by runtime interval
         fig = px.pie(cpu_time_by_interval, names='runtime_interval', values='lost_cpu_days')
-        
+
         st.markdown('Lost CPU Time by Job Runtime Interval', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
 
-        # Create summary dataframe efficiently without second query
+        # Summary statistics table
         summary_data = {
             'total CPU days booked': f"{total_cpu_days:,}",
             'total CPU days lost': f"{lost_cpu_days_total:,}",
             'cluster efficiency': f"{cluster_efficiency:.2f}%"
         }
-        
+
         df2 = pd.DataFrame(list(summary_data.items()), columns=['Metric', 'Time in days'])
         df2 = df2.set_index('Metric')
-        
+
         st.write('Cluster Efficiency')
         st.dataframe(df2, use_container_width=False)
+
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
