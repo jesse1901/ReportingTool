@@ -31,7 +31,7 @@ class PieCharts:
         query = f"""
             SELECT 
                 IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days  -- raw (can be negative)
+                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days 
             FROM allocations
             WHERE Partition != 'jhub' 
             AND JobName != 'interactive'

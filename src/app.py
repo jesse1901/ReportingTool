@@ -46,7 +46,7 @@ def input_controls(user_role=None):
     with st.sidebar:
         search_user = None
 
-        if user_role is not 'user':
+        if user_role != 'user':
             search_user = st.text_input("select User", value="", key="username_filter_sidebar", placeholder="<username>")
 
         default_range = [datetime.today() - timedelta(days=30), datetime.today()]
@@ -146,13 +146,13 @@ def main():
 
         start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user = input_controls(user_role)
 
-        if user_role is not 'user 'and search_user:
+        if user_role != 'user 'and search_user:
             username = search_user            
-        elif user_role is not 'user' and not search_user:
+        elif user_role != 'user' and not search_user:
             username = None
 
         
-        # if user_role is not 'user':
+        # if user_role != 'user':
         #     tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
         #     with st.spinner("loading..."):
         #         with tab1:
@@ -201,7 +201,7 @@ def main():
         #         with col9:    
         #             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
-        if user_role is not 'user':
+        if user_role != 'user':
             tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
