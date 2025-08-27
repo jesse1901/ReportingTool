@@ -201,53 +201,53 @@ def main():
                 with col9:    
                     scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
-        elif user_role == 'exfel' or user_role == 'uhh':
-            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
-            with st.spinner("loading"):
-                with tab1:
-                    col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
-                    col1, col2 = st.columns([5, 2])
-                    with col_num:                   
-                        number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-                                                                                                                                Column sorting is disabled for values above 150k!""")
-                    with col_jobid:
-                        filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
-                    with col_username:
-                        filter_user = st.text_input("search for Username", value="", key="username_filter", placeholder="<username>")
-                    with col1:
-                        frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date, allowed_groups=allowed_groups)
-                    with col2:
-                        frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+        # elif user_role == 'exfel' or user_role == 'uhh':
+        #     tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
+        #     with st.spinner("loading"):
+        #         with tab1:
+        #             col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
+        #             col1, col2 = st.columns([5, 2])
+        #             with col_num:                   
+        #                 number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
+        #                                                                                                                         Column sorting is disabled for values above 150k!""")
+        #             with col_jobid:
+        #                 filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
+        #             with col_username:
+        #                 filter_user = st.text_input("search for Username", value="", key="username_filter", placeholder="<username>")
+        #             with col1:
+        #                 frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date, allowed_groups=allowed_groups)
+        #             with col2:
+        #                 frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 
-                with tab2:
-                    col_num2, _ = st.columns([1, 2])
-                    col3,col4 = st.columns([1,1])
+        #         with tab2:
+        #             col_num2, _ = st.columns([1, 2])
+        #             col3,col4 = st.columns([1,1])
                     
-                    with col_num2:
-                        number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
-                    with col3:
-                        bar.job_counts_by_log2(start_date, end_date, number2, partition_selector,user_role, username, allowed_groups)
-                    with col4:
-                        pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector,user_role, username, allowed_groups) 
+        #             with col_num2:
+        #                 number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
+        #             with col3:
+        #                 bar.job_counts_by_log2(start_date, end_date, number2, partition_selector,user_role, username, allowed_groups)
+        #             with col4:
+        #                 pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector,user_role, username, allowed_groups) 
           
                 
-                with tab3:
-                    col3, col4, col4_5 = st.columns([1,1,1])
-                    with col3:
-                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
-                    with col4: 
-                        pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector, allowed_groups)
-                    with col4_5:
-                        pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
-                with tab4:
-                    col_num2, _ = st.columns([1, 2])
-                    col5, col6 = st.columns([1,1])
-                    with col_num2:
-                        number3 = st.number_input("select number of user:", min_value=0, value=20)
-                    with col5:
-                        bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups)
-                    with col6:    
-                        scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+        #         with tab3:
+        #             col3, col4, col4_5 = st.columns([1,1,1])
+        #             with col3:
+        #                 pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+        #             with col4: 
+        #                 pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector, allowed_groups)
+        #             with col4_5:
+        #                 pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+        #         with tab4:
+        #             col_num2, _ = st.columns([1, 2])
+        #             col5, col6 = st.columns([1,1])
+        #             with col_num2:
+        #                 number3 = st.number_input("select number of user:", min_value=0, value=20)
+        #             with col5:
+        #                 bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups)
+        #             with col6:    
+        #                 scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 
         elif user_role == 'user':    
             tab1, tab2, tab3 = st.tabs(["Tables", "Charts", "Overview"]) 
