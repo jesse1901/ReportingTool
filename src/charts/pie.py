@@ -189,7 +189,8 @@ class PieCharts:
 
         # Totals for the summary (consistent with 'net' semantics)
         total_cpu_days = (df["CPUTime"] * factor).sum() / 86400.0
-        total_lost_cpu_days = df["lost_days_raw"].sum()  # NET (positives + negatives)
+        total_lost_cpu_days = df["lost_days_raw"].sum()  
+        total_lost_cpu_days = max(total_lost_cpu_days, 0.0)
 
         # Binning by runtime
         max_runtime = df["runtime_minutes"].max()
