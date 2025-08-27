@@ -148,7 +148,7 @@ def main():
 
         if user_role is not 'user 'and search_user:
             username = search_user            
-        elif user_role ist not 'user' and not search_user:
+        elif user_role is not 'user' and not search_user:
             username = None
 
         
