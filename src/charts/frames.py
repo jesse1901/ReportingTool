@@ -173,7 +173,7 @@ no matter which option is selected
 
         # Fetch and process data
         df = self.fetch_all_data(
-            current_user, user_role, number, partition_selector, filter_jobid, filter_user, start_date, end_date
+            current_user, user_role, number, partition_selector, filter_jobid, filter_user, start_date, end_date, allowed_groups=allowed_groups
         )
         
         df = helpers.convert_timestamps_to_berlin_time(df)
