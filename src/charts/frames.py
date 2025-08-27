@@ -272,7 +272,7 @@ no matter which option is selected
             base_query += " AND eff.User = ?"
             params.append(current_user)
 
-        if user_role == 'admin' and current_user:
+        if current_user:
             base_query += " AND eff.User = ?"
             params.append(current_user)
 
