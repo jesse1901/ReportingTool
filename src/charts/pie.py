@@ -16,59 +16,60 @@ class PieCharts:
         'NODE_FAIL': '#566573'
     }
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_by_session_state(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
-        # Query to get raw data for proper aggregation
-        query = """
+    def pie_chart_by_session_state(
+        _self,
+        start_date,
+        end_date,
+        current_user,
+        user_role,
+        scale_efficiency=True,
+        partition_selector=None,
+        allowed_groups=None
+    ):
+        # Verlust pro Job in SQL berechnen (wie in pie_chart_batch_inter)
+        scale = "0.5" if scale_efficiency else "1.0"
+        query = f"""
             SELECT 
                 IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                CPUTime,
-                TotalCPU
+                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days
             FROM allocations
             WHERE Partition != 'jhub' 
-            AND State NOT IN ('PENDING', 'RUNNING') 
-            AND Start >= ? 
-            AND End <= ? 
             AND JobName != 'interactive'
+            AND State NOT IN ('PENDING', 'RUNNING')
+            AND Start >= ? 
+            AND End   <= ?
+            AND End IS NOT NULL
         """
-        
         params = [start_date, end_date]
 
-        # Streamlined role filtering - match the parameter order from other methods
-        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+        # Einheitliche Zusatzfilter (Partitionsliste + allowed_groups + ggf. Rolle/User)
+        query, params = helpers.build_conditions(
+            query, params, partition_selector, allowed_groups, user_role, current_user
+        )
 
+        # Falls du wirklich explizit nach current_user filtern willst:
         if current_user:
             query += " AND User = ?"
             params.append(current_user)
-        
+
         df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
-        
-        # Group by Category and sum CPUTime and TotalCPU
-        grouped = df.groupby('Category').agg({
-            'CPUTime': 'sum',
-            'TotalCPU': 'sum'
-        }).reset_index()
-        
-        # Apply scaling consistently
-        if scale_efficiency:
-            grouped['lost_cpu_days'] = ((grouped['CPUTime'] * 0.5) - grouped['TotalCPU']) / 86400
-            total_lost_cpu_days = ((df['CPUTime'] * 0.5) - df['TotalCPU']).sum() / 86400
+
+        # Summe je Kategorie
+        grouped = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
+
+        # Clipping identisch zu deinen anderen Charts:
+        total_lost = grouped['lost_cpu_days'].sum()
+        if total_lost <= 0:
+            grouped['lost_cpu_days'] = 0.0
         else:
-            grouped['lost_cpu_days'] = (grouped['CPUTime'] - grouped['TotalCPU']) / 86400
-            total_lost_cpu_days = (df['CPUTime'] - df['TotalCPU']).sum() / 86400
-        
-        # If total lost CPU days is negative (over-efficient), set all categories to 0
-        if total_lost_cpu_days <= 0:
-            grouped['lost_cpu_days'] = 0
-        else:
-            # Only clip individual negative values if total is positive
-            grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0)
-        
-        # Round
+            grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0.0)
+
         grouped['lost_cpu_days'] = grouped['lost_cpu_days'].round(1)
-        
+
+        # Plot
         fig = px.pie(
             grouped,
             names='Category',
@@ -76,13 +77,13 @@ class PieCharts:
             color='Category',
             color_discrete_map=_self.color_map,
         )
-        
         st.markdown('Lost CPU Time by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
-        
-        # Sort by lost_cpu_days for display
+
+        # Tabelle (absteigend)
         df_sorted = grouped.sort_values(by='lost_cpu_days', ascending=False)
         st.dataframe(df_sorted[['Category', 'lost_cpu_days']], hide_index=True, use_container_width=False)
+
 
 
     @st.cache_data(ttl=3600, show_spinner=False)
