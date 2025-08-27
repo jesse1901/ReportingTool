@@ -14,7 +14,8 @@ class PieCharts:
         'FAILED': "#ff2b2b",      # Pink
         'PREEMPTED': '#ffe312',     # Light Green
         'NODE_FAIL': '#566573'
-    }
+        }
+    
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_session_state(
         _self,
@@ -30,7 +31,7 @@ class PieCharts:
         query = f"""
             SELECT 
                 IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
-                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days
+                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days  -- raw (can be negative)
             FROM allocations
             WHERE Partition != 'jhub' 
             AND JobName != 'interactive'
@@ -46,7 +47,6 @@ class PieCharts:
             query, params, partition_selector, allowed_groups, user_role, current_user
         )
 
-        # Falls du wirklich explizit nach current_user filtern willst:
         if current_user:
             query += " AND User = ?"
             params.append(current_user)
@@ -56,32 +56,41 @@ class PieCharts:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Summe je Kategorie
-        grouped = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
+        # Sum lost time per category (still raw; may contain negatives)
+        grouped_raw = df.groupby("Category", as_index=False)["lost_cpu_days"].sum()
+        grouped_raw.rename(columns={"lost_cpu_days": "lost_days_raw"}, inplace=True)
 
-        # Clipping identisch zu deinen anderen Charts:
-        total_lost = grouped['lost_cpu_days'].sum()
-        if total_lost <= 0:
-            grouped['lost_cpu_days'] = 0.0
+        # Net total across all categories (positives + negatives)
+        net_total = grouped_raw["lost_days_raw"].sum()
+
+        # Rescale only positive categories so their sum equals the net total
+        if net_total <= 0:
+            grouped_raw["lost_cpu_days"] = 0.0
         else:
-            grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0.0)
+            pos_sum = grouped_raw.loc[grouped_raw["lost_days_raw"] > 0, "lost_days_raw"].sum()
+            if pos_sum > 0:
+                scale_factor = net_total / pos_sum
+                grouped_raw["lost_cpu_days"] = grouped_raw["lost_days_raw"].clip(lower=0.0) * scale_factor
+            else:
+                grouped_raw["lost_cpu_days"] = 0.0
 
-        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].round(1)
+        grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round(1)
 
         # Plot
         fig = px.pie(
-            grouped,
-            names='Category',
-            values='lost_cpu_days',
-            color='Category',
+            grouped_raw,
+            names="Category",
+            values="lost_cpu_days",
+            color="Category",
             color_discrete_map=_self.color_map,
         )
         st.markdown('Lost CPU Time by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
 
         # Tabelle (absteigend)
-        df_sorted = grouped.sort_values(by='lost_cpu_days', ascending=False)
-        st.dataframe(df_sorted[['Category', 'lost_cpu_days']], hide_index=True, use_container_width=False)
+        df_sorted = grouped_raw.sort_values(by="lost_cpu_days", ascending=False)
+        st.dataframe(df_sorted[["Category", "lost_cpu_days"]], hide_index=True, use_container_width=False)
+
 
 
 
