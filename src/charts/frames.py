@@ -268,7 +268,7 @@ no matter which option is selected
 
         if partition_selector:  # Liste mit 1 oder mehr Partitionen
             placeholders = ','.join('?' for _ in partition_selector)
-            conditions.append(f"slurm.Partition IN ({placeholders})")
+            base_query.append(f"slurm.Partition IN ({placeholders})")
             params.extend(partition_selector)
 
 
