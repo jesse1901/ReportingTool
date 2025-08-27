@@ -56,11 +56,7 @@ class BarCharts:
             query += f" AND slurm.Partition IN ({placeholders})"
             params.extend(partition_selector)
 
-        if user_role == 'user' and current_user:
-            query += " AND eff.User = ?"
-            params.append(current_user)
-        
-        if user_role == 'admin' and current_user:
+        if current_user:
             query += " AND eff.User = ?"
             params.append(current_user)
 

@@ -147,7 +147,7 @@ class helpers:
             params.extend(partition_selector)
 
 
-        if user_role == 'user' and current_user:
+        if current_user:
             query += " AND User = ?"
             params.append(current_user)
 

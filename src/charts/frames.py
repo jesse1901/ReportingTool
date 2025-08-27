@@ -92,11 +92,7 @@ class DataFrames:
             conditions.append("User = ?")
             params.append(filter_user)
 
-        if user_role == 'user':   # Regular users only see their own data
-            conditions.append("User = ?")
-            params.append(current_user)
-
-        if user_role == 'admin' and current_user:
+        if current_user:   # Regular users only see their own data
             conditions.append("User = ?")
             params.append(current_user)
       
@@ -272,7 +268,7 @@ no matter which option is selected
             params.extend(partition_selector)
 
 
-        if user_role == 'user' and current_user:
+        if current_user:
             base_query += " AND eff.User = ?"
             params.append(current_user)
 
