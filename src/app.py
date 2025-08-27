@@ -200,7 +200,7 @@ def main():
                     with col_jobid:
                         filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
                     with col_username:
-                        filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
+                        filter_user = st.text_input("select User", value="", key="username_filter", placeholder="<username>")
                     with col1:
                         frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date, allowed_groups=allowed_groups)
                     with col2:
