@@ -44,8 +44,9 @@ class ScatterCharts:
             params.append(current_user)
 
         if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
+            placeholders = ','.join(['?'] * len(partition_selector))
+            query += f" AND Partition IN ({placeholders})"
+            params.extend(partition_selector)
 
         # Add ORDER BY to the base query
         query += " ORDER BY Elapsed ASC"

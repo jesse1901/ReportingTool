@@ -40,7 +40,6 @@ def is_user_uhh(username):
     return username in UHH_USERS
 
 def input_controls(user_role=None):
-    
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
                     you can click on the checkbox to include hyperthreading cores into the calculations"""
         
@@ -62,44 +61,51 @@ def input_controls(user_role=None):
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
         if user_role == 'exfel':
-             partition_selector = st.selectbox("select partition",  
-                                               ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", "upex","upex-beamtime","upex-high","upex-middle",
-                                                "xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
-        
-        elif user_role == 'uhh':
-            partition_selector = st.selectbox("select partition", 
-            ["allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"],   key=f"partition_selector")
+            choice = st.selectbox(
+                "select partition",  
+                ["All available partitions","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv", 
+                 "upex","upex-beamtime","upex-high","upex-middle",
+                 "xfel-guest","xfel-op","xfel-sim" ],
+                key=f"partition_selector"
+            )
+            if choice == "All available partitions":
+                partition_selector = ["exfel","exfel-th","exfel-theory","exfel-wp72","exrsv",
+                                      "upex","upex-beamtime","upex-high","upex-middle",
+                                      "xfel-guest","xfel-op","xfel-sim"]
+            else:
+                partition_selector = [choice]
 
+        elif user_role == 'uhh':
+            choice = st.selectbox(
+                "select partition", 
+                ["allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"],
+                key=f"partition_selector"
+            )
+            partition_selector = [choice]
             allowed_groups = ['i02', 'unihh2']
 
-        else:
-            partition_selector = st.selectbox("select partition", 
-
-
-    ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
-    "cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
-    "jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
-    "pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
-    "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
-    "ukecpu","upex","upex-beamtime","upex-high","upex-middle","xfel-guest","xfel-op","xfel-sim" ],   key=f"partition_selector")
-
-            
-        if partition_selector == "All available partitions":
-                partition_selector = None
-
+        else:  # admin und user
+            choice = st.selectbox(
+                "select partition", 
+                ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
+                 "cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
+                 "jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
+                 "pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
+                 "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
+                 "ukecpu","upex","upex-beamtime","upex-high","upex-middle",
+                 "xfel-guest","xfel-op","xfel-sim" ],
+                key=f"partition_selector"
+            )
+            if choice == "All available partitions":
+                partition_selector = []
+            else:
+                partition_selector = [choice]
 
         scale = st.checkbox("take hyperthreading cores into account", key=f"checkbox", help=help_hyper)        
-        
-        if scale:
-            scale_efficiency = False
-
-        else:
-            scale_efficiency = True
-
-
-
+        scale_efficiency = not scale
 
     return start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user
+
 
 def main():
     if 'user_role' in st.session_state:

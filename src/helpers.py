@@ -142,8 +142,10 @@ class helpers:
     def build_conditions(query, params, partition_selector=None, allowed_groups=None,user_role=None, current_user=None, ):
 
         if partition_selector:
-            query += " AND Partition = ?"
-            params.append(partition_selector)
+            placeholders = ','.join(['?'] * len(partition_selector))
+            query += f" AND Partition IN ({placeholders})"
+            params.extend(partition_selector)
+
 
         if user_role == 'user' and current_user:
             query += " AND User = ?"

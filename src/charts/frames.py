@@ -99,10 +99,12 @@ class DataFrames:
         if user_role == 'admin' and current_user:
             conditions.append("User = ?")
             params.append(current_user)
-
+      
         if partition_selector:
-            conditions.append("Partition = ?")
-            params.append(partition_selector)
+            placeholders = ','.join('?' for _ in partition_selector)
+            conditions.append(f"Partition IN ({placeholders})")
+            params.extend(partition_selector)
+
 
         if allowed_groups is not None and user_role == 'uhh':
             placeholders = ','.join('?' for _ in allowed_groups)
@@ -264,9 +266,11 @@ no matter which option is selected
         base_query = base_query_scaled if scale_efficiency else base_query_normal
         params = [start_date, end_date]
 
-        if partition_selector:
-            base_query += " AND slurm.Partition = ?"
-            params.append(partition_selector)
+        if partition_selector:  # Liste mit 1 oder mehr Partitionen
+            placeholders = ','.join('?' for _ in partition_selector)
+            conditions.append(f"slurm.Partition IN ({placeholders})")
+            params.extend(partition_selector)
+
 
         if user_role == 'user' and current_user:
             base_query += " AND eff.User = ?"
