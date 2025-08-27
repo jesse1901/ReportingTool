@@ -103,7 +103,7 @@ class PieCharts:
         # Streamlined role filtering
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
-        if user_role == 'admin' and current_user:
+        if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
@@ -258,7 +258,7 @@ class PieCharts:
         # Add filters efficiently
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
-        if user_role == 'admin' and current_user:
+        if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
