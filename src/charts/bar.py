@@ -117,21 +117,22 @@ class BarCharts:
     @st.cache_data(ttl=3600, show_spinner=False)
     def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, user_role, current_user=None, allowed_groups=None) -> None:
         st.markdown('Job Count by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
-        
-        min_runtime = max(0, number)        
-        
-        # Optimized query with early filtering
+
+        min_runtime = max(0, number)  # minutes (achte darauf, wirklich Minuten zu übergeben)
+
         query = """
-            SELECT (End - Start) / 60 AS runtime_minutes
+            SELECT CAST((End - Start) AS REAL) / 60.0 AS runtime_minutes
             FROM allocations
             WHERE Partition != 'jhub'
             AND JobName != 'interactive'
-            AND (End - Start) / 60 >= ?
-            AND Start >= ? 
-            AND End <= ?
+            AND (End - Start) / 60.0 >= ?
+            AND Start >= ?
+            AND End   <= ?
+            AND End IS NOT NULL
         """
         params = [min_runtime, start_date, end_date]
 
+        # partitions (Liste) + allowed_groups anwenden
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
         if user_role == 'admin' and current_user:
@@ -139,35 +140,41 @@ class BarCharts:
             params.append(current_user)
 
         df = pd.read_sql_query(query, _self.con, params=params)
-        
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Fill NaN values (though they should be minimal with improved query)
-        df['runtime_minutes'] = df['runtime_minutes'].fillna(0)
-        max_runtime = df['runtime_minutes'].max()
-        
-        # Pre-filter bins to avoid unnecessary processing
+        # Datentypen absichern
+        df['runtime_minutes'] = pd.to_numeric(df['runtime_minutes'], errors='coerce').fillna(0)
+
+        max_runtime = float(df['runtime_minutes'].max())
+
+        # Vordefinierte Bins in MINUTEN
         all_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
-        bins = [b for b in all_bins if min_runtime <= b <= max_runtime]
-        
-        # Ensure we have proper bin boundaries
-        if not bins or bins[0] > min_runtime:
-            bins.insert(0, min_runtime)
-        if bins[-1] < max_runtime:
-            bins.append(int(max_runtime) + 1)
-        
-        # Create intervals more efficiently
-        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins, include_lowest=True, right=False)
+        edges = [b for b in all_bins if b >= min_runtime and b < max_runtime]
+        if not edges or edges[0] > min_runtime:
+            edges.insert(0, min_runtime)
+
+        # letzte Kante minimal über max_runtime, damit Werte == max_runtime ins letzte Bin fallen
+        EPS = 1e-9
+        edges.append(max_runtime + EPS)
+
+        df['runtime_interval'] = pd.cut(
+            df['runtime_minutes'],
+            bins=edges,
+            include_lowest=True,
+            right=False
+        )
+
+        # Labels formatieren
         df['runtime_interval'] = df['runtime_interval'].apply(helpers.format_interval_label)
-        
-        # Get counts and prepare for plotting
+
+        # Zählen
         job_counts = df['runtime_interval'].value_counts().sort_index()
         job_counts_df = job_counts.reset_index()
         job_counts_df.columns = ['runtime_interval', 'job_count']
 
-        # Create optimized chart
+        # Plot
         fig = px.bar(
             job_counts_df,
             x="runtime_interval",
@@ -175,15 +182,10 @@ class BarCharts:
             width=550,
             height=450,
         )
-
-        # Apply layout optimizations
         fig.update_layout(
             xaxis_tickangle=-90,
             yaxis_title=None,
-            xaxis=dict(
-                title=None,
-                tickfont=dict(size=15),
-            ),
+            xaxis=dict(title=None, tickfont=dict(size=15)),
             margin=dict(l=20, r=20, t=20, b=20),
         )
         st.plotly_chart(fig, use_container_width=False)
