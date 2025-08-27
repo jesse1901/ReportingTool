@@ -78,10 +78,14 @@ def input_controls(user_role=None):
         elif user_role == 'uhh':
             choice = st.selectbox(
                 "select partition", 
-                ["allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"],
+                ["All available partitions","allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"],
                 key=f"partition_selector"
             )
-            partition_selector = [choice]
+            if choice == "All available partitions":
+                partition_selector = ["allcpu","allgpu", "maxgpu", "maxcpu", "acc-uhh"]
+            
+            else:
+                partition_selector = [choice]
             allowed_groups = ['i02', 'unihh2']
 
         else:  # admin und user
