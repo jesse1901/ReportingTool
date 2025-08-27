@@ -134,86 +134,97 @@ class PieCharts:
 
  
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_job_runtime(_self, start_date, end_date, scale_efficiency=True, partition_selector=None, user_role=None, current_user=None, allowed_groups=None) -> None:
-        # Common WHERE conditions to avoid duplication
-        base_conditions = "WHERE Partition != 'jhub' AND Start >= ? AND End <= ? AND JobName != 'interactive'"
+    def pie_chart_job_runtime(
+        _self,
+        start_date,
+        end_date,
+        scale_efficiency=True,
+        partition_selector=None,
+        user_role=None,
+        current_user=None,
+        allowed_groups=None
+    ) -> None:
+        query = """
+            SELECT 
+                CAST((End - Start) AS REAL) / 60.0 AS runtime_minutes,
+                CAST(CPUTime  AS REAL) AS CPUTime,
+                CAST(TotalCPU AS REAL) AS TotalCPU
+            FROM allocations
+            WHERE Partition != 'jhub'
+            AND State NOT IN ('PENDING', 'RUNNING')
+            AND JobName != 'interactive'
+            AND Start >= ?
+            AND End   <= ?
+        """
         params = [start_date, end_date]
 
-        base_conditions, params = helpers.build_conditions(base_conditions, params, partition_selector, allowed_groups)
+        query, params = helpers.build_conditions(
+            query, params, partition_selector, allowed_groups, user_role, current_user
+        )
 
         if user_role == 'admin' and current_user:
-            base_conditions += " AND User = ?"
+            query += " AND User = ?"
             params.append(current_user)
 
-        # Query without rounding for consistent processing in Python
-        combined_query = f"""
-            SELECT  
-                (End - Start) / 60 AS runtime_minutes,
-                CPUTime,
-                TotalCPU
-            FROM allocations
-            {base_conditions}
-        """
-
-        # Load query result into DataFrame
-        df = pd.read_sql_query(combined_query, _self.con, params=params)
-
+        df = pd.read_sql_query(query, _self.con, params=params)
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Create runtime bins dynamically based on max runtime
-        max_runtime = df['runtime_minutes'].max()
+        for col in ("runtime_minutes", "CPUTime", "TotalCPU"):
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = df.dropna(subset=["runtime_minutes", "CPUTime", "TotalCPU"])
+
+        if scale_efficiency:
+            total_lost_cpu_days = ((df["CPUTime"] * 0.5) - df["TotalCPU"]).sum() / 86400.0
+            total_cpu_days = (df["CPUTime"] * 0.5).sum() / 86400.0
+        else:
+            total_lost_cpu_days = ((df["CPUTime"]) - df["TotalCPU"]).sum() / 86400.0
+            total_cpu_days = (df["CPUTime"]).sum() / 86400.0
+
+        max_runtime = df["runtime_minutes"].max()
         predefined_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
         bins = [b for b in predefined_bins if b <= max_runtime] + [max_runtime]
-        bins = sorted(set(bins))  # Remove duplicates and sort
+        bins = sorted(set(bins))
+        if len(bins) < 2:
+            bins = [0, max(1, max_runtime)]
 
-        # Assign intervals and group by them
-        df['runtime_interval'] = pd.cut(df['runtime_minutes'], bins=bins)
-        
-        # Group by interval and calculate lost CPU days with proper scaling
-        grouped = df.groupby('runtime_interval', observed=True).agg({
-            'CPUTime': 'sum',
-            'TotalCPU': 'sum'
+        df["runtime_interval"] = pd.cut(df["runtime_minutes"], bins=bins, right=True, include_lowest=True)
+
+        grouped = df.groupby("runtime_interval", observed=True).agg({
+            "CPUTime": "sum",
+            "TotalCPU": "sum"
         }).reset_index()
-        
-        # Apply scaling consistently with cluster efficiency calculation
+
         if scale_efficiency:
-            grouped['lost_cpu_days'] = ((grouped['CPUTime'] * 0.5) - grouped['TotalCPU']) / 86400
-            total_cpu_days = int(round((df['CPUTime'].sum() * 0.5) / 86400))
-            lost_cpu_days_total = int(round(max(0, ((df['CPUTime'] * 0.5) - df['TotalCPU']).sum() / 86400)))
+            grouped["lost_cpu_days"] = ((grouped["CPUTime"] * 0.5) - grouped["TotalCPU"]) / 86400.0
         else:
-            grouped['lost_cpu_days'] = (grouped['CPUTime'] - grouped['TotalCPU']) / 86400
-            total_cpu_days = int(round(df['CPUTime'].sum() / 86400))
-            lost_cpu_days_total = int(round(max(0, ((df['CPUTime'] - df['TotalCPU']).sum() / 86400))))
+            grouped["lost_cpu_days"] = ((grouped["CPUTime"]) - grouped["TotalCPU"]) / 86400.0
 
-        # Clip negative values to zero and round consistently
-        grouped['lost_cpu_days'] = grouped['lost_cpu_days'].clip(lower=0).round(1)
-        
-        # Format interval labels
-        grouped['runtime_interval'] = grouped['runtime_interval'].apply(helpers.format_interval_label)
+        if total_lost_cpu_days <= 0:
+            grouped["lost_cpu_days"] = 0.0
+        else:
+            grouped["lost_cpu_days"] = grouped["lost_cpu_days"].clip(lower=0.0)
 
-        # Create pie chart for lost CPU days by runtime interval
-        fig = px.pie(grouped, names='runtime_interval', values='lost_cpu_days')
+        grouped["lost_cpu_days"] = grouped["lost_cpu_days"].round(1)
+        grouped["runtime_interval"] = grouped["runtime_interval"].apply(helpers.format_interval_label)
 
         st.markdown('Lost CPU Time by Job Runtime Interval', help='Partition "jhub" and Interactive Jobs are excluded')
+        fig = px.pie(grouped, names="runtime_interval", values="lost_cpu_days")
         st.plotly_chart(fig)
 
-        # Calculate cluster efficiency
-        cluster_efficiency = (total_cpu_days - lost_cpu_days_total) / total_cpu_days * 100 if total_cpu_days > 0 else 0
-
-        # Summary statistics table
+        # Summary wie im alten Code (df2)
+        cluster_efficiency = ((total_cpu_days - total_lost_cpu_days) / total_cpu_days * 100.0) if total_cpu_days > 0 else 0.0
         summary_data = {
-            'total CPU days booked': f"{total_cpu_days:,}",
-            'total CPU days lost': f"{lost_cpu_days_total:,}",
-            'cluster efficiency': f"{cluster_efficiency:.2f}%"
+            "total CPU days booked": f"{int(round(total_cpu_days)):,}",
+            "total CPU days lost": f"{int(round(total_lost_cpu_days)):,}",
+            "cluster efficiency": f"{cluster_efficiency:.2f}%"
         }
+        df2 = pd.DataFrame(list(summary_data.items()), columns=["Metric", "Time in days"]).set_index("Metric")
 
-        df2 = pd.DataFrame(list(summary_data.items()), columns=['Metric', 'Time in days'])
-        df2 = df2.set_index('Metric')
-
-        st.write('Cluster Efficiency')
+        st.write("Cluster Efficiency")
         st.dataframe(df2, use_container_width=False)
+
 
 
     @st.cache_data(ttl=3600, show_spinner=False)
