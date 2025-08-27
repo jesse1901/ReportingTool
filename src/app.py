@@ -146,7 +146,7 @@ def main():
 
         start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user = input_controls(user_role)
 
-        if user_role != 'user 'and search_user:
+        if user_role != 'user' and search_user:
             username = search_user            
         elif user_role != 'user' and not search_user:
             username = None
