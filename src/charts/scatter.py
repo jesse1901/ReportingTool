@@ -20,7 +20,8 @@ class ScatterCharts:
             SELECT JobID, User, COALESCE(GpuUtil, 0) AS GpuUtil, 
                 (CPUEff * 100) AS CPUEff, 
                 ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days, 
-                Elapsed
+                Elapsed,
+                Partition
             FROM allocations
             WHERE Start >= ? AND End <= ? 
             AND Partition != 'jhub'
@@ -73,9 +74,11 @@ class ScatterCharts:
         df['hover_text'] = (
             "JobID: " + df['JobID'].astype(str) + 
             "<br>User: " + df['User'].astype(str) + 
+            "<br>Partition: " + df['Partition'].astype(str) + 
             "<br>Lost CPU days: " + df['lost_cpu_days'].astype(str) + 
             "<br>CPU Efficiency: " + df['CPUEff'].astype(str)
         )
+
 
         # Pre-defined color scale to avoid recreation
         custom_color_scale = [
