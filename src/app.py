@@ -46,7 +46,7 @@ def input_controls(user_role=None):
     with st.sidebar:
         search_user = None
 
-        if user_role == 'admin':
+        if user_role is not 'user':
             search_user = st.text_input("select User", value="", key="username_filter_sidebar", placeholder="<username>")
 
         default_range = [datetime.today() - timedelta(days=30), datetime.today()]
