@@ -131,7 +131,7 @@ class BarCharts:
         # partitions (Liste) + allowed_groups anwenden
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
-        if user_role == 'admin' and current_user:
+        if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
