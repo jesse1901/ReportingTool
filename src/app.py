@@ -201,7 +201,7 @@ def main():
         #         with col9:    
         #             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
-        elif user_role is not 'user':
+        if user_role is not 'user':
             tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
             with st.spinner("loading"):
                 with tab1:
