@@ -97,14 +97,14 @@ class DataFrames:
 
     def frame_user_all(
         self, 
-        current_user: str, 
-        user_role: str, 
-        number: int,
-        partition_selector: list | None, 
-        filter_jobid: str | None, 
-        filter_user: str | None,
-        start_date: str | None,
-        end_date: str | None,
+        current_user, 
+        user_role, 
+        number,
+        partition_selector = None, 
+        filter_jobid = None, 
+        filter_user = None,
+        start_date = None,
+        end_date =  None,
         allowed_groups=None
     ) -> None:
         # Apply custom CSS for scrollbars
