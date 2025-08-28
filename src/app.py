@@ -309,6 +309,21 @@ def main():
             except Exception as e:
                 st.error("An error occurred during login.")
 
+
+@st.cache_resource(show_spinner=False)
+def get_duckdb_connection():
+    con = duckdb.connect()
+    # If your DuckDB build supports extensions (most do):
+    con.execute("INSTALL sqlite_scanner;")
+    con.execute("LOAD sqlite_scanner;")
+    # Attach the existing SQLite DB under schema `sqlite_db`
+    con.execute("""
+        ATTACH '/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3'
+        AS sqlite_db (TYPE SQLITE);
+    """)
+    return con
+
+
 if __name__ == "__main__":
     st.set_page_config(
         layout="wide",
@@ -342,19 +357,8 @@ if __name__ == "__main__":
     """)
 
     # --- DuckDB setup ---
-    con = duckdb.connect()
-
-    # Optional: keep memory usage under control
-    # con.execute("SET memory_limit='1GB'")
-    # con.execute("SET temp_directory='/tmp/duckdb_spill'")  # where to spill if needed
-    # con.execute("SET threads TO 8")  # or let DuckDB auto-detect
-
-    # Attach your existing SQLite file so DuckDB can query it directly
-    con.execute("""
-        ATTACH DATABASE '/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3'
-        AS sqlite_db (TYPE SQLITE)
-    """)
-
+    con = get_duckdb_connection()
+    
     # Pass the DuckDB connection to your chart/data helpers
     frames = DataFrames(con)
     bar = BarCharts(con)
