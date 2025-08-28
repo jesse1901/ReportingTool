@@ -23,14 +23,14 @@ class DataFrames:
     @st.cache_data(ttl=3600, show_spinner=False)
     def fetch_all_data(
         _self, 
-        current_user: str, 
-        user_role: str, 
-        number: int = None, 
-        partition_selector: list | None = None, 
-        filter_jobid: str | None = None, 
-        filter_user: str | None = None,
-        start_date: str | None = None,
-        end_date: str | None = None, 
+        current_user, 
+        user_role, 
+        number = None, 
+        partition_selector = None, 
+        filter_jobid = None, 
+        filter_user = None,
+        start_date = None,
+        end_date = None, 
         allowed_groups=None
     ) -> pd.DataFrame:
         """
