@@ -155,7 +155,6 @@ class DataFrames:
             filtered_df = df.iloc[selected_rows]
             if len(filtered_df) > 0:
                 helpers.get_job_script(jobid=filtered_df.JobID.iloc[0])
-
     @st.cache_data(ttl=3600, show_spinner=False)
     def frame_group_by_user(
         _self, 
@@ -164,7 +163,7 @@ class DataFrames:
         current_user, 
         user_role, 
         scale_efficiency, 
-        partition_selector = None,
+        partition_selector=None,
         allowed_groups=None
     ) -> None:
         # Validate date range
@@ -174,66 +173,70 @@ class DataFrames:
             st.error("Error: End date must fall after start date.")
             return
 
-        # Base query (normal)
+        # --- Base queries: compute numeric percentages; format later in Python ---
         base_query_normal = """
         SELECT
-            eff.User,
-            eff.Account,
-            COUNT(eff.JobID) AS JobCount,
-            ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
-            ROUND(SUM(slurm.CPUTime) / 86400.0, 1) AS cpu_days,
-            printf('%2.0f%%',
-                   100.0 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)
-            ) AS CPUEff,
-            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
-            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
+            eff."User"                             AS "User",
+            eff."Account"                          AS "Account",
+            COUNT(eff.JobID)                       AS "JobCount",
+            ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400.0, 1)             AS "Lost_CPU_days",
+            ROUND(SUM(slurm.CPUTime) / 86400.0, 1)                                   AS "cpu_days",
+            /* numeric CPU % (0..100) */
+            LEAST(100.0,
+                100.0 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff)
+                        / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)
+            ) AS "CPUEff",
+            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1)                          AS "GPU_Days",
+            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1)     AS "Lost_GPU_Days",
+            /* numeric GPU % (0..100), NULL if no GPUs */
             CASE WHEN SUM(eff.NGPUS) > 0 THEN
-                 printf('%2.0f%%',
-                        100.0 * SUM(eff.Elapsed * eff.NGPUS * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUS), 0)
-                 )
-                 ELSE NULL
-            END AS GPUEff,
-            ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
-            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
-        FROM sqlite_db.eff AS eff
+                LEAST(100.0,
+                    100.0 * SUM(eff.Elapsed * eff.NGPUS * eff.GPUeff)
+                            / NULLIF(SUM(eff.Elapsed * eff.NGPUS), 0)
+                )
+                ELSE NULL
+            END AS "GPUEff",
+            ROUND(SUM(eff.TotDiskRead  / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS "read_MiBps",
+            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS "write_MiBps"
+        FROM sqlite_db.eff   AS eff
         JOIN sqlite_db.slurm AS slurm ON eff.JobID = slurm.JobID
-        WHERE eff.Start >= ? 
-          AND eff.End   <= ? 
-          AND eff.End IS NOT NULL 
-          AND slurm.Partition != 'jhub'
-          AND slurm.JobName != 'interactive'
+        WHERE eff."Start" >= ?
+        AND eff."End"   <= ?
+        AND eff."End" IS NOT NULL 
+        AND slurm."Partition" != 'jhub'
+        AND slurm.JobName     != 'interactive'
         """
 
-        # Base query (scaled for hyperthreading)
         base_query_scaled = """
         SELECT
-            eff.User,
-            eff.Account,
-            COUNT(eff.JobID) AS JobCount,
-            ROUND(SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
-            ROUND(SUM(slurm.CPUTime) / (86400.0 * 2.0), 1) AS cpu_days,
-            printf('%2.0f%%',
-                   LEAST(100.0,
-                         2.0 * (100.0 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0))
-                   )
-            ) AS CPUEff,
-            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
-            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
+            eff."User"                             AS "User",
+            eff."Account"                          AS "Account",
+            COUNT(eff.JobID)                       AS "JobCount",
+            ROUND(SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used) / 86400.0, 1)      AS "Lost_CPU_days",
+            ROUND(SUM(slurm.CPUTime) / (86400.0 * 2.0), 1)                             AS "cpu_days",
+            /* scale CPU % x2 but cap at 100 */
+            LEAST(100.0,
+                2.0 * (100.0 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff)
+                            / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0))
+            ) AS "CPUEff",
+            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1)                           AS "GPU_Days",
+            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1)      AS "Lost_GPU_Days",
             CASE WHEN SUM(eff.NGPUS) > 0 THEN
-                 printf('%2.0f%%',
-                        100.0 * SUM(eff.Elapsed * eff.NGPUS * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUS), 0)
-                 )
-                 ELSE NULL
-            END AS GPUEff,
-            ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
-            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
-        FROM sqlite_db.eff AS eff
+                LEAST(100.0,
+                    100.0 * SUM(eff.Elapsed * eff.NGPUS * eff.GPUeff)
+                            / NULLIF(SUM(eff.Elapsed * eff.NGPUS), 0)
+                )
+                ELSE NULL
+            END AS "GPUEff",
+            ROUND(SUM(eff.TotDiskRead  / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2)  AS "read_MiBps",
+            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2)  AS "write_MiBps"
+        FROM sqlite_db.eff   AS eff
         JOIN sqlite_db.slurm AS slurm ON eff.JobID = slurm.JobID
-        WHERE eff.Start >= ? 
-          AND eff.End   <= ? 
-          AND eff.End IS NOT NULL 
-          AND slurm.Partition != 'jhub'
-          AND slurm.JobName != 'interactive'
+        WHERE eff."Start" >= ?
+        AND eff."End"   <= ?
+        AND eff."End" IS NOT NULL 
+        AND slurm."Partition" != 'jhub'
+        AND slurm.JobName     != 'interactive'
         """
 
         base_query = base_query_scaled if scale_efficiency else base_query_normal
@@ -241,34 +244,34 @@ class DataFrames:
 
         if partition_selector:
             placeholders = ",".join(["?"] * len(partition_selector))
-            base_query += f" AND slurm.Partition IN ({placeholders})"
+            base_query += f" AND slurm.\"Partition\" IN ({placeholders})"
             params.extend(partition_selector)
 
         if current_user:
-            base_query += " AND eff.User = ?"
+            base_query += " AND eff.\"User\" = ?"
             params.append(current_user)
 
         if allowed_groups:
             placeholders = ",".join(["?"] * len(allowed_groups))
-            base_query += f" AND eff.Account IN ({placeholders})"
+            base_query += f" AND eff.\"Account\" IN ({placeholders})"
             params.extend(allowed_groups)
 
-        # Execute with DuckDB
-        df = _self.con.execute(base_query + " GROUP BY eff.User, eff.Account", params).fetchdf()
-
-        # Ensure non-negative
-        if 'Lost_CPU_days' in df.columns:
-            df['Lost_CPU_days'] = df['Lost_CPU_days'].clip(lower=0)
+        # Execute with DuckDB; group by quoted columns
+        df = _self.con.execute(base_query + ' GROUP BY eff."User", eff."Account"', params).fetchdf()
 
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
+        # Ensure non-negative
+        if "Lost_CPU_days" in df.columns:
+            df["Lost_CPU_days"] = df["Lost_CPU_days"].clip(lower=0)
+
         # For regular users, transpose for display
-        if user_role == 'user':
+        if user_role == "user":
             df = df.T.reset_index()
             df.columns = ["Metric", "Value"]
-        
+
         st.markdown("<div style='height: 81px;'></div>", unsafe_allow_html=True)
         st.markdown("Data Grouped by User", help='Partition "jhub" and Interactive Jobs are excluded')
         st.dataframe(df, use_container_width=False)
