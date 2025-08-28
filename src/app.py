@@ -8,7 +8,7 @@ from charts.pie import PieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
 
-secrets = toml.load('.streamlit/secrets.toml')
+secrets = toml.load('/var/www/max-reports/ReportingTool/src/.streamlit/secrets.toml')
 
 ALLOWED_USERS = secrets['users']['allowed_users']
 ADMIN_USERS = secrets['users']['admin_users']
@@ -285,9 +285,9 @@ def main():
 
 
             try:
-                login()
-                username = st.user.preferred_username
-
+                #login()
+                #username = st.user.preferred_username
+                username = 'schuetzj'
                 st.session_state['username'] = username
 
                 if is_user_admin(username):
