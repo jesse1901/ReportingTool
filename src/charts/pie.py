@@ -222,7 +222,7 @@ class PieCharts:
         grouped["lost_cpu_days"] = grouped["lost_cpu_days"].round(1)
         grouped["runtime_interval"] = grouped["runtime_interval"].apply(helpers.format_interval_label)
 
-        st.markdown('Lost CPU Time by Job Runtime Interval', help='Partition "jhub" and Interactive Jobs are excluded')
+        st.markdown('Lost CPU Time by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
         fig = px.pie(grouped, names="runtime_interval", values="lost_cpu_days")
         st.plotly_chart(fig)
 
