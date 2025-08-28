@@ -314,6 +314,8 @@ def main():
 def get_duckdb_connection():
     con = duckdb.connect()
     # If your DuckDB build supports extensions (most do):
+    con.execute("SET home_directory='/var/www/max-reports/duckdb_home';")
+    con.execute("INSTALL sqlite_scanner;")
     con.execute("LOAD sqlite_scanner;")
     # Attach the existing SQLite DB under schema `sqlite_db`
     con.execute("""
