@@ -9,48 +9,57 @@ class BarCharts:
         self.con = connection
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
+    def bar_char_by_user(
+        _self,
+        start_date,
+        end_date,
+        current_user,
+        user_role,
+        number=None,
+        scale_efficiency=True,
+        partition_selector=None,
+        allowed_groups=None
+    ) -> None:
         st.markdown('Total Lost CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded')
 
-        # Set parameters for the SQL query
+        # DuckDB param list
         params = [start_date, end_date]
 
-        # Build query with common filters first
+        # Common filters (DuckDB + attached SQLite -> prefix with sqlite_db.)
         base_conditions = """
-            WHERE eff.Start >= ? 
+            WHERE eff.Start >= ?
             AND eff.Start IS NOT NULL
-            AND eff.End <= ? 
-            AND eff.End IS NOT NULL 
+            AND eff.End <= ?
+            AND eff.End IS NOT NULL
             AND slurm.Partition != 'jhub'
             AND slurm.JobName != 'interactive'
         """
-        
-        # Select query based on `scale_efficiency`
+
         if scale_efficiency:
             query = f"""
-                SELECT 
+                SELECT
                     eff.User,
                     COUNT(eff.JobID) AS job_count,
                     ROUND(SUM((eff.cpu_s_reserved * 0.5) - eff.cpu_s_used) / 86400, 1) AS lost_cpu_days,
-                    eff.Account
-                FROM eff
-                JOIN slurm ON eff.JobID = slurm.JobID
+                    ANY_VALUE(eff.Account) AS Account
+                FROM sqlite_db.eff AS eff
+                JOIN sqlite_db.slurm AS slurm ON eff.JobID = slurm.JobID
                 {base_conditions}
             """
         else:
             query = f"""
-                SELECT 
+                SELECT
                     eff.User,
                     ROUND(SUM((eff.cpu_s_reserved - eff.cpu_s_used) / 86400), 1) AS lost_cpu_days,
                     COUNT(eff.JobID) AS job_count,
                     ROUND(SUM(eff.Elapsed * eff.NCPUS) / 86400, 1) AS total_cpu_days,
-                    eff.Account
-                FROM eff
-                JOIN slurm ON eff.JobID = slurm.JobID
+                    ANY_VALUE(eff.Account) AS Account
+                FROM sqlite_db.eff AS eff
+                JOIN sqlite_db.slurm AS slurm ON eff.JobID = slurm.JobID
                 {base_conditions}
             """
 
-        # Add role-based filtering
+        # Optional filters
         if partition_selector:
             placeholders = ','.join(['?'] * len(partition_selector))
             query += f" AND slurm.Partition IN ({placeholders})"
@@ -64,25 +73,25 @@ class BarCharts:
             placeholders = ','.join('?' for _ in allowed_groups)
             query += f" AND eff.Account IN ({placeholders})"
             params.extend(allowed_groups)
-        
-        # Add grouping and ordering with LIMIT in SQL if number is specified
+
+        # Group + order (+ limit)
         if number:
             query += f" GROUP BY eff.User ORDER BY lost_cpu_days DESC LIMIT {number}"
         else:
             query += " GROUP BY eff.User ORDER BY lost_cpu_days DESC"
 
-        # Execute query
-        result_df = pd.read_sql_query(query, _self.con, params=params)
-        
-        # Early exit if no data
+        # --- Execute with DuckDB ---
+        # _self.con is a duckdb.Connection (with the SQLite file attached as sqlite_db)
+        result_df = _self.con.execute(query, params).fetchdf()
+
         if result_df.empty:
             st.warning("No data available for the selected criteria.")
             return
-        
-        # Clip negative values
+
+        # Ensure no negatives
         result_df['lost_cpu_days'] = result_df['lost_cpu_days'].clip(lower=0)
-        
-        # Calculate ticks more efficiently
+
+        # Ticks
         max_lost_time = result_df['lost_cpu_days'].max()
         if max_lost_time > 0:
             tick_vals = np.linspace(0, max_lost_time, num=10)
@@ -91,14 +100,10 @@ class BarCharts:
             tick_vals = [0]
             tick_text = [0]
 
-        # Create chart with optimized settings
+        # Chart
         fig = px.bar(result_df, x='User', y='lost_cpu_days', hover_data=['job_count', 'Account'])
-
         fig.update_layout(
-            xaxis=dict(
-                title='User',
-                tickangle=-45
-            ),
+            xaxis=dict(title='User', tickangle=-45),
             yaxis=dict(
                 title='Total Lost CPU Time (in Days)',
                 tickmode='array',
@@ -107,18 +112,26 @@ class BarCharts:
                 tickformat='d'
             )
         )
-
         st.plotly_chart(fig)
 
     @st.cache_data(ttl=3600, show_spinner=False)
-    def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, user_role, current_user=None, allowed_groups=None) -> None:
+    def job_counts_by_log2(
+        _self,
+        start_date,
+        end_date,
+        number,
+        partition_selector,
+        user_role,
+        current_user=None,
+        allowed_groups=None
+    ) -> None:
         st.markdown('Job Count by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
 
-        min_runtime = max(0, number)  # minutes (achte darauf, wirklich Minuten zu übergeben)
+        min_runtime = max(0, number)  # minutes
 
         query = """
-            SELECT CAST((End - Start) AS REAL) / 60.0 AS runtime_minutes
-            FROM allocations
+            SELECT CAST((End - Start) AS DOUBLE) / 60.0 AS runtime_minutes
+            FROM sqlite_db.allocations
             WHERE Partition != 'jhub'
             AND JobName != 'interactive'
             AND (End - Start) / 60.0 >= ?
@@ -128,30 +141,31 @@ class BarCharts:
         """
         params = [min_runtime, start_date, end_date]
 
-        # partitions (Liste) + allowed_groups anwenden
+        # Apply partitions + allowed_groups with your helper (it appends AND ... conditions)
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups)
 
         if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        # DuckDB execution (SQLite file must be attached as sqlite_db at startup)
+        df = _self.con.execute(query, params).fetchdf()
+
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Datentypen absichern
+        # Ensure correct dtype
         df['runtime_minutes'] = pd.to_numeric(df['runtime_minutes'], errors='coerce').fillna(0)
 
         max_runtime = float(df['runtime_minutes'].max())
 
-        # Vordefinierte Bins in MINUTEN
+        # Predefined bins in MINUTES
         all_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
         edges = [b for b in all_bins if b >= min_runtime and b < max_runtime]
         if not edges or edges[0] > min_runtime:
             edges.insert(0, min_runtime)
 
-        # letzte Kante minimal über max_runtime, damit Werte == max_runtime ins letzte Bin fallen
         EPS = 1e-9
         edges.append(max_runtime + EPS)
 
@@ -162,10 +176,10 @@ class BarCharts:
             right=False
         )
 
-        # Labels formatieren
+        # Labels
         df['runtime_interval'] = df['runtime_interval'].apply(helpers.format_interval_label)
 
-        # Zählen
+        # Counts
         job_counts = df['runtime_interval'].value_counts().sort_index()
         job_counts_df = job_counts.reset_index()
         job_counts_df.columns = ['runtime_interval', 'job_count']

@@ -8,39 +8,54 @@ class ScatterCharts:
         self.con = connection
     
     @st.cache_data(ttl=3600, show_spinner=False)
-    def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
+    def scatter_chart_data_cpu_gpu_eff(
+        _self,
+        start_date,
+        end_date,
+        current_user,
+        user_role,
+        scale_efficiency=True,
+        partition_selector=None,
+        allowed_groups=None
+    ):
         st.markdown('CPU & GPU Efficiency by Job Duration', help='Partition "jhub" and Interactive Jobs are excluded')
         
         if start_date > end_date:
             st.error("Error: End date must be after start date.")
             return
 
-        # Optimized query - only select needed columns and add early filtering
+        # Only needed columns; prefix table with sqlite_db.
         query = """
-            SELECT JobID, User, COALESCE(GpuUtil, 0) AS GpuUtil, 
-                (CPUEff * 100) AS CPUEff, 
-                ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days, 
+            SELECT
+                JobID,
+                User,
+                COALESCE(GpuUtil, 0) AS GpuUtil,
+                (CPUEff * 100.0)      AS CPUEff,
+                ROUND((CPUTime - TotalCPU) / 86400.0, 1) AS lost_cpu_days,
                 Elapsed,
-                Partition
-            FROM allocations
-            WHERE Start >= ? AND End <= ? 
-            AND Partition != 'jhub'
-            AND JobName != 'interactive'
-            AND Elapsed IS NOT NULL
+                Partition,
+                Account
+            FROM sqlite_db.allocations
+            WHERE Start >= ?
+              AND End   <= ?
+              AND Partition != 'jhub'
+              AND JobName  != 'interactive'
+              AND Elapsed IS NOT NULL
         """
         params = [start_date, end_date]
 
-        # Streamlined role-based filtering
+        # Role-based filtering (admin shows longer jobs; uhh limited by account; user limited to own)
         if user_role == "admin":
             query += " AND Elapsed > 100"
-        elif user_role == "uhh":
-            query += "  AND Account IN ({})".format(','.join('?' for _ in allowed_groups))
+        elif user_role == "uhh" and allowed_groups:
+            query += " AND Account IN ({})".format(','.join('?' for _ in allowed_groups))
             params.extend(allowed_groups)
         elif user_role == "user":
             query += " AND User = ?"
             params.append(current_user)
-        
-        if current_user:
+
+        # Optional explicit user filter (keep if you sometimes pass current_user even for admins)
+        if current_user and user_role != "user":
             query += " AND User = ?"
             params.append(current_user)
 
@@ -49,65 +64,62 @@ class ScatterCharts:
             query += f" AND Partition IN ({placeholders})"
             params.extend(partition_selector)
 
-        # Add ORDER BY to the base query
         query += " ORDER BY Elapsed ASC"
-        
-        df = pd.read_sql_query(query, _self.con, params=params)
+
+        # Execute via DuckDB
+        df = _self.con.execute(query, params).fetchdf()
 
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
         
-        # Vectorized operations for better performance
-        df['GpuUtil'] = df['GpuUtil'] * 100
-        df['Elapsed'] = df['Elapsed'].astype(int).apply(helpers.seconds_to_timestring)
-        df['CPUEff'] = df['CPUEff'].clip(upper=100)
+        # Post-processing
+        df['GpuUtil'] = df['GpuUtil'] * 100.0
+        df['CPUEff'] = df['CPUEff'].clip(upper=100.0)
 
         if scale_efficiency:
-            # More efficient conditional operation
-            mask = df['CPUEff'] <= 100
-            df.loc[mask, 'CPUEff'] = (df.loc[mask, 'CPUEff'] * 2).clip(upper=100)
+            mask = df['CPUEff'] <= 100.0
+            df.loc[mask, 'CPUEff'] = (df.loc[mask, 'CPUEff'] * 2.0).clip(upper=100.0)
 
         df['lost_cpu_days'] = df['lost_cpu_days'].fillna(0)
 
-        # Vectorized hover text creation - more efficient than apply
-        df['hover_text'] = (
-            "JobID: " + df['JobID'].astype(str) + 
-            "<br>User: " + df['User'].astype(str) + 
-            "<br>Partition: " + df['Partition'].astype(str) + 
-            "<br>Lost CPU days: " + df['lost_cpu_days'].astype(str) + 
-            "<br>CPU Efficiency: " + df['CPUEff'].astype(str)
-        )
+        # Keep a numeric Elapsed for x-axis scaling, but create a human-readable label for hover if you want
+        df['Elapsed_human'] = df['Elapsed'].astype(int).apply(helpers.seconds_to_timestring)
 
+        # Optional: concise custom hover
+        hover_data = {
+            'JobID': True,
+            'User': True,
+            'Partition': True,
+            'lost_cpu_days': True,
+            'CPUEff': True,
+            'Elapsed_human': True
+        }
 
-        # Pre-defined color scale to avoid recreation
         custom_color_scale = [
-            [0.0, "CornflowerBlue"],  
+            [0.0, "CornflowerBlue"],
             [0.25, "cyan"],
-            [0.5, "green"],     
-            [0.75, "orange"],  
-            [1.0, "red"],       
+            [0.5, "green"],
+            [0.75, "orange"],
+            [1.0, "red"],
         ]
 
         fig = px.scatter(
-            df, 
-            x='Elapsed', 
-            y='CPUEff', 
-            range_color=[0, 100],
+            df,
+            x='Elapsed',
+            y='CPUEff',
             color='GpuUtil',
+            range_color=[0, 100],
             color_continuous_scale=custom_color_scale,
-            hover_data={'JobID': True, 'User': True, 'Partition': True, 'lost_cpu_days': False, 'CPUEff': True},
-            labels={'Elapsed': 'Elapsed Time', 'CPUEff': 'CPU Efficiency (%)'}
+            hover_data=hover_data,
+            labels={'Elapsed': 'Elapsed Time (s)', 'CPUEff': 'CPU Efficiency (%)', 'Elapsed_human': 'Elapsed'}
         )
-        
-        # Batch update for better performance
         fig.update_traces(marker=dict(size=2.5))
         fig.update_layout(
-            xaxis=dict(showgrid=False, title='Elapsed Time'),
+            xaxis=dict(showgrid=False, title='Elapsed Time (s)'),
             yaxis=dict(showgrid=False, title='CPU Efficiency (%)'),
             plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',  
+            paper_bgcolor='rgba(0,0,0,0)',
         )
 
         st.plotly_chart(fig, theme=None)
-

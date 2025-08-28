@@ -8,12 +8,12 @@ class PieCharts:
     def __init__(self, connection):
         self.con = connection
         self.color_map = {
-         'CANCELLED': "#803df5", #'#1f77b4 ',    # Light Blue
-         'COMPLETED':  "#5ce488",  ##17becf ',    # Light Sky Blue
-        'TIMEOUT': "#1c83e1", #'#d62728 ',     # red
-        'FAILED': "#ff2b2b",      # Pink
-        'PREEMPTED': '#ffe312',     # Light Green
-        'NODE_FAIL': '#566573'
+            'CANCELLED': "#803df5",
+            'COMPLETED': "#5ce488",
+            'TIMEOUT':   "#1c83e1",
+            'FAILED':    "#ff2b2b",
+            'PREEMPTED': '#ffe312',
+            'NODE_FAIL': '#566573'
         }
     
     @st.cache_data(ttl=3600, show_spinner=False)
@@ -30,19 +30,18 @@ class PieCharts:
         scale = "0.5" if scale_efficiency else "1.0"
         query = f"""
             SELECT 
-                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
+                CASE WHEN LOWER(State) LIKE 'cancelled %%' THEN 'CANCELLED' ELSE State END AS Category,
                 ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days 
-            FROM allocations
+            FROM sqlite_db.allocations
             WHERE Partition != 'jhub' 
-            AND JobName != 'interactive'
-            AND State NOT IN ('PENDING', 'RUNNING')
-            AND Start >= ? 
-            AND End   <= ?
-            AND End IS NOT NULL
+              AND JobName != 'interactive'
+              AND State NOT IN ('PENDING', 'RUNNING')
+              AND Start >= ? 
+              AND End   <= ?
+              AND End IS NOT NULL
         """
         params = [start_date, end_date]
 
-        # Einheitliche Zusatzfilter (Partitionsliste + allowed_groups + ggf. Rolle/User)
         query, params = helpers.build_conditions(
             query, params, partition_selector, allowed_groups, user_role, current_user
         )
@@ -51,19 +50,16 @@ class PieCharts:
             query += " AND User = ?"
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        df = _self.con.execute(query, params).fetchdf()
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Sum lost time per category (still raw; may contain negatives)
         grouped_raw = df.groupby("Category", as_index=False)["lost_cpu_days"].sum()
         grouped_raw.rename(columns={"lost_cpu_days": "lost_days_raw"}, inplace=True)
 
-        # Net total across all categories (positives + negatives)
         net_total = grouped_raw["lost_days_raw"].sum()
 
-        # Rescale only positive categories so their sum equals the net total
         if net_total <= 0:
             grouped_raw["lost_cpu_days"] = 0.0
         else:
@@ -76,7 +72,6 @@ class PieCharts:
 
         grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round(1)
 
-        # Plot
         fig = px.pie(
             grouped_raw,
             names="Category",
@@ -87,40 +82,35 @@ class PieCharts:
         st.markdown('Lost CPU Time by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
 
-        # Tabelle (absteigend)
         df_sorted = grouped_raw.sort_values(by="lost_cpu_days", ascending=False)
         st.dataframe(df_sorted[["Category", "lost_cpu_days"]], hide_index=True, use_container_width=False)
 
-
-
-
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
+    def pie_chart_by_job_count(
+        _self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None
+    ):
         query = """
             SELECT
-                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category, 
+                CASE WHEN LOWER(State) LIKE 'cancelled %' THEN 'CANCELLED' ELSE State END AS Category, 
                 COUNT(JobID) AS JobCount
-            FROM allocations
+            FROM sqlite_db.allocations
             WHERE Partition != 'jhub' 
-            AND State NOT IN ('PENDING', 'RUNNING') 
-            AND Start >= ? 
-            AND End <= ? 
-            AND JobName != 'interactive'
+              AND State NOT IN ('PENDING', 'RUNNING') 
+              AND Start >= ? 
+              AND End   <= ? 
+              AND JobName != 'interactive'
         """
         params = [start_date, end_date]
 
-        # Streamlined role filtering
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
         
         if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
-        # GROUP BY the Category (not State) to properly aggregate CANCELLED entries
-        query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
+        query += " GROUP BY CASE WHEN LOWER(State) LIKE 'cancelled %' THEN 'CANCELLED' ELSE State END"
         
-        df = pd.read_sql_query(query, _self.con, params=params)
-        
+        df = _self.con.execute(query, params).fetchdf()
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
@@ -137,7 +127,6 @@ class PieCharts:
         st.markdown('Job Count by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
         
-        # Since df is already properly grouped by Category, we can directly sort
         df_sorted = df.sort_values(by='JobCount', ascending=False)
         st.dataframe(df_sorted, hide_index=True, use_container_width=False)
 
@@ -154,15 +143,15 @@ class PieCharts:
     ) -> None:
         query = """
             SELECT 
-                CAST((End - Start) AS REAL) / 60.0 AS runtime_minutes,
-                CAST(CPUTime  AS REAL) AS CPUTime,
-                CAST(TotalCPU AS REAL) AS TotalCPU
-            FROM allocations
+                CAST((End - Start) AS DOUBLE) / 60.0 AS runtime_minutes,
+                CAST(CPUTime  AS DOUBLE) AS CPUTime,
+                CAST(TotalCPU AS DOUBLE) AS TotalCPU
+            FROM sqlite_db.allocations
             WHERE Partition != 'jhub'
-            AND State NOT IN ('PENDING', 'RUNNING')
-            AND JobName != 'interactive'
-            AND Start >= ?
-            AND End   <= ?
+              AND State NOT IN ('PENDING', 'RUNNING')
+              AND JobName != 'interactive'
+              AND Start >= ?
+              AND End   <= ?
         """
         params = [start_date, end_date]
 
@@ -174,7 +163,7 @@ class PieCharts:
             query += " AND User = ?"
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        df = _self.con.execute(query, params).fetchdf()
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
@@ -184,15 +173,11 @@ class PieCharts:
         df = df.dropna(subset=["runtime_minutes", "CPUTime", "TotalCPU"])
 
         factor = 0.5 if scale_efficiency else 1.0
-        # per-row raw lost days (can be negative)
         df["lost_days_raw"] = ((df["CPUTime"] * factor) - df["TotalCPU"]) / 86400.0
 
-        # Totals for the summary (consistent with 'net' semantics)
         total_cpu_days = (df["CPUTime"] * factor).sum() / 86400.0
-        total_lost_cpu_days = df["lost_days_raw"].sum()  
-        total_lost_cpu_days = max(total_lost_cpu_days, 0.0)
+        total_lost_cpu_days = max(df["lost_days_raw"].sum(), 0.0)
 
-        # Binning by runtime
         max_runtime = df["runtime_minutes"].max()
         predefined_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
         bins = [b for b in predefined_bins if b <= max_runtime] + [max_runtime]
@@ -202,14 +187,11 @@ class PieCharts:
 
         df["runtime_interval"] = pd.cut(df["runtime_minutes"], bins=bins, right=True, include_lowest=True)
 
-        # Group sums per bin (sum the raw lost days per bin; can be negative)
         grouped = df.groupby("runtime_interval", observed=True).agg({
             "lost_days_raw": "sum"
         }).reset_index()
 
-        # Rescale positive bins so their sum equals the net total
         if total_lost_cpu_days <= 0:
-            # Nothing net to show: zero out all bins
             grouped["lost_cpu_days"] = 0.0
         else:
             pos_sum = grouped.loc[grouped["lost_days_raw"] > 0, "lost_days_raw"].sum()
@@ -226,7 +208,6 @@ class PieCharts:
         fig = px.pie(grouped, names="runtime_interval", values="lost_cpu_days")
         st.plotly_chart(fig)
 
-        # Summary (uses the same net definition)
         cluster_efficiency = ((total_cpu_days - total_lost_cpu_days) / total_cpu_days * 100.0) if total_cpu_days > 0 else 0.0
         summary_data = {
             "total CPU days booked": f"{int(round(total_cpu_days)):,}",
@@ -238,50 +219,47 @@ class PieCharts:
         st.write("Cluster Efficiency")
         st.dataframe(df2, use_container_width=False)
 
-
     @st.cache_data(ttl=3600, show_spinner=False)
-    def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
-        # Build query with optimized conditions
+    def pie_chart_batch_inter(
+        _self, start_date, end_date, current_user, user_role, scale_efficiency=True,
+        partition_selector=None, allowed_groups=None
+    ) -> None:
         if scale_efficiency:
             query = """
                 SELECT
-                    ROUND(((CPUTime * 0.5) - TotalCPU) / 86400, 1) AS lost_cpu_days,
+                    ROUND(((CPUTime * 0.5) - TotalCPU) / 86400.0, 1) AS lost_cpu_days,
                     JobName
-                FROM allocations 
+                FROM sqlite_db.allocations
                 WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ?
-                AND JobName != 'interactive'
+                  AND Start >= ? 
+                  AND End   <= ?
+                  AND JobName != 'interactive'
             """
         else:
             query = """
                 SELECT             
-                    ROUND((CPUTime - TotalCPU) / 86400) AS lost_cpu_days,
+                    ROUND((CPUTime - TotalCPU) / 86400.0, 1) AS lost_cpu_days,
                     JobName
-                FROM allocations 
+                FROM sqlite_db.allocations
                 WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ? 
-                AND JobName != 'interactive'
+                  AND Start >= ? 
+                  AND End   <= ? 
+                  AND JobName != 'interactive'
             """
         
         params = [start_date, end_date]
 
-        # Add filters efficiently
         query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
 
         if current_user:
             query += " AND User = ?"
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
-
-        
+        df = _self.con.execute(query, params).fetchdf()
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Optimized category assignment using vectorized operations
         conditions = [
             df['JobName'] == 'spawner-jupyterhub',
             df['JobName'] == 'interactive', 
@@ -290,11 +268,9 @@ class PieCharts:
         choices = ['Jupyterhub', 'Interactive', 'Batch']
         df['Category'] = np.select(conditions, choices, default='None')
 
-        # Group and aggregate efficiently
         aggregated_df = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
         aggregated_df['lost_cpu_days'] = aggregated_df['lost_cpu_days'].clip(lower=0)
         
-        # Pre-defined color mapping
         color_map = {
             'Interactive': 'red',
             'Batch': 'darkcyan',
@@ -302,7 +278,6 @@ class PieCharts:
             'Jupyterhub': 'orange'
         }
 
-        # Create pie chart
         fig = px.pie(
             aggregated_df,
             names='Category',

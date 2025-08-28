@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
+import duckdb
+
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
@@ -234,7 +236,9 @@ def main():
                 with tab3:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
-                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+                     with col9:    
+        #             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
+            pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                     with col4: 
                         pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                     with col4_5:
@@ -308,20 +312,20 @@ def main():
                 st.error("An error occurred during login.")
 
 if __name__ == "__main__":
-    st.set_page_config(layout="wide",
-    page_title="max-reports",
-    page_icon=ICON_URL
-    #initial_sidebar_state="collapsed"
-)
+    st.set_page_config(
+        layout="wide",
+        page_title="max-reports",
+        page_icon=ICON_URL,
+        # initial_sidebar_state="collapsed"
+    )
     st.logo(
-    LOGO_URL,
-    icon_image=LOGO_URL,
-    size="large"
-)
+        LOGO_URL,
+        icon_image=LOGO_URL,
+        size="large"
+    )
 
     st.html("""
         <style>
-
         /* Alternative - alle Logo-Images */
         img[data-testid*="logo"], 
         div[data-testid="stSidebarHeader"] img,
@@ -337,11 +341,27 @@ if __name__ == "__main__":
             padding: 1rem 1rem 2rem 1rem !important;
         }
         </style>
-        """)
-    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3')
+    """)
+
+    # --- DuckDB setup ---
+    con = duckdb.connect()
+
+    # Optional: keep memory usage under control
+    # con.execute("SET memory_limit='1GB'")
+    # con.execute("SET temp_directory='/tmp/duckdb_spill'")  # where to spill if needed
+    # con.execute("SET threads TO 8")  # or let DuckDB auto-detect
+
+    # Attach your existing SQLite file so DuckDB can query it directly
+    con.execute("""
+        ATTACH DATABASE '/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3'
+        AS sqlite_db (TYPE SQLITE)
+    """)
+
+    # Pass the DuckDB connection to your chart/data helpers
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)
     scatter = ScatterCharts(con)
 
     main()
+
