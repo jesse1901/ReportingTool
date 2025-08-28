@@ -161,12 +161,12 @@ class DataFrames:
     @st.cache_data(ttl=3600, show_spinner=False)
     def frame_group_by_user(
         _self, 
-        start_date: str, 
-        end_date: str, 
-        current_user: str, 
-        user_role: str, 
-        scale_efficiency: bool, 
-        partition_selector: list | None = None,
+        start_date, 
+        end_date, 
+        current_user, 
+        user_role, 
+        scale_efficiency, 
+        partition_selector = None,
         allowed_groups=None
     ) -> None:
         # Validate date range
