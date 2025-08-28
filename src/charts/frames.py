@@ -23,24 +23,22 @@ class DataFrames:
     @st.cache_data(ttl=3600, show_spinner=False)
     def fetch_all_data(
         _self, 
-        current_user, 
-        user_role, 
-        number = None, 
-        partition_selector = None, 
-        filter_jobid = None, 
-        filter_user = None,
-        start_date = None,
-        end_date = None, 
+        current_user: str, 
+        user_role: str, 
+        number: int = None, 
+        partition_selector=None, 
+        filter_jobid: str = None, 
+        filter_user: str = None,
+        start_date: str = None,
+        end_date: str = None, 
         allowed_groups=None
     ) -> pd.DataFrame:
-        """
-        Retrieves data from the allocations table based on filters.
-        """
+
         base_query = """
         SELECT 
-            JobID, JobName, User, Account, State, 
+            JobID, JobName, "User", "Account", State, 
             ROUND(Elapsed / 3600.0, 2) AS Elapsed_hours, 
-            Start, End, Partition, NodeList, AllocCPUS,  
+            "Start", "End", "Partition", NodeList, AllocCPUS,  
             ROUND((CPUTime / 3600.0), 2) AS CPU_hours, 
             ROUND((TotalCPU / 3600.0), 2) AS CPU_hours_used, 
             ROUND((CPUTime - TotalCPU) / 3600.0, 2) AS CPU_hours_lost, 
@@ -60,40 +58,40 @@ class DataFrames:
             params.append(filter_jobid)
 
         if filter_user:
-            conditions.append("User = ?")
+            conditions.append("\"User\" = ?")
             params.append(filter_user)
 
-        # Regular users only see their own data (keeping your original logic)
+        # Regular users only see their own data
         if current_user:
-            conditions.append("User = ?")
+            conditions.append("\"User\" = ?")
             params.append(current_user)
-      
+    
         if partition_selector:
             placeholders = ",".join(["?"] * len(partition_selector))
-            conditions.append(f"Partition IN ({placeholders})")
+            conditions.append(f"\"Partition\" IN ({placeholders})")
             params.extend(partition_selector)
 
         if allowed_groups is not None and user_role == 'uhh':
             placeholders = ",".join(["?"] * len(allowed_groups))
-            conditions.append(f"Account IN ({placeholders})")
+            conditions.append(f"\"Account\" IN ({placeholders})")
             params.extend(allowed_groups)
 
         if start_date:
-            conditions.append("Start >= ?")
+            conditions.append("\"Start\" >= ?")
             params.append(start_date)
 
         if end_date:
-            conditions.append("End <= ?")
+            conditions.append("\"End\" <= ?")
             params.append(end_date)
 
         if conditions:
             base_query += " WHERE " + " AND ".join(conditions)
 
-        base_query += " ORDER BY End DESC LIMIT ?"
+        base_query += " ORDER BY \"End\" DESC LIMIT ?"
         params.append(int(number) if number is not None else 1000)
 
-        # DuckDB execution
         return _self.con.execute(base_query, params).fetchdf()
+
 
     def frame_user_all(
         self, 
