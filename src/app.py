@@ -211,7 +211,7 @@ def main():
                     col1, col2 = st.columns([5, 2])
                     with col_num:                   
                         number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-                                                                                                                                Column sorting is disabled for values above 150k!""")
+                                                                                                               Column sorting is disabled for values above 150k!""")
                     with col_jobid:
                         filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
                     with col_username:
@@ -236,9 +236,7 @@ def main():
                 with tab3:
                     col3, col4, col4_5 = st.columns([1,1,1])
                     with col3:
-                     with col9:    
-        #             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-            pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
+                        pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                     with col4: 
                         pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                     with col4_5:
