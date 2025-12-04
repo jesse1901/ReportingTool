@@ -339,10 +339,9 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    con = duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb')
-    frames = DataFrames(con)
-    bar = BarCharts(con)
-    pie = PieCharts(con)
-    scatter = ScatterCharts(con)
-
-    main()
+    with duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb') as con:
+        frames = DataFrames(con)
+        bar = BarCharts(con)
+        pie = PieCharts(con)
+        scatter = ScatterCharts(con)
+        main()

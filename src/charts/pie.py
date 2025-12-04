@@ -353,7 +353,7 @@ class PieCharts:
         # Note: We sum raw values first, then clip, to handle net calculations correctly
         aggregated_df = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
         aggregated_df['lost_cpu_days'] = aggregated_df['lost_cpu_days'].clip(lower=0)
-        
+        aggregated_df['lost_cpu_days'] = aggregated_df['lost_cpu_days'].round(0).astype(int)
         # Pre-defined color mapping
         color_map = {
             'Interactive': 'red',
