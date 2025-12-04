@@ -104,7 +104,7 @@ class DataFrames:
         if conditions:
             base_query += " WHERE " + " AND ".join(conditions)
 
-        base_query += " ORDER BY End DESC LIMIT ?"
+        base_query += " ORDER BY "End" DESC LIMIT ?"
         params.append(int(number))
 
         return _self.con.execute(base_query, params).df()
