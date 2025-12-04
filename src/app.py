@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
+import duckdb
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
@@ -338,7 +339,7 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb')
+    con = duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb')
     frames = DataFrames(con)
     bar = BarCharts(con)
     pie = PieCharts(con)
