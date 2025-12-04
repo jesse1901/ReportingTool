@@ -28,33 +28,55 @@ class PieCharts:
         allowed_groups=None
     ):
         scale = "0.5" if scale_efficiency else "1.0"
+        
+        # DuckDB Notes:
+        # 1. "Partition", "User", "Start", "End" must be quoted.
+        # 2. Use CASE WHEN instead of IIF.
+        # 3. Direct Integer Comparison: Inputs and DB columns are both Unix Timestamps.
         query = f"""
             SELECT 
-                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category,
+                CASE 
+                    WHEN lower(State) LIKE 'cancelled%' THEN 'CANCELLED' 
+                    ELSE State 
+                END AS Category,
                 ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days 
             FROM allocations
-            WHERE Partition != 'jhub' 
+            WHERE "Partition" != 'jhub' 
             AND JobName != 'interactive'
             AND State NOT IN ('PENDING', 'RUNNING')
-            AND Start >= ? 
-            AND End   <= ?
-            AND End IS NOT NULL
+            AND "Start" >= ?
+            AND "End"   <= ?
+            AND "End" IS NOT NULL
         """
         params = [start_date, end_date]
 
-        # Einheitliche Zusatzfilter (Partitionsliste + allowed_groups + ggf. Rolle/User)
-        query, params = helpers.build_conditions(
-            query, params, partition_selector, allowed_groups, user_role, current_user
-        )
+        # Manual condition building to ensure correct Quoting for DuckDB
+        if partition_selector:
+            placeholders = ','.join('?' for _ in partition_selector)
+            query += f' AND "Partition" IN ({placeholders})'
+            params.extend(partition_selector)
+            
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f' AND "Account" IN ({placeholders})'
+            params.extend(allowed_groups)
 
         if current_user:
-            query += " AND User = ?"
+            query += ' AND "User" = ?'
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        # Execute
+        try:
+            df = _self.con.execute(query, params).df()
+        except Exception as e:
+            st.error(f"Database Error: {e}")
+            return
+
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
+
+        # --- Data Processing (Pandas logic remains the same) ---
 
         # Sum lost time per category (still raw; may contain negatives)
         grouped_raw = df.groupby("Category", as_index=False)["lost_cpu_days"].sum()
@@ -87,39 +109,61 @@ class PieCharts:
         st.markdown('Lost CPU Time by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
 
-        # Tabelle (absteigend)
+        # Table (descending)
         df_sorted = grouped_raw.sort_values(by="lost_cpu_days", ascending=False)
         st.dataframe(df_sorted[["Category", "lost_cpu_days"]], hide_index=True, use_container_width=False)
 
 
-
-
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
+        # DuckDB Notes:
+        # 1. "Partition", "User", "Start", "End" quoted.
+        # 2. CASE WHEN used for state grouping.
+        # 3. Direct comparison of Unix timestamps.
         query = """
             SELECT
-                IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State) AS Category, 
+                CASE 
+                    WHEN LOWER(State) LIKE 'cancelled%' THEN 'CANCELLED' 
+                    ELSE State 
+                END AS Category, 
                 COUNT(JobID) AS JobCount
             FROM allocations
-            WHERE Partition != 'jhub' 
+            WHERE "Partition" != 'jhub' 
             AND State NOT IN ('PENDING', 'RUNNING') 
-            AND Start >= ? 
-            AND End <= ? 
+            AND "Start" >= ? 
+            AND "End" <= ? 
             AND JobName != 'interactive'
         """
         params = [start_date, end_date]
 
-        # Streamlined role filtering
-        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+        # Manual condition building to ensure correct Quoting for DuckDB
+        if partition_selector:
+            placeholders = ','.join('?' for _ in partition_selector)
+            query += f' AND "Partition" IN ({placeholders})'
+            params.extend(partition_selector)
+
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f' AND "Account" IN ({placeholders})'
+            params.extend(allowed_groups)
         
         if current_user:
-            query += " AND User = ?"
+            query += ' AND "User" = ?'
             params.append(current_user)
 
-        # GROUP BY the Category (not State) to properly aggregate CANCELLED entries
-        query += " GROUP BY IIF(LOWER(State) LIKE 'cancelled %', 'CANCELLED', State)"
+        # GROUP BY the expression
+        query += """ 
+            GROUP BY CASE 
+                WHEN LOWER(State) LIKE 'cancelled%' THEN 'CANCELLED' 
+                ELSE State 
+            END
+        """
         
-        df = pd.read_sql_query(query, _self.con, params=params)
+        try:
+            df = _self.con.execute(query, params).df()
+        except Exception as e:
+            st.error(f"Database Error: {e}")
+            return
         
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
@@ -137,7 +181,7 @@ class PieCharts:
         st.markdown('Job Count by Job State', help='Partition "jhub" and Interactive Jobs are excluded')
         st.plotly_chart(fig)
         
-        # Since df is already properly grouped by Category, we can directly sort
+        # Data is already grouped, just sort
         df_sorted = df.sort_values(by='JobCount', ascending=False)
         st.dataframe(df_sorted, hide_index=True, use_container_width=False)
 
@@ -152,39 +196,53 @@ class PieCharts:
         current_user=None,
         allowed_groups=None
     ) -> None:
+
         query = """
             SELECT 
-                CAST((End - Start) AS REAL) / 60.0 AS runtime_minutes,
-                CAST(CPUTime  AS REAL) AS CPUTime,
-                CAST(TotalCPU AS REAL) AS TotalCPU
+                ("End" - "Start") / 60.0 AS runtime_minutes,
+                CPUTime AS CPUTime,
+                TotalCPU AS TotalCPU
             FROM allocations
-            WHERE Partition != 'jhub'
+            WHERE "Partition" != 'jhub'
             AND State NOT IN ('PENDING', 'RUNNING')
             AND JobName != 'interactive'
-            AND Start >= ?
-            AND End   <= ?
+            AND "Start" >= ?
+            AND "End"   <= ?
+            AND "End" IS NOT NULL
         """
         params = [start_date, end_date]
 
-        query, params = helpers.build_conditions(
-            query, params, partition_selector, allowed_groups, user_role, current_user
-        )
+        # Manual condition building to ensure correct Quoting for DuckDB
+        if partition_selector:
+            placeholders = ','.join('?' for _ in partition_selector)
+            query += f' AND "Partition" IN ({placeholders})'
+            params.extend(partition_selector)
+
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f' AND "Account" IN ({placeholders})'
+            params.extend(allowed_groups)
 
         if current_user:
-            query += " AND User = ?"
+            query += ' AND "User" = ?'
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        try:
+            df = _self.con.execute(query, params).df()
+        except Exception as e:
+            st.error(f"Database Error: {e}")
+            return
+
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
+        
         for col in ("runtime_minutes", "CPUTime", "TotalCPU"):
             df[col] = pd.to_numeric(df[col], errors="coerce")
         df = df.dropna(subset=["runtime_minutes", "CPUTime", "TotalCPU"])
 
         factor = 0.5 if scale_efficiency else 1.0
-        # per-row raw lost days (can be negative)
         df["lost_days_raw"] = ((df["CPUTime"] * factor) - df["TotalCPU"]) / 86400.0
 
         # Totals for the summary (consistent with 'net' semantics)
@@ -197,12 +255,13 @@ class PieCharts:
         predefined_bins = [0, 2, 5, 10, 20, 60, 120, 240, 480, 1440, 2880, 5760, 11520, 23040]
         bins = [b for b in predefined_bins if b <= max_runtime] + [max_runtime]
         bins = sorted(set(bins))
+        
+        # Safety check if bins are degenerate
         if len(bins) < 2:
-            bins = [0, max(1, max_runtime)]
+            bins = [0, max(1, max_runtime + 1)] # Ensure at least one interval
 
         df["runtime_interval"] = pd.cut(df["runtime_minutes"], bins=bins, right=True, include_lowest=True)
 
-        # Group sums per bin (sum the raw lost days per bin; can be negative)
         grouped = df.groupby("runtime_interval", observed=True).agg({
             "lost_days_raw": "sum"
         }).reset_index()
@@ -241,56 +300,57 @@ class PieCharts:
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
-        # Build query with optimized conditions
-        if scale_efficiency:
-            query = """
-                SELECT
-                    ROUND(((CPUTime * 0.5) - TotalCPU) / 86400, 1) AS lost_cpu_days,
-                    JobName
-                FROM allocations 
-                WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ?
-                AND JobName != 'interactive'
-            """
-        else:
-            query = """
-                SELECT             
-                    ROUND((CPUTime - TotalCPU) / 86400) AS lost_cpu_days,
-                    JobName
-                FROM allocations 
-                WHERE Partition != 'jhub' 
-                AND Start >= ? 
-                AND End <= ? 
-                AND JobName != 'interactive'
-            """
+        
+        scale = "0.5" if scale_efficiency else "1.0"
+        
+        # DuckDB Notes:
+        # 1. "Partition", "User", "Start", "End" must be quoted.
+        # 2. Logic for Categories moved to SQL (CASE WHEN) for performance.
+        # 3. Direct Integer Comparison for Unix Timestamps.
+        query = f"""
+            SELECT
+                CASE 
+                    WHEN JobName = 'spawner-jupyterhub' THEN 'Jupyterhub'
+                    WHEN JobName = 'interactive' THEN 'Interactive'
+                    ELSE 'Batch'
+                END AS Category,
+                ((CPUTime * {scale}) - TotalCPU) / 86400.0 AS lost_cpu_days
+            FROM allocations 
+            WHERE "Partition" != 'jhub' 
+            AND "Start" >= ? 
+            AND "End" <= ?
+            AND JobName != 'interactive'
+        """
         
         params = [start_date, end_date]
 
-        # Add filters efficiently
-        query, params = helpers.build_conditions(query, params, partition_selector, allowed_groups, user_role, current_user)
+        # Manual condition building to ensure correct Quoting for DuckDB
+        if partition_selector:
+            placeholders = ','.join('?' for _ in partition_selector)
+            query += f' AND "Partition" IN ({placeholders})'
+            params.extend(partition_selector)
+
+        if allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f' AND "Account" IN ({placeholders})'
+            params.extend(allowed_groups)
 
         if current_user:
-            query += " AND User = ?"
+            query += ' AND "User" = ?'
             params.append(current_user)
 
-        df = pd.read_sql_query(query, _self.con, params=params)
+        try:
+            df = _self.con.execute(query, params).df()
+        except Exception as e:
+            st.error(f"Database Error: {e}")
+            return
 
-        
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # Optimized category assignment using vectorized operations
-        conditions = [
-            df['JobName'] == 'spawner-jupyterhub',
-            df['JobName'] == 'interactive', 
-            df['JobName'] != ''
-        ]
-        choices = ['Jupyterhub', 'Interactive', 'Batch']
-        df['Category'] = np.select(conditions, choices, default='None')
-
         # Group and aggregate efficiently
+        # Note: We sum raw values first, then clip, to handle net calculations correctly
         aggregated_df = df.groupby('Category', as_index=False)['lost_cpu_days'].sum()
         aggregated_df['lost_cpu_days'] = aggregated_df['lost_cpu_days'].clip(lower=0)
         

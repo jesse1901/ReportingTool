@@ -36,7 +36,7 @@ class BarCharts:
                     eff.User,
                     COUNT(eff.JobID) AS job_count,
                     ROUND(SUM((eff.cpu_s_reserved * 0.5) - eff.cpu_s_used) / 86400, 1) AS lost_cpu_days,
-                    ANY_VALUE(eff.Account) AS Account
+                    STRING_AGG(DISTINCT eff.Account, ',') As Account
                 FROM eff
                 JOIN slurm ON eff.JobID = slurm.JobID
                 {base_conditions}
@@ -48,7 +48,7 @@ class BarCharts:
                     ROUND(SUM((eff.cpu_s_reserved - eff.cpu_s_used) / 86400), 1) AS lost_cpu_days,
                     COUNT(eff.JobID) AS job_count,
                     ROUND(SUM(eff.Elapsed * eff.NCPUS) / 86400, 1) AS total_cpu_days,
-                    ANY_VALUE(eff."Account") AS "Account"
+                    STRING_AGG(DISTINCT eff.Account, ',') AS Account
                 FROM eff
                 JOIN slurm ON eff.JobID = slurm.JobID
                 {base_conditions}
@@ -89,7 +89,6 @@ class BarCharts:
         # Clip negative values
         result_df['lost_cpu_days'] = result_df['lost_cpu_days'].clip(lower=0)
         
-        # Calculate ticks more efficiently
         max_lost_time = result_df['lost_cpu_days'].max()
         if max_lost_time > 0:
             tick_vals = np.linspace(0, max_lost_time, num=10)

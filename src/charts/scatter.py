@@ -15,48 +15,56 @@ class ScatterCharts:
             st.error("Error: End date must be after start date.")
             return
 
-        # Optimized query - only select needed columns and add early filtering
+        # DuckDB Notes:
+        # 1. "User", "Partition", "Account", "Start", "End", "Elapsed" must be quoted.
+        # 2. Direct comparison for Unix Timestamps (Integers).
+        # 3. Float division (86400.0).
         query = """
-            SELECT JobID, User, COALESCE(GpuUtil, 0) AS GpuUtil, 
+            SELECT "JobID", "User", COALESCE(GpuUtil, 0) AS GpuUtil, 
                 (CPUEff * 100) AS CPUEff, 
-                ROUND((CPUTime - TotalCPU) / 86400, 1) AS lost_cpu_days, 
-                Elapsed,
-                Partition
+                ROUND((CPUTime - TotalCPU) / 86400.0, 1) AS lost_cpu_days, 
+                "Elapsed",
+                "Partition"
             FROM allocations
-            WHERE Start >= ? AND End <= ? 
-            AND Partition != 'jhub'
+            WHERE "Start" >= ? AND "End" <= ? 
+            AND "Partition" != 'jhub'
             AND JobName != 'interactive'
-            AND Elapsed IS NOT NULL
+            AND "Elapsed" IS NOT NULL
         """
         params = [start_date, end_date]
 
-        # Streamlined role-based filtering
+        # Role-based filtering with correct Quoting
         if user_role == "admin":
-            query += " AND Elapsed > 100"
-        elif user_role == "uhh":
-            query += "  AND Account IN ({})".format(','.join('?' for _ in allowed_groups))
+            query += ' AND "Elapsed" > 100'
+        elif user_role == "uhh" and allowed_groups:
+            placeholders = ','.join('?' for _ in allowed_groups)
+            query += f' AND "Account" IN ({placeholders})'
             params.extend(allowed_groups)
-        elif user_role == "user":
-            query += " AND User = ?"
-            params.append(current_user)
         
+        # User filter (handles role 'user' and specific user filters)
         if current_user:
-            query += " AND User = ?"
+            query += ' AND "User" = ?'
             params.append(current_user)
 
         if partition_selector:
             placeholders = ','.join(['?'] * len(partition_selector))
-            query += f" AND Partition IN ({placeholders})"
+            query += f' AND "Partition" IN ({placeholders})'
             params.extend(partition_selector)
 
         # Add ORDER BY to the base query
-        query += " ORDER BY Elapsed ASC"
+        query += ' ORDER BY "Elapsed" ASC'
         
-        df = pd.read_sql_query(query, _self.con, params=params)
+        try:
+            df = _self.con.execute(query, params).df()
+        except Exception as e:
+            st.error(f"Database Error: {e}")
+            return
 
         if df.empty:
             st.warning("No data available for the selected date range or partition.")
             return
+        
+        # --- Pandas Post-Processing (same as original) ---
         
         # Vectorized operations for better performance
         df['GpuUtil'] = df['GpuUtil'] * 100
@@ -70,7 +78,7 @@ class ScatterCharts:
 
         df['lost_cpu_days'] = df['lost_cpu_days'].fillna(0)
 
-        # Vectorized hover text creation - more efficient than apply
+        # Vectorized hover text creation
         df['hover_text'] = (
             "JobID: " + df['JobID'].astype(str) + 
             "<br>User: " + df['User'].astype(str) + 
@@ -78,7 +86,6 @@ class ScatterCharts:
             "<br>Lost CPU days: " + df['lost_cpu_days'].astype(str) + 
             "<br>CPU Efficiency: " + df['CPUEff'].astype(str)
         )
-
 
         # Pre-defined color scale to avoid recreation
         custom_color_scale = [
