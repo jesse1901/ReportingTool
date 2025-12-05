@@ -209,7 +209,7 @@ no matter which option is selected
             COUNT(eff.JobID) AS JobCount,
             ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
             ROUND(SUM(slurm.CPUTime) / 86400.0, 1) AS cpu_days,
-            printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / (SUM(eff.Elapsed * eff.NCPUS), 0) AS CPUEff,
+            printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS) AS CPUEff,
             ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
             ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
             CASE WHEN SUM(eff.NGPUs) > 0 
