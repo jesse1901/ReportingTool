@@ -57,9 +57,9 @@ class DataFrames:
             ROUND((CPUTime / 3600), 2) AS CPU_hours, 
             ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
             ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
-            ROUND(CPUEff * 100, 2) AS CPUEff, 
+            CONCAT(ROUND(CPUEff * 100, 2), '%') AS CPUEff, 
             NGPUS AS AllocGPUS, 
-            ROUND(GpuUtil * 100, 2) AS GPUEff,
+            CONCAT(ROUND(GpuUtil * 100, 2), '%') AS GPUEff,
             ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
             Comment, SubmitLine 
         FROM allocations
@@ -235,12 +235,12 @@ no matter which option is selected
             COUNT(eff.JobID) AS JobCount,
             ROUND(SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
             ROUND(SUM(slurm.CPUTime) / 86400.0 / 2.0, 1) AS cpu_days,
-            ROUND(LEAST(100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)) * 2), 1) AS CPUEff,
+            CONCAT(ROUND(LEAST(100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)) * 2), 1), '%') AS CPUEff,
             ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
             ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
-            CASE WHEN SUM(eff.NGPUs) > 0 
+            CONCAT(CASE WHEN SUM(eff.NGPUs) > 0 
                  THEN 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
-                 ELSE NULL END AS GPUEff,
+                 ELSE NULL END, '%') AS GPUEff,
             ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
             ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
         FROM eff
