@@ -59,7 +59,7 @@ class DataFrames:
             ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
             CONCAT(ROUND(CPUEff * 100, 2), '%') AS CPUEff, 
             NGPUS AS AllocGPUS, 
-            CONCAT(ROUND(GpuUtil * 100, 2), '%') AS GPUEff,
+            CASE WHEN GpuUtil IS NOT NULL THEN CONCAT(ROUND(GpuUtil * 100, 2), '%') ELSE NULL END AS GPUEff,
             ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
             Comment, SubmitLine 
         FROM allocations
