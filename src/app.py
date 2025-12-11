@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import timedelta, datetime
 import sqlite3
 import toml
+import duckdb
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
@@ -338,10 +339,9 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    con = sqlite3.connect('/var/www/max-reports/ReportingTool/max-reports-slurm2sql-v9.8.sqlite3')
-    frames = DataFrames(con)
-    bar = BarCharts(con)
-    pie = PieCharts(con)
-    scatter = ScatterCharts(con)
-
-    main()
+    with duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb') as con:
+        frames = DataFrames(con)
+        bar = BarCharts(con)
+        pie = PieCharts(con)
+        scatter = ScatterCharts(con)
+        main()
