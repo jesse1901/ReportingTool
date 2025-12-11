@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 import sqlite3
 import toml
 import duckdb
+import subprocess
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
