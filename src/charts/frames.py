@@ -238,9 +238,10 @@ no matter which option is selected
             CONCAT(ROUND(LEAST(100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)) * 2), 1), '%') AS CPUEff,
             ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
             ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
-            CONCAT(ROUND(CASE WHEN SUM(eff.NGPUs) > 0 
-                 THEN 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
-                 ELSE NULL END, 0) , '%') AS GPUEff,
+            CASE WHEN SUM(eff.NGPUs) > 0 THEN CONCAT(ROUND(
+                100.0 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
+            , 0),'%')
+            ELSE NULL END AS GPUEff,
             ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
             ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
         FROM eff
