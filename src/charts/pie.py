@@ -76,8 +76,6 @@ class PieCharts:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # --- Data Processing (Pandas logic remains the same) ---
-
         # Sum lost time per category (still raw; may contain negatives)
         grouped_raw = df.groupby("Category", as_index=False)["lost_cpu_days"].sum()
         grouped_raw.rename(columns={"lost_cpu_days": "lost_days_raw"}, inplace=True)
@@ -96,7 +94,7 @@ class PieCharts:
             else:
                 grouped_raw["lost_cpu_days"] = 0.0
 
-        grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round(1)
+        grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round()
 
         # Plot
         fig = px.pie(

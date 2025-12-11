@@ -26,7 +26,11 @@ def login():
             st.login()
         st.stop()
 
+def is_user_crystalsfirst(username):
+    return username in CRYSTAL_USERS
 
+def is_user_pinktum(username):
+    return username in PINKTUM_USERS
 
 def is_user_allowed(username):
     return username in ALLOWED_USERS
@@ -39,6 +43,34 @@ def is_user_xfel(username):
 
 def is_user_uhh(username):
     return username in UHH_USERS
+
+def get_slurm_partitions():
+    """
+    Executes 'sinfo' to get a list of current Slurm partition names.
+    Returns:
+        list: A list of unique partition names as strings.
+    """
+    try:
+        result = subprocess.run(
+            ['sinfo', '--noheader', '--format=%P'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        raw_partitions = result.stdout.split('\n')
+        partitions = {p.strip() for p in raw_partitions if p.strip()} # Use a set to get unique names
+
+        partition_list = sorted(list(partitions))
+
+        return partition_list
+
+    except subprocess.CalledProcessError as e:
+        st.error(f"Failed to fetch partitions from sinfo. Error: {e.stderr}")
+        return []
+    except FileNotFoundError:
+        st.error("The 'sinfo' command was not found.")
+        return []
+
 
 def input_controls(user_role=None):
     help_hyper = """some jobs can only use physical cores, therefore hyperthreading cores are not included.  
@@ -61,6 +93,15 @@ def input_controls(user_role=None):
         start_date = int(datetime.combine(start_date, datetime.min.time()).timestamp())
         end_date = int(datetime.combine(end_date, datetime.max.time()).timestamp())
 
+
+        #get partitions
+        available_partitions = get_slurm_partitions()
+
+        # Define the full list of choices
+        default_choice = "All available partitions"
+        partition_choices = [default_choice] + available_partitions
+
+        #Access based on user_role
         if user_role == 'exfel':
             choice = st.selectbox(
                 "select partition",  
@@ -90,20 +131,42 @@ def input_controls(user_role=None):
             
             else:
                 partition_selector = [choice]
+
+        elif user_role == 'crystalsfirst':
+            allowed_groups = ['crystalsfirst']
+
+            choice = st.selectbox(
+                "select partition", 
+                ["All available partitions","hpcgwgpu"],
+                key=f"partition_selector"
+            )
+            if choice == "All available partitions":
+                partition_selector = ["hpcgwgpu"]
             
+            else:
+                partition_selector = [choice]
+
+        elif user_role == 'pinktum':
+            allowed_groups = ['pinktum']
+
+            choice = st.selectbox(
+                "select partition", 
+                ["All available partitions","hpcgwgpu"],
+                key=f"partition_selector"
+            )
+            if choice == "All available partitions":
+                partition_selector = ["hpcgwgpu"]
+            
+            else:
+                partition_selector = [choice]
 
         else:  # admin und user
             choice = st.selectbox(
                 "select partition", 
-                ["All available partitions","acc-uhh","allcpu","allgpu","allrsv","cdcs","cfel","cfel-cdi","cfel-cmi","cfel-ux","com",
-                 "cssbcpu","cssbgpu","exfel","exfel-th","exfel-theory","exfel-wp72","exrsv","fspetra","hzg",
-                 "jhub","livcpu","livgpu","maxcpu","maxgpu","mcpu","mpa","mpaj","p06","p10","p11","p11x",
-                 "pcommissioning","petra4","petra4-guest","ponline","ponline_p09","ponline_p11",
-                 "ponline_p11_com","pscpu","psgpu","psxcpu","psxgpu","short","topfgpu","uhhxuv",
-                 "ukecpu","upex","upex-beamtime","upex-high","upex-middle",
-                 "xfel-guest","xfel-op","xfel-sim" ],
+                partition_choices,              
                 key=f"partition_selector"
             )
+
             if choice == "All available partitions":
                 partition_selector = []
             else:
@@ -123,11 +186,15 @@ def main():
 
         
         if user_role == 'admin':
-            view_options = ["Admin View", "XFEL View", "User View", "UHH View"]
+            view_options = ["Admin View", "XFEL View", "User View", "UHH View", "Pinktum View", "Crystalsfirst View"]
         elif user_role == 'exfel':
             view_options = ["XFEL View", "User View"]
         elif user_role == 'uhh':
             view_options = ["UHH View", "User View"]
+        elif user_role == 'pinktum':
+            view_options = ['Pinktum View', 'User View']
+        elif user_role == 'crystalsfirst':
+            view_options = ['Crystalsfirst View', 'User View']
         else:
             view_options = ["User View"]
         
@@ -142,6 +209,10 @@ def main():
             user_role = 'exfel'
         elif selected_view == "UHH View":
             user_role = 'uhh'
+        elif selected_view == "Pinktum View":
+            user_role = 'pinktum'
+        elif selected_view == "Crystalsfrist View":
+            user_role = 'crystalsfirst'
         else:
             user_role = 'user'
 
@@ -151,56 +222,6 @@ def main():
             username = search_user            
         elif user_role != 'user' and not search_user:
             username = None
-
-        
-        # if user_role != 'user':
-        #     tab1, tab2, tab3, tab4 = st.tabs(["User Data", "Job Data Charts", "Job State Charts", "Overview"])
-        #     with st.spinner("loading..."):
-        #         with tab1:
-        #             col_num, col_username, col_jobid, _ = st.columns([1, 1, 1, 2])
-        #             col1, col2 = st.columns([5, 2])
-        #             with col_num:                   
-        #                 number = st.number_input("select last n jobs:", min_value=1, max_value=1_000_000, value=25_000, help=""" Input values above 250k can cause the browser to crash!  
-        #                                                                                                                         Column sorting is disabled for values above 150k!""")
-        #             with col_jobid:
-        #                 filter_jobid = st.text_input("search for JobID", value="", key="jobid_filter", placeholder="<jobID>")
-        #             with col_username:
-        #                 filter_user = st.text_input("search for User", value="", key="username_filter", placeholder="<username>")
-        #             with col1:
-        #                 frames.frame_user_all(username, user_role, number, partition_selector, filter_jobid, filter_user, start_date=start_date, end_date=end_date)
-        #             with col2:
-        #                 frames.frame_group_by_user( start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-
-        #         with tab2:
-        #             col_num2, _ = st.columns([1, 2])
-        #             col3,col4 = st.columns([1,1])
-                    
-        #             with col_num2:
-        #                 number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
-        #             with col3:
-        #                 bar.job_counts_by_log2(start_date, end_date, number2, partition_selector, user_role, username)
-        #             with col4:
-        #                 pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector, user_role, username)
-
-        #         with tab3:
-        #             col5, col6, col7 = st.columns([1,1,1])
-        #             with col5:
-        #                 pie.pie_chart_by_session_state(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-        #             with col6: 
-        #                 pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
-        #             with col7:
-        #                 pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
-
-
-        #     with tab4:
-        #         col_num3, _ = st.columns([1, 2])
-        #         col8, col9 = st.columns([1,1])
-        #         with col_num3:
-        #             number3 = st.number_input("select number of user:", min_value=0, value=20)
-        #         with col8:
-        #             bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector)
-        #         with col9:    
-        #             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
 
         if user_role != 'user':
             tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview"]) 
@@ -297,6 +318,10 @@ def main():
                     st.session_state['user_role'] = 'exfel'
                 elif is_user_uhh(username):
                     st.session_state['user_role'] = 'uhh'
+                elif is_user_crystalsfirst(username):
+                    st.session_state['user_role'] = 'crystalsfirst'
+                elif is_user_pinktum(username):
+                    st.session_state['user_role'] = 'pinktum'
                 elif is_user_allowed(username):        
                     st.session_state['user_role'] = 'user'
                 else:
