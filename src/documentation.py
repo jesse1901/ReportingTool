@@ -44,6 +44,7 @@ class Documentation:
         st.markdown("""
         * **AllocGPUS:** Number of GPUs requested.
         * **GpuEff:** Overall GPU efficiency.
+        * **GPU_hours_lost:** GPU hours that are not effectivley used by the Job. Formula: Elased * AllocGPUS * (GpuEff/100)  
         """)
         
         st.markdown("---")
