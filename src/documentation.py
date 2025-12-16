@@ -33,7 +33,7 @@ class Documentation:
             
             * **CPU_hours_lost / Lost_CPU_Time:** CPU-Time that is not effectively used by the job.<br>Formula: CPU_hours - CPU_hours_used
 
-            * **CPUEff:** CPU Efficiency. Indicates how well the reserved CPUs were utilized.<br>Formula: TotalCPU / CPUTime
+            * **CPUEff:** CPU Efficiency. Indicates how well the reserved CPUs were utilized.<br>Formula: CPU_hours_used / CPU_hours
             """, unsafe_allow_html=True)
 
         st.markdown("---")
