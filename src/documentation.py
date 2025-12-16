@@ -3,7 +3,7 @@ import streamlit as st
 class Documentation:
     @staticmethod
     def documentation():
-        st.header("Documentation: Metrics & Fields")
+        st.header("Documentation for the Maxwell Reporting Tool")
         st.markdown("Below is an explanation of the most relevant columns and the charts displayed in this app")
         
         st.markdown("---")
