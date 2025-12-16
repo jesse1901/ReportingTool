@@ -42,10 +42,8 @@ class Documentation:
         st.subheader("GPU")
         
         st.markdown("""
-        * **ReqGPU / NGpus:** Number of GPUs requested.
-        * **GpuUtil:** GPU utilization (normalized).
+        * **AllocGPUS:** Number of GPUs requested.
         * **GpuEff:** Overall GPU efficiency.
-          Formula: GpuUtil / (100 * AllocTRES)
         """)
         
         st.markdown("---")
