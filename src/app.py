@@ -9,7 +9,7 @@ from charts.bar import BarCharts
 from charts.pie import PieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
-from documentation import documentation as doc
+from documentation import documentation
 secrets = toml.load('.streamlit/secrets.toml')
 
 ALLOWED_USERS = secrets['users']['allowed_users']
@@ -227,7 +227,7 @@ def main():
             username = None
 
         if user_role != 'user':
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview", "Documentation"]) 
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
@@ -274,10 +274,10 @@ def main():
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
-                    doc.doc()
+                    documentation.documentation()
                 
         elif user_role == 'user':    
-            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview", "Documentation"]) 
+            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
@@ -305,7 +305,7 @@ def main():
                     with col1:
                             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab4:
-                    doc.doc()
+                    documentation.documentation()
     else:
         _ , col1, _ = st.columns([1, 2, 1])    
         with col1:    
@@ -375,5 +375,4 @@ if __name__ == "__main__":
         bar = BarCharts(con)
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
-        doc = doc()
         main()
