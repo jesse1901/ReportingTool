@@ -277,7 +277,7 @@ def main():
                     doc.doc()
                 
         elif user_role == 'user':    
-            tab1, tab2, tab3, tab4" = st.tabs(["Tables", "Charts", "Overview", "Documentation"]) 
+            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview", "Documentation"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
