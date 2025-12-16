@@ -59,7 +59,7 @@ class Documentation:
         * **Lost CPU Time by Job State:** Visualizes the distribution of wasted CPU resources based on the job's final state (e.g., CANCELLED, TIMEOUT, FAILED). This helps identify if specific failure modes are significant contributors to resource loss.
         * **Job Count by Job State:** Displays the total number of jobs categorized by their final state, providing an overview of system usage and job completion rates.
         * **Lost CPU Time by Job Time:** Categorizes lost CPU time based on the duration of the jobs. This helps pinpoint whether short, frequent jobs or long-running jobs are the primary source of inefficiency.
-        * **Lost CPU Time by Job Category:** Breaks down wasted resources by job type, distinguishing between Batch jobs, Interactive sessions, and JupyterHub instances.
+        * **Lost CPU Time by Job Category:** Breaks down wasted resources by job type, distinguishing between Batch jobs and JupyterHub instances.
         """)
 
         st.markdown("#### Bar Charts")
