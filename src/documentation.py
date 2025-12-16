@@ -70,9 +70,9 @@ class Documentation:
 
         st.markdown("#### Scatter Charts")
         st.markdown("""
-        * **CPU & GPU Efficiency by Job Duration:** Plots individual jobs to correlate efficiency with runtime.
+        * **CPU & GPU Efficiency by Job Duration:** Plots individual jobs to correlate efficiency with runtime and GPU-Utilization.
             * **X-Axis:** Elapsed Time (Job Duration).
             * **Y-Axis:** CPU Efficiency (%).
-            * **Color:** GPU Utilization (%).
-            This chart allows you to spot long-running jobs with low efficiency (bottom-right area) and check if requested GPUs are actually being utilized (color intensity).
+            * **Color:** GPU Utilization (%). \n
+            This chart visualizes CPU efficiency by job runtime and helps to see the correlation between GPU and CPU efficiency, which can be an explanation for bad CPU utilization.
         """)
