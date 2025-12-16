@@ -9,7 +9,7 @@ class Documentation:
         st.markdown("---")
 
         # --- SECTION 1: CPU & TIME ---
-        st.subheader("CPU & Time")
+        st.subheader("CPU")
         st.markdown("These values help analyze how long a job ran versus how much processing power it actually consumed.")
 
         c1, c2 = st.columns(2)
