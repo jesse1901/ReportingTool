@@ -63,7 +63,7 @@ class Documentation:
         st.markdown("#### Bar Charts")
         st.markdown("""
         * **Total Lost CPU-Time per User:** Ranks users by the total amount of CPU time lost. This is useful for identifying users who might benefit from optimization advice.
-        * **Job Count by Job Time:** A histogram showing the frequency of jobs within specific runtime intervals (e.g., jobs running for < 2 minutes vs. > 1 hour).
+        * **Job Count by Job Time:** A histogram showing the frequency of jobs within specific runtime intervals.
         """)
 
         st.markdown("#### Scatter Charts")
