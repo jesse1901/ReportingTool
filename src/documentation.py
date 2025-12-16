@@ -31,9 +31,10 @@ class Documentation:
             st.markdown("""
             * **CPU_hours_used:** The actual CPU seconds used (sum over all cores).
             
-            * **CPU_hours_lost / Lost_CPU_Time:** CPU-Time that is not effectively used. Formula: CPU_hours - CPU_hours_used
+            * **CPU_hours_lost / Lost_CPU_Time:** CPU-Time that is not effectively used. \n 
+            Formula: CPU_hours - CPU_hours_used
 
-            * **CPUEff:** CPU Efficiency. Indicates how well the reserved CPUs were utilized.
+            * **CPUEff:** CPU Efficiency. Indicates how well the reserved CPUs were utilized. \n
               Formula: TotalCPU / CPUTime
             """)
 
