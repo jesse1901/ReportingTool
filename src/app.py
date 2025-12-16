@@ -274,7 +274,7 @@ def main():
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
-                    doc()
+                    doc.doc()
                 
         elif user_role == 'user':    
             tab1, tab2, tab3, tab4" = st.tabs(["Tables", "Charts", "Overview", "Documentation"]) 
@@ -305,7 +305,7 @@ def main():
                     with col1:
                             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab4:
-                    doc()
+                    doc.doc()
     else:
         _ , col1, _ = st.columns([1, 2, 1])    
         with col1:    
@@ -375,4 +375,5 @@ if __name__ == "__main__":
         bar = BarCharts(con)
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
+        doc = doc()
         main()
