@@ -22,7 +22,7 @@ class Documentation:
             * **AllocCPUS:** Number of Allocated CPU-Cores
 
             * **CPU_hours:** Reserved CPU time.
-              Formula: Elapsed * Number of CPU-Cores
+              Formula: Elapsed * AllocCPUS
             
             """)
         
