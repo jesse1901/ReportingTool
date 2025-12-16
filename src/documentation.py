@@ -4,7 +4,7 @@ class Documentation:
     @staticmethod
     def documentation():
         st.header("Documentation: Metrics & Fields")
-        st.markdown("Below is an explanation of the most relevant columns from the Slurm database.")
+        st.markdown("Below is an explanation of the most relevant columns and the Charts displayed in this app")
         
         st.markdown("---")
 
