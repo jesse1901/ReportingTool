@@ -40,7 +40,7 @@ class Documentation:
         st.markdown("---")
 
         # --- SECTION 2: GPU ---
-        st.subheader("GPU (Accelerators)")
+        st.subheader("GPU")
         
         st.markdown("""
         * **ReqGPU / NGpus:** Number of GPUs requested.
@@ -50,3 +50,29 @@ class Documentation:
         """)
         
         st.markdown("---")
+        
+        st.subheader("Charts")
+        st.markdown("Most of the Charts focus on CPU Utilization, therefore GPU-Utilization is not taken into Account, but could be an argument for bad CPU-Utilization")
+
+        st.markdown("#### Pie Charts")
+        st.markdown("""
+        * **Lost CPU Time by Job State:** Visualizes the distribution of wasted CPU resources based on the job's final state (e.g., CANCELLED, TIMEOUT, FAILED). This helps identify if specific failure modes are significant contributors to resource loss.
+        * **Job Count by Job State:** Displays the total number of jobs categorized by their final state, providing an overview of system usage and job completion rates.
+        * **Lost CPU Time by Job Time:** Categorizes lost CPU time based on the duration of the jobs. This helps pinpoint whether short, frequent jobs or long-running jobs are the primary source of inefficiency.
+        * **Lost CPU Time by Job Category:** Breaks down wasted resources by job type, distinguishing between Batch jobs, Interactive sessions, and JupyterHub instances.
+        """)
+
+        st.markdown("#### Bar Charts")
+        st.markdown("""
+        * **Total Lost CPU-Time per User:** Ranks users by the total amount of CPU time lost. This is useful for identifying users who might benefit from optimization advice.
+        * **Job Count by Job Time:** A histogram showing the frequency of jobs within specific runtime intervals (e.g., jobs running for < 2 minutes vs. > 1 hour).
+        """)
+
+        st.markdown("#### Scatter Charts")
+        st.markdown("""
+        * **CPU & GPU Efficiency by Job Duration:** Plots individual jobs to correlate efficiency with runtime.
+            * **X-Axis:** Elapsed Time (Job Duration).
+            * **Y-Axis:** CPU Efficiency (%).
+            * **Color:** GPU Utilization (%).
+            This chart allows you to spot long-running jobs with low efficiency (bottom-right area) and check if requested GPUs are actually being utilized (color intensity).
+        """)
