@@ -9,7 +9,7 @@ from charts.bar import BarCharts
 from charts.pie import PieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
-from documentation import documentation
+from documentation import Documentation
 secrets = toml.load('.streamlit/secrets.toml')
 
 ALLOWED_USERS = secrets['users']['allowed_users']
@@ -274,7 +274,7 @@ def main():
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
-                    documentation.documentation()
+                    Documentation.documentation()
                 
         elif user_role == 'user':    
             tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview", "Docs"]) 
@@ -305,7 +305,7 @@ def main():
                     with col1:
                             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab4:
-                    documentation.documentation()
+                    Documentation.documentation()
     else:
         _ , col1, _ = st.columns([1, 2, 1])    
         with col1:    
