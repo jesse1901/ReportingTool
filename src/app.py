@@ -380,6 +380,7 @@ if __name__ == "__main__":
             main()
 
     except duckdb.IOException:
+        st.markdown('<div style="height: 5cm;"></div>', unsafe_allow_html=True)
         st.error("⚠️ **Database is currently updating.** Please wait a few minutes and reload the page.")
         st.stop() 
     except Exception as e:
