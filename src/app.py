@@ -370,9 +370,17 @@ if __name__ == "__main__":
         }
         </style>
         """)
-    with duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb', read_only=True) as con:
-        frames = DataFrames(con)
-        bar = BarCharts(con)
-        pie = PieCharts(con)
-        scatter = ScatterCharts(con)
-        main()
+
+    try:
+        with duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb', read_only=True) as con:
+            frames = DataFrames(con)
+            bar = BarCharts(con)
+            pie = PieCharts(con)
+            scatter = ScatterCharts(con)
+            main()
+
+    except duckdb.IOException:
+        st.error("⚠️ **Database is currently updating.** Please wait a few minutes and reload the page.")
+        st.stop() 
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
