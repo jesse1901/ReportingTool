@@ -253,39 +253,41 @@ no matter which option is selected
         # AND slurm.JobName != 'interactive'
         # """
         base_query_scaled = """
-        SELECT
+SELECT
     eff."User",
     STRING_AGG(DISTINCT eff."Account", ',') AS "Account",
     COUNT(eff.JobID) AS JobCount,
-    -- CPU: Standardized Logic
-    ROUND(SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
+    
+    -- CPU Metrics
+    -- Ensure Lost Days is never negative (consistent with 100% eff cap)
+    ROUND(GREATEST(0, SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used)) / 86400.0, 1) AS Lost_CPU_days,
     ROUND(SUM(slurm.CPUTime) / 86400.0 / 2.0, 1) AS cpu_days,
     
-    -- FIXED CPUEff: Calculated dynamically from the Used vs Reserved time 
-    -- to ensure it mathematically matches "Lost_CPU_days". 
-    -- We use COALESCE to prevent divide-by-zero errors.
-    CONCAT(ROUND(
+    -- CPUEff: Recalculated accurately and clipped at 100%
+    CONCAT(ROUND(LEAST(100.0, 
         (SUM(eff.cpu_s_used) / NULLIF(SUM(eff.cpu_s_reserved / 2.0), 0)) * 100
-    , 1), '%') AS CPUEff,
+    ), 1), '%') AS CPUEff,
 
-    -- GPU: Handling NULLs
-    ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
+    -- GPU Metrics
+    -- GPU_Days: Returns NULL if 0
+    NULLIF(ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1), 0) AS GPU_Days,
     
-    -- FIXED Lost_GPU_Days: Handle NULL GPUeff by treating it as 0 (complete loss) 
-    -- or you can use COALESCE(..., 1) if you want to give benefit of doubt.
-    ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - COALESCE(eff.GPUeff, 0))) / 86400.0, 1) AS Lost_GPU_Days,
+    -- Lost_GPU_Days: Returns NULL if no GPUs used. Treats missing efficiency data as 0% eff (100% loss).
+    CASE WHEN SUM(eff.NGPUs) > 0 THEN
+        ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - COALESCE(eff.GPUeff, 0))) / 86400.0, 1)
+    ELSE NULL END AS Lost_GPU_Days,
     
-    -- FIXED GPUEff: Handle NULLs in calculation
-    CASE 
-        WHEN SUM(eff.NGPUs) > 0 THEN 
-            CONCAT(ROUND(
-                100.0 * SUM(eff.Elapsed * eff.NGPUs * COALESCE(eff.GPUeff, 0)) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
-            , 0),'%')
-        ELSE NULL 
-    END AS GPUEff,
+    -- GPUEff: Returns NULL if no GPUs used
+    CASE WHEN SUM(eff.NGPUs) > 0 THEN 
+        CONCAT(ROUND(
+            100.0 * SUM(eff.Elapsed * eff.NGPUs * COALESCE(eff.GPUeff, 0)) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
+        , 0),'%')
+    ELSE NULL END AS GPUEff,
 
+    -- IO Metrics
     ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
     ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
+
 FROM eff
 JOIN slurm ON eff.JobID = slurm.JobID
 WHERE eff."Start" >= ?
@@ -293,6 +295,7 @@ AND eff."End" <= ?
 AND eff."End" IS NOT NULL 
 AND slurm."Partition" != 'jhub'
 AND slurm.JobName != 'interactive'
+
 """
 
 
