@@ -293,8 +293,6 @@ AND eff."End" <= ?
 AND eff."End" IS NOT NULL 
 AND slurm."Partition" != 'jhub'
 AND slurm.JobName != 'interactive'
-GROUP BY eff."User" -- You were missing the GROUP BY in the provided snippet
-ORDER BY Lost_CPU_days DESC;
 """
 
 
