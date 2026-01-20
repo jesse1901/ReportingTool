@@ -259,11 +259,10 @@ SELECT
     COUNT(eff.JobID) AS JobCount,
     
     -- CPU Metrics
-    -- Ensure Lost Days is never negative (consistent with 100% eff cap)
     ROUND(GREATEST(0, SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used)) / 86400.0, 1) AS Lost_CPU_days,
     ROUND(SUM(slurm.CPUTime) / 86400.0 / 2.0, 1) AS cpu_days,
     
-    -- CPUEff: Recalculated accurately and clipped at 100%
+    -- CPUEff: Clipped at 100%
     CONCAT(ROUND(LEAST(100.0, 
         (SUM(eff.cpu_s_used) / NULLIF(SUM(eff.cpu_s_reserved / 2.0), 0)) * 100
     ), 1), '%') AS CPUEff,
@@ -272,15 +271,21 @@ SELECT
     -- GPU_Days: Returns NULL if 0
     NULLIF(ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1), 0) AS GPU_Days,
     
-    -- Lost_GPU_Days: Returns NULL if no GPUs used. Treats missing efficiency data as 0% eff (100% loss).
+    -- Lost_GPU_Days: SANITIZED
+    -- We use a CASE statement to verify GPUeff is a valid number between 0 and 1. 
+    -- If it is NaN, NULL, or negative, we treat it as 0.
     CASE WHEN SUM(eff.NGPUs) > 0 THEN
-        ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - COALESCE(eff.GPUeff, 0))) / 86400.0, 1)
+        ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - 
+            CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+        )) / 86400.0, 1)
     ELSE NULL END AS Lost_GPU_Days,
     
-    -- GPUEff: Returns NULL if no GPUs used
+    -- GPUEff: SANITIZED
+    -- Same logic: If GPUeff is NaN, it fails the 'BETWEEN' check and becomes 0.
     CASE WHEN SUM(eff.NGPUs) > 0 THEN 
         CONCAT(ROUND(
-            100.0 * SUM(eff.Elapsed * eff.NGPUs * COALESCE(eff.GPUeff, 0)) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
+            100.0 * SUM(eff.Elapsed * eff.NGPUs * CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+            ) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
         , 0),'%')
     ELSE NULL END AS GPUEff,
 
