@@ -373,7 +373,7 @@ if __name__ == "__main__":
         """)
 
     try:
-        current_mtime = helpers.get_file_mtime()
+        current_mtime = helpers.get_db_timestamp()
         
 
         # 2. Hole Verbindung (Wird neu erstellt, wenn mtime anders ist als beim letzten Run)
