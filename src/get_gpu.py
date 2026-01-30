@@ -173,7 +173,7 @@ def get_gpu_data(row, step, prom_base_url):
 
 
 if __name__ == "__main__":
-    secrets = toml.load('.streamlit/secrets.toml')
+    secrets = toml.load('/var/www/max-reports/ReportingTool/src/.streamlit/secrets.toml')
 
     prom_base_url = secrets['urls']['prometheus']
 
