@@ -10,6 +10,7 @@ from charts.pie import PieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
 from documentation import Documentation
+from helpers import helpers
 secrets = toml.load('.streamlit/secrets.toml')
 
 ALLOWED_USERS = secrets['users']['allowed_users']
