@@ -49,20 +49,23 @@ class DataFrames:
         allowed_groups=None
     ) -> pd.DataFrame:
 
-        base_query = """
-        SELECT 
-            jobID, JobName, "User", "Account", State, 
-            ROUND(Elapsed / 3600, 2) AS Elapsed_hours, 
-            "Start", "End", "Partition", NodeList, AllocCPUS,  
-            ROUND((CPUTime / 3600), 2) AS CPU_hours, 
-            ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
-            ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
-            CONCAT(ROUND(CPUEff * 100, 2), '%') AS CPUEff, 
-            NGPUS AS AllocGPUS, 
-            CASE WHEN GpuUtil IS NOT NULL THEN CONCAT(ROUND(GpuUtil * 100, 2), '%') ELSE NULL END AS GPUEff,
-            ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
-            Comment, SubmitLine 
-        FROM allocations
+        # base_query = """
+        # SELECT 
+        #     jobID, JobName, "User", "Account", State, 
+        #     ROUND(Elapsed / 3600, 2) AS Elapsed_hours, 
+        #     "Start", "End", "Partition", NodeList, AllocCPUS,  
+        #     ROUND((CPUTime / 3600), 2) AS CPU_hours, 
+        #     ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
+        #     ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
+        #     CONCAT(ROUND(CPUEff * 100, 2), '%') AS CPUEff, 
+        #     NGPUS AS AllocGPUS, 
+        #     CASE WHEN GpuUtil IS NOT NULL THEN CONCAT(ROUND(GpuUtil * 100, 2), '%') ELSE NULL END AS GPUEff,
+        #     ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
+        #     Comment, SubmitLine 
+        # FROM allocations
+        # """
+        base_query = """ 
+        SELECT * FROM allocations
         """
 
         conditions = []

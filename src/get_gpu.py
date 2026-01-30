@@ -177,7 +177,7 @@ if __name__ == "__main__":
 
     prom_base_url = secrets['urls']['prometheus']
 
-    con = duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb')
+    con = duckdb.connect('/var/www/max-reports/ReportingTool/database/max-reports-staging.duckdb')
     
     get_available_gpus_per_node(prom_base_url)
     get_rows_without_gpu(con, prom_base_url)

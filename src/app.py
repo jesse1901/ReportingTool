@@ -372,7 +372,7 @@ if __name__ == "__main__":
         """)
 
     try:
-        with duckdb.connect('/var/www/max-reports/ReportingTool/max-reports.duckdb', read_only=True) as con:
+        with duckdb.connect('/var/www/max-reports/ReportingTool/database/max-reports.duckdb', read_only=True) as con:
             frames = DataFrames(con)
             bar = BarCharts(con)
             pie = PieCharts(con)

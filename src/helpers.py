@@ -1,159 +1,209 @@
-import streamlit as st
-import pandas as pd
-import pytz
-import subprocess
-from datetime import timedelta
+import requests
+import duckdb
+import hostlist
+import toml
+import gpu_node_data
+from collections import defaultdict
 
 
+def get_available_gpus_per_node(prom_base_url):
+    url = f"{prom_base_url}/api/v1/query?query=nvidia_smi_gpu_info"
 
-class helpers:
-    def timestring_to_seconds(timestring):
-        if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
-            return 0
+    r = requests.get(url)
+    r = r.json()
 
-        if isinstance(timestring, float):
-            timestring = str(int(timestring)) 
+    gpu_d = r["data"]["result"]
 
-        timestring = str(timestring).strip()
+    gpu_count = defaultdict(int)
+    list_nodes = []
 
-        if 'T' in timestring:
-            days_part, time_part = timestring.split('T')
-        else:
-            days_part, time_part = '0', timestring
+    for i in gpu_d:
+        instance = i["metric"]["instance"]
+        gpu_count[instance] += 1
 
+    for node, count in gpu_count.items():
+        list_nodes.append((node, count))
+
+    with open("gpu_node_data.py", "w") as f:
+        f.write(f"""def hostlist_gpu(): 
+                              gpu_nodes = {list_nodes}
+                              return gpu_nodes""")
+
+    print("GPU counts saved to gpu_node_data.py.txt")
+
+
+def bulk_update_duckdb(con, updates):
+    """
+    Performs a bulk update using a temporary table.
+    'updates' is a list of tuples: (NGpus, GpuUtil, ReqGPUS, JobID)
+    """
+    if not updates:
+        return
+
+    cur = con.cursor()
+    try:
+        cur.execute("""
+            CREATE TEMPORARY TABLE IF NOT EXISTS gpu_update_stage (
+                NGpus INTEGER, 
+                GpuUtil DOUBLE, 
+                ReqGPUS INTEGER, 
+                JobID VARCHAR
+            )
+        """)
+        
+        # Clear any old data
+        cur.execute("DELETE FROM gpu_update_stage")
+
+        # 2. Insert all python data into the temp table in one fast operation
+        cur.executemany(
+            "INSERT INTO gpu_update_stage VALUES (?, ?, ?, ?)", 
+            updates
+        )
+
+        # 3. Perform a single JOIN UPDATE to update the main 'slurm' table
+        cur.execute("""
+            UPDATE slurm
+            SET 
+                NGpus = stage.NGpus,
+                GpuUtil = stage.GpuUtil,
+                ReqGPUS = stage.ReqGPUS
+            FROM gpu_update_stage AS stage
+            WHERE slurm.JobID = stage.JobID
+        """)
+
+        # 4. Clean up
+        cur.execute("DROP TABLE gpu_update_stage")
+        con.commit()
+        
+    except duckdb.Error as e:
+        print(f"DuckDB Batch Update Error: {e}")
+
+
+def get_rows_without_gpu(con, prom_base_url):
+    cur = con.cursor()
+    step = 1
+    jobs_processed = 0
+
+    while True:
         try:
-            days = int(days_part.strip()) if days_part.strip() else 0
-        except ValueError:
-            days = 0
-
-        # Convert time part (HH:MM:SS)
-        time_parts = time_part.split(':')
-        try:
-            hours = int(time_parts[0].strip()) if len(time_parts) > 0 and time_parts[0].strip() else 0
-        except ValueError:
-            hours = 0
-        try:
-            minutes = int(time_parts[1].strip()) if len(time_parts) > 1 and time_parts[1].strip() else 0
-        except ValueError:
-            minutes = 0
-        try:
-            seconds = int(time_parts[2].strip()) if len(time_parts) > 2 and time_parts[2].strip() else 0
-        except ValueError:
-            seconds = 0
-
-        # Calculate total seconds
-        total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
-        return total_seconds
-
-
-
-    def seconds_to_timestring(total_seconds):
-        if pd.isna(total_seconds):
-            return None
-        if isinstance(total_seconds, float):
-            total_seconds = int(total_seconds)
-
-        if isinstance(total_seconds, int) and total_seconds >= 0: 
-
-            td = timedelta(seconds=total_seconds)
-
-            days = td.days
-            hours, remainder = divmod(td.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            seconds = round(seconds)  
-
-            timestring = f"{days}T {hours}:{minutes}:{seconds}"
-            return timestring
-        else:
-            return None
-
-    def format_interval_label(interval):
-        min_time = interval.left
-        max_time = interval.right
-
-        def format_time(minutes):
-            days = int(minutes // 1440)  
-            hours = int((minutes % 1440) // 60)
-            mins = int(minutes % 60)
-
-            if days > 0 and hours > 0:
-                return f"{days}d {hours}h"
-            elif days > 0:
-                return f"{days}d"
-            elif hours > 0 and mins > 0:
-                return f"{hours}h {mins}m"
-            elif hours > 0:
-                return f"{hours}h"
-            else:
-                return f"{mins}m"
-
-        min_time_str = format_time(min_time)
-        max_time_str = format_time(max_time)
-        return f"{min_time_str} - {max_time_str}"
-
-
-    def get_job_script(jobid):
-        command = ["sacct", "-B", "-j", jobid]
-
-        try:
-            result = subprocess.run(command, capture_output=True, text=True, check=True)
-            output = result.stdout
-            st.code(output)
-        except subprocess.CalledProcessError as e:
-            st.error(f"Error details: {e}")
+            cur.execute("""SELECT Start, End, NodeList, Elapsed, JobID 
+                FROM allocations 
+                WHERE 
+                (NGPUS > 0 AND GpuUtil IS NULL AND Start IS NOT NULL AND End IS NOT NULL AND State != 'RUNNING') 
+                      OR 
+                (ReqGPUS IS NULL AND Start IS NOT NULL AND End IS NOT NULL AND State != 'RUNNING')""")
             
-
-    def readable_with_commas(value):
-        if value >= 100_000:
-            return f"{value / 1_000_000:.3f}M"
-        elif value <= 100_000 and value >= 1_000:
-            return f"{value / 1_000:.3f}K"
-        else:
-            return f"{value:,}"
-
-    def convert_timestamps_to_berlin_time(df: pd.DataFrame) -> pd.DataFrame:
-            """
-            Convert Unix timestamps to Berlin timezone and format as strings.
+            data = cur.fetchall()
             
-            Args:
-                df: DataFrame with 'Start' and 'End' columns containing Unix timestamps
-                
-            Returns:
-                DataFrame with formatted datetime strings
-            """
+            if not data:
+                if jobs_processed > 0:
+                    print(f"{jobs_processed} jobs were successfully updated with GPU data.")
+                else:
+                    print("No jobs to process.")
+                break
 
-            berlin_tz = pytz.timezone('Europe/Berlin')
-            
-            # Convert Unix timestamps to datetime and localize to UTC
-            df['Start'] = pd.to_datetime(df['Start'], unit='s', errors='coerce').dt.tz_localize('UTC')
-            df['End'] = pd.to_datetime(df['End'], unit='s', errors='coerce').dt.tz_localize('UTC')
+            # Buffer to hold updates for this batch
+            batch_updates = []
 
-            # Convert to Berlin time (handles daylight saving time automatically)
-            df['Start'] = df['Start'].dt.tz_convert(berlin_tz)
-            df['End'] = df['End'].dt.tz_convert(berlin_tz)
+            for row in data:
+                if row[0] and row[1]:  # Ensure Start and End are not None
+                    try:
 
-            # Format datetime columns without timezone offset
-            df['Start'] = df['Start'].dt.strftime('%Y-%m-%d %H:%M:%S')
-            df['End'] = df['End'].dt.strftime('%Y-%m-%d %H:%M:%S')
-            
-            return df
+                        result = get_gpu_data(row, step, prom_base_url=prom_base_url)
+                        
+                        if result:
+                            # result is (total_gpus, gpu_eff, gpu_available, jobID)
+                            batch_updates.append(result)
+                            jobs_processed += 1
+
+                    except Exception as e:
+                        print(f"Failed to process JobID {row[4]}: {e}")
+
+            # Perform the BULK UPDATE for all successful calculations in this step
+            if batch_updates:
+                bulk_update_duckdb(con, batch_updates)
+
+            step += 1
+            if step > 10:
+                print(f"No response for {len(data)} jobs remaining.")
+                break
+
+        except duckdb.Error as e:
+            print(f"DuckDB error: {e}")
+            break
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            break
 
 
-    def build_conditions(query, params, partition_selector=None, allowed_groups=None,user_role=None, current_user=None, ):
+def get_gpu_data(row, step, prom_base_url):
+    """
+    Calculates GPU usage and returns a tuple (NGpus, GpuUtil, ReqGPUS, JobID).
+    Returns None if no GPU nodes were found.
+    """
+    start = row[0]
+    end = row[1]
+    nodelist = row[2]
+    # elapsed = row[3] # Unused
+    jobID = row[4]
+    
+    nodelist = hostlist.expand_hostlist(nodelist)
+    nodelist = [host + '.desy.de' for host in nodelist]
 
-        if partition_selector:
-            placeholders = ','.join(['?'] * len(partition_selector))
-            query += f" AND Partition IN ({placeholders})"
-            params.extend(partition_selector)
+    all_gpu_nodes = gpu_node_data.hostlist_gpu()
+
+    # Determine which nodes in the job are actually GPU nodes
+    gpu_nodes = [node for node in nodelist if any(node == gpu_node[0] for gpu_node in all_gpu_nodes)]
+    total_gpus = sum(gpu_count for node, gpu_count in all_gpu_nodes if node in gpu_nodes)
+
+    gpu_eff = None
+
+    if gpu_nodes:
+        gpu_available = total_gpus
+    else:
+        gpu_available = None
+
+    # Only query prometheus if we actually have GPU nodes
+    if gpu_nodes:
+        join_nodes = '|'.join([node for node in gpu_nodes])
+        prometheus_url = f'{prom_base_url}/api/v1/query_range'
+        params = {
+            'query': f'nvidia_smi_utilization_gpu_ratio{{instance=~"{join_nodes}"}}',
+            'start': f'{start}',
+            'end': f'{end}',
+            'step': f'{str(step)}m'
+        }
+        try:
+            response = requests.get(prometheus_url, params=params)
+            response.raise_for_status()
+            response = response.json()
+
+            if 'data' in response and 'result' in response['data'] and len(response['data']['result']) > 0:
+                total_sum = 0
+                value_count = 0
+
+                for result in response['data']['result']:
+                    values = result['values']
+                    for value in values:
+                        total_sum += float(value[1])
+                        value_count += 1
+
+                gpu_eff = (total_sum / value_count) if value_count > 0 else 0
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request error for JobID {jobID}: {e}")
+            return None # Skip update for this row on error
+
+    # Return the data to be inserted
+    return (total_gpus, gpu_eff, gpu_available, jobID)
 
 
-        if current_user:
-            query += " AND User = ?"
-            params.append(current_user)
+if __name__ == "__main__":
+    secrets = toml.load('.streamlit/secrets.toml')
 
-        if allowed_groups:
-            placeholders = ','.join('?' for _ in allowed_groups)
-            query += f" AND Account IN ({placeholders})"
-            params.extend(allowed_groups)
+    prom_base_url = secrets['urls']['prometheus']
 
-        return query, params
+    con = duckdb.connect('/var/www/max-reports/ReportingTool/max-reports_v1.duckdb')
+    
+    get_available_gpus_per_node(prom_base_url)
+    get_rows_without_gpu(con, prom_base_url)
