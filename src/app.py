@@ -373,11 +373,12 @@ if __name__ == "__main__":
         """)
 
     try:
-        current_mtime = helpers.get_db_timestamp()
+        db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
+        current_mtime = helpers.get_db_timestamp(db_path=db_path)
         
 
         # 2. Hole Verbindung (Wird neu erstellt, wenn mtime anders ist als beim letzten Run)
-        con = helpers.get_connection(db_path='/var/www/max-reports/ReportingTool/database/max-reports.duckdb',  last_modified_time=current_mtime)
+        con = helpers.get_connection(db_path=db_path,  last_modified_time=current_mtime)
         
         # 3. Initialisiere deine Klassen mit der (ggf. neuen) Verbindung
         frames = DataFrames(con)

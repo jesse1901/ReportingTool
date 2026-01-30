@@ -159,9 +159,9 @@ class helpers:
 
 
 
-    def get_db_timestamp():
+    def get_db_timestamp(db_path):
         try:
-            return os.stat(DB_PATH).st_mtime
+            return os.stat(db_path).st_mtime
         except FileNotFoundError:
             return 0
 
