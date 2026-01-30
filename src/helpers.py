@@ -4,7 +4,7 @@ import pytz
 import subprocess
 from datetime import timedelta
 import os
-
+import duckdb
 class helpers:
     def timestring_to_seconds(timestring):
         if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
