@@ -378,6 +378,20 @@ if __name__ == "__main__":
             pie = PieCharts(con)
             scatter = ScatterCharts(con)
             main()
+    try:
+        current_mtime = helpers.get_file_mtime()
+        
+
+        # 2. Hole Verbindung (Wird neu erstellt, wenn mtime anders ist als beim letzten Run)
+        con = helpers.get_connection(db_path='/var/www/max-reports/ReportingTool/database/max-reports.duckdb',  last_modified_time=current_mtime)
+        
+        # 3. Initialisiere deine Klassen mit der (ggf. neuen) Verbindung
+        frames = DataFrames(con)
+        bar = BarCharts(con)
+        pie = PieCharts(con)
+        scatter = ScatterCharts(con)
+        
+        main()
 
     except duckdb.IOException:
         st.markdown('<div style="height: 5cm;"></div>', unsafe_allow_html=True)
