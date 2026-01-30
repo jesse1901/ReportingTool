@@ -161,16 +161,14 @@ class helpers:
 
 
     def get_db_timestamp():
-    """Holt den Modifikations-Zeitstempel der Datei.
-       Wenn sich die Datei ändert (durch mv), ändert sich dieser Wert."""
-    try:
-        return os.stat(DB_PATH).st_mtime
-    except FileNotFoundError:
-        return 0
+        try:
+            return os.stat(DB_PATH).st_mtime
+        except FileNotFoundError:
+            return 0
 
-    @st.cache_resource(ttl="1h")
-    def get_connection(db_path, last_modified_time):
+        @st.cache_resource(ttl="1h")
+        def get_connection(db_path, last_modified_time):
 
-        # read_only=True ist wichtig für Multi-Reader Szenarien
-        con = duckdb.connect(db_path, read_only=True)
-        return con
+            # read_only=True ist wichtig für Multi-Reader Szenarien
+            con = duckdb.connect(db_path, read_only=True)
+            return con
