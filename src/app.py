@@ -372,18 +372,21 @@ if __name__ == "__main__":
         </style>
         """)
 
-    current_mtime = helpers.get_db_mtime(db_path)
+    current_mtime = helpers.get_last_timestamp(db_path)
 
+    # 2. Prüfen: Haben wir diesen Zeitstempel schon im Session State?
     if "db_last_mtime" not in st.session_state:
-        st.session_state.get_last_timestamp = current_mtime
+        st.session_state.db_last_mtime = current_mtime
 
+    # 3. Wenn sich der Zeitstempel geändert hat (Update lief!)
     if current_mtime != st.session_state.db_last_mtime:
         st.toast("Datenbank-Update erkannt! Aktualisiere Ansicht...", icon="🔄")
         
+        # A. ALLES löschen was Streamlit im RAM hat
         st.cache_data.clear()     # Löscht gecachte Dataframes/Queries
         st.cache_resource.clear() # Löscht gecachte Verbindungen/Objekte
         
-        st.session_state.get_db_timestamp = current_mtime
+        st.session_state.db_last_mtime = current_mtime
         
         st.rerun()
 
