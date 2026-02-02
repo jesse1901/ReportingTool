@@ -372,19 +372,21 @@ if __name__ == "__main__":
         </style>
         """)
 
+import streamlit as st
+import helpers
+import duckdb
+import time
+
+def main_app():
     db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
 
-    current_mtime = helpers.get_db_timestamp(db_path)
+    current_mtime = helpers.get_db_mtime(db_path)
 
-    # 2. Prüfen: Haben wir diesen Zeitstempel schon im Session State?
     if "db_last_mtime" not in st.session_state:
         st.session_state.db_last_mtime = current_mtime
 
-    # 3. Wenn sich der Zeitstempel geändert hat (Update lief!)
     if current_mtime != st.session_state.db_last_mtime:
-        st.toast("Datenbank-Update erkannt! Aktualisiere Ansicht...", icon="🔄")
         
-        # A. ALLES löschen was Streamlit im RAM hat
         st.cache_data.clear()     # Löscht gecachte Dataframes/Queries
         st.cache_resource.clear() # Löscht gecachte Verbindungen/Objekte
         
@@ -396,13 +398,15 @@ if __name__ == "__main__":
 
         con = helpers.get_connection(db_path)
         
+        # Initialisiere Klassen
         frames = DataFrames(con)
         bar = BarCharts(con)
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
         
         main()
-
+        
+        # Optional: Verbindung am Ende explizit schließen
         con.close()
 
     except duckdb.IOException:
@@ -411,7 +415,6 @@ if __name__ == "__main__":
         st.rerun()
     except Exception as e:
         st.error(f"Fehler: {e}")
-    except duckdb.IOException:
-        st.markdown('<div style="height: 5cm;"></div>', unsafe_allow_html=True)
-        st.error("⚠️ **Database is currently updating.** Please wait a few minutes and reload the page.")
-        st.stop() 
+
+if __name__ == "__main__":
+    main_app()

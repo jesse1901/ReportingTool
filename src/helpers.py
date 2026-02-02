@@ -159,14 +159,12 @@ class helpers:
 
 
 
-    def get_db_timestamp(db_path):
-        try:
-            return os.stat(db_path).st_mtime
-        except FileNotFoundError:
-            return 0
+        def get_db_mtime(db_path):
+            try:
+                return os.path.getmtime(db_path)
+            except OSError:
+                return 0
 
-    @st.cache_resource()
-    def get_connection(db_path, last_modified_time):
-            # read_only=True ist wichtig für Multi-Reader Szenarien
-            con = duckdb.connect(db_path, read_only=True)
-            return con
+        def get_connection(db_path):
+            # read_only=True ist wichtig, damit keine .wal Files blockieren
+            return duckdb.connect(db_path, read_only=True)
