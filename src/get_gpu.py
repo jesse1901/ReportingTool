@@ -45,26 +45,26 @@ def get_rows_without_gpu(con, prom_base_url):
     while True:
         try:
             # Jobs abrufen, die noch keine GPU Daten haben
-        cur.execute("""
-                SELECT Start, "End", NodeList, Elapsed, JobID 
-                FROM allocations 
-                WHERE 
-                (
-                    NGPUS > 0 
-                    AND GpuUtil IS NULL 
-                    AND Start IS NOT NULL 
-                    AND "End" IS NOT NULL 
-                    AND State != 'RUNNING' 
-                    AND to_timestamp("End") > (now() - INTERVAL '2 WEEKS')
-                ) 
-                OR 
-                (
-                    ReqGPUS IS NULL 
-                    AND Start IS NOT NULL 
-                    AND "End" IS NOT NULL 
-                    AND State != 'RUNNING'
-                )
-            """)
+            cur.execute("""
+                    SELECT Start, "End", NodeList, Elapsed, JobID 
+                    FROM allocations 
+                    WHERE 
+                    (
+                        NGPUS > 0 
+                        AND GpuUtil IS NULL 
+                        AND Start IS NOT NULL 
+                        AND "End" IS NOT NULL 
+                        AND State != 'RUNNING' 
+                        AND to_timestamp("End") > (now() - INTERVAL '2 WEEKS')
+                    ) 
+                    OR 
+                    (
+                        ReqGPUS IS NULL 
+                        AND Start IS NOT NULL 
+                        AND "End" IS NOT NULL 
+                        AND State != 'RUNNING'
+                    )
+                """)
 
 
             
