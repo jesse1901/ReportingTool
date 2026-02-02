@@ -5,18 +5,19 @@ import subprocess
 from datetime import timedelta
 import os
 import duckdb
-class helpers:
 
-    def get_db_mtime(db_path):
+def get_db_mtime(db_path):
         try:
             return os.path.getmtime(db_path)
         except OSError:
             return 0
 
-    def get_connection(db_path):
+def get_connection(db_path):
         # read_only=True ist wichtig, damit keine .wal Files blockieren
         return duckdb.connect(db_path, read_only=True)
 
+
+class helpers:
 
     def timestring_to_seconds(timestring):
         if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
