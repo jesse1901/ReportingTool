@@ -372,6 +372,8 @@ if __name__ == "__main__":
         </style>
         """)
 
+    db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
+
     current_mtime = helpers.get_db_timestamp(db_path)
 
     # 2. Prüfen: Haben wir diesen Zeitstempel schon im Session State?
