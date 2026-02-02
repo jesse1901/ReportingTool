@@ -372,15 +372,25 @@ if __name__ == "__main__":
         </style>
         """)
 
-    try:
-        db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
-        current_mtime = helpers.get_db_timestamp(db_path=db_path)
-        
+    current_mtime = helpers.get_db_mtime(db_path)
 
-        # 2. Hole Verbindung (Wird neu erstellt, wenn mtime anders ist als beim letzten Run)
-        con = helpers.get_connection(db_path=db_path,  last_modified_time=current_mtime)
+    if "db_last_mtime" not in st.session_state:
+        st.session_state.db_last_mtime = current_mtime
+
+    if current_mtime != st.session_state.db_last_mtime:
+        st.toast("Datenbank-Update erkannt! Aktualisiere Ansicht...", icon="🔄")
         
-        # 3. Initialisiere deine Klassen mit der (ggf. neuen) Verbindung
+        st.cache_data.clear()     # Löscht gecachte Dataframes/Queries
+        st.cache_resource.clear() # Löscht gecachte Verbindungen/Objekte
+        
+        st.session_state.db_last_mtime = current_mtime
+        
+        st.rerun()
+
+    try:
+
+        con = helpers.get_connection(db_path)
+        
         frames = DataFrames(con)
         bar = BarCharts(con)
         pie = PieCharts(con)
@@ -388,9 +398,15 @@ if __name__ == "__main__":
         
         main()
 
+        con.close()
+
+    except duckdb.IOException:
+        st.error("⚠️ Datenbank wird gerade kopiert. Bitte in 5 Sekunden neu laden.")
+        time.sleep(5)
+        st.rerun()
+    except Exception as e:
+        st.error(f"Fehler: {e}")
     except duckdb.IOException:
         st.markdown('<div style="height: 5cm;"></div>', unsafe_allow_html=True)
         st.error("⚠️ **Database is currently updating.** Please wait a few minutes and reload the page.")
         st.stop() 
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
