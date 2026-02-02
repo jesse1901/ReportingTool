@@ -372,12 +372,6 @@ if __name__ == "__main__":
         </style>
         """)
 
-import streamlit as st
-import helpers
-import duckdb
-import time
-
-def main_app():
     db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
 
     current_mtime = helpers.get_db_mtime(db_path)
