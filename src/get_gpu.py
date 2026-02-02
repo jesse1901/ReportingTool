@@ -205,13 +205,31 @@ def get_current_db_path():
 
 
 if __name__ == "__main__":
+    # Secrets laden
     secrets = toml.load('/var/www/max-reports/ReportingTool/src/.streamlit/secrets.toml')
-
     prom_base_url = secrets['urls']['prometheus']
 
-    path = get_current_db_path()
+    if len(sys.argv) > 1:
+        path = sys.argv[1]
+        print(f"Update-Modus: Nutze angegebene Datenbank: {path}")
+    else:
+        print("Manueller Modus: Nutze aktuell aktive Datenbank via Pointer.")
+        path = get_current_db_path()
+
+    print(f"Verbinde zu: {path}")
 
     con = duckdb.connect(path)
     
-    get_available_gpus_per_node(prom_base_url)
-    get_rows_without_gpu(con, prom_base_url)
+    try:
+        gpu_data = get_available_gpus_per_node(prom_base_url)
+        
+        get_rows_without_gpu(con, prom_base_url)
+        
+        print("GPU-Daten erfolgreich aktualisiert.")
+        
+    except Exception as e:
+        print(f"Fehler beim Update der GPU-Daten: {e}")
+        sys.exit(1) # Wichtig: Fehlercode an bash zurückgeben, damit das Script stoppt!
+        
+    finally:
+        con.close()
