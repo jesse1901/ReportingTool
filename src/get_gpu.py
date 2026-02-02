@@ -4,7 +4,7 @@ import hostlist
 import toml
 import gpu_node_data
 from collections import defaultdict
-
+import os
 
 def get_available_gpus_per_node(prom_base_url):
     url = f"{prom_base_url}/api/v1/query?query=nvidia_smi_gpu_info"
@@ -188,12 +188,30 @@ def get_gpu_data(row, step, prom_base_url):
     return (total_gpus, gpu_eff, gpu_available)
 
 
+BASE_DIR = "/var/www/max-reports/ReportingTool/database"
+POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
+
+def get_current_db_path():
+        """Liest den Pfad zur aktuell aktiven Datenbank aus der Textdatei."""
+        try:
+            with open(POINTER_FILE, "r") as f:
+                filename = f.read().strip()
+                full_path = os.path.join(BASE_DIR, filename)
+                if os.path.exists(full_path):
+                    return full_path
+        except Exception:
+            pass
+        return os.path.join(BASE_DIR, "max-reports.duckdb")
+
+
 if __name__ == "__main__":
     secrets = toml.load('/var/www/max-reports/ReportingTool/src/.streamlit/secrets.toml')
 
     prom_base_url = secrets['urls']['prometheus']
 
-    con = duckdb.connect('/var/www/max-reports/ReportingTool/database/max-reports-staging.duckdb')
+    path = get_current_db_path()
+
+    con = duckdb.connect(path)
     
     get_available_gpus_per_node(prom_base_url)
     get_rows_without_gpu(con, prom_base_url)
