@@ -6,7 +6,8 @@ from datetime import timedelta
 import os
 import duckdb
 
-
+BASE_DIR = "/var/www/max-reports/ReportingTool/database"
+POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
 
 class helpers:
 
@@ -160,10 +161,6 @@ class helpers:
             params.extend(allowed_groups)
 
         return query, params
-
-
-    BASE_DIR = "/var/www/max-reports/ReportingTool/database"
-    POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
 
     def get_current_db_path():
         """Liest den Pfad zur aktuell aktiven Datenbank aus der Textdatei."""
