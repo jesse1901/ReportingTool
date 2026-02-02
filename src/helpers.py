@@ -6,15 +6,6 @@ from datetime import timedelta
 import os
 import duckdb
 
-def get_db_mtime(db_path):
-        try:
-            return os.path.getmtime(db_path)
-        except OSError:
-            return 0
-
-def get_connection(db_path):
-        # read_only=True ist wichtig, damit keine .wal Files blockieren
-        return duckdb.connect(db_path, read_only=True)
 
 
 class helpers:
@@ -170,4 +161,14 @@ class helpers:
 
         return query, params
 
+
+    def get_db_mtime(db_path):
+        try:
+            return os.path.getmtime(db_path)
+        except OSError:
+            return 0
+
+    def get_connection(db_path):
+        # read_only=True ist wichtig, damit keine .wal Files blockieren
+        return duckdb.connect(db_path, read_only=True)
 
