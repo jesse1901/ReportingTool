@@ -372,45 +372,47 @@ if __name__ == "__main__":
         </style>
         """)
 
-    db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
-    
-    current_mtime = helpers.get_db_mtime(db_path)
+    pointer_mtime = helpers.get_pointer_mtime()
 
-    if "db_last_mtime" not in st.session_state:
-        st.session_state.db_last_mtime = current_mtime
+    if "last_pointer_update" not in st.session_state:
+        st.session_state.last_pointer_update = pointer_mtime
 
-    if current_mtime != st.session_state.db_last_mtime:
-        
-        st.toast("Neue Daten erkannt! Aktualisiere...", icon="🔄")
-        
-        st.cache_data.clear()
-        st.cache_resource.clear()
+    if pointer_mtime != st.session_state.last_pointer_update:
+        st.toast("Datenbank-Update! Lade neue Version...", icon="🔄")
         
         if "con" in st.session_state:
             try:
                 st.session_state.con.close()
             except:
                 pass
-            del st.session_state.con # Aus dem State werfen
+            del st.session_state.con
 
-        st.session_state.db_last_mtime = current_mtime
+        st.cache_data.clear()
+        st.cache_resource.clear()
+
+        st.session_state.last_pointer_update = pointer_mtime
         
+        time.sleep(0.5)
         st.rerun()
 
-    
     try:
-        con = helpers.get_connection(db_path)
+        current_db_path = helpers.get_current_db_path()
         
+        # Verbindung herstellen
+        con = helpers.get_connection(current_db_path)
+        
+        # Im State speichern, damit wir sie oben schließen können
         st.session_state.con = con 
 
+        # Klassen initialisieren
         frames = DataFrames(con)
         bar = BarCharts(con)
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
         
         main()
-        
+
     except Exception as e:
-        st.error(f"Fehler: {e}")
+        st.error(f"Warte auf Datenbank... ({e})")
 
 

@@ -162,13 +162,29 @@ class helpers:
         return query, params
 
 
-    def get_db_mtime(db_path):
+    BASE_DIR = "/var/www/max-reports/ReportingTool/database"
+    POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
+
+    def get_current_db_path():
+        """Liest den Pfad zur aktuell aktiven Datenbank aus der Textdatei."""
         try:
-            return os.path.getmtime(db_path)
+            with open(POINTER_FILE, "r") as f:
+                filename = f.read().strip()
+                full_path = os.path.join(BASE_DIR, filename)
+                if os.path.exists(full_path):
+                    return full_path
+        except Exception:
+            pass
+        # Fallback, falls noch kein Script lief
+        return os.path.join(BASE_DIR, "max-reports.duckdb")
+
+    def get_pointer_mtime():
+        """Prüft, wann sich die Pointer-Datei geändert hat."""
+        try:
+            return os.path.getmtime(POINTER_FILE)
         except OSError:
             return 0
 
     def get_connection(db_path):
-        # read_only=True ist wichtig, damit keine .wal Files blockieren
+        # Frische Verbindung zur (neuen) Datei
         return duckdb.connect(db_path, read_only=True)
-
