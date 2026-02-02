@@ -375,7 +375,7 @@ if __name__ == "__main__":
     current_mtime = helpers.get_db_mtime(db_path)
 
     if "db_last_mtime" not in st.session_state:
-        st.session_state.db_last_mtime = current_mtime
+        st.session_state.get_last_timestamp = current_mtime
 
     if current_mtime != st.session_state.db_last_mtime:
         st.toast("Datenbank-Update erkannt! Aktualisiere Ansicht...", icon="🔄")
@@ -383,7 +383,7 @@ if __name__ == "__main__":
         st.cache_data.clear()     # Löscht gecachte Dataframes/Queries
         st.cache_resource.clear() # Löscht gecachte Verbindungen/Objekte
         
-        st.session_state.db_last_mtime = current_mtime
+        st.session_state.get_db_timestamp = current_mtime
         
         st.rerun()
 

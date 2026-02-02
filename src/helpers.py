@@ -165,9 +165,8 @@ class helpers:
         except FileNotFoundError:
             return 0
 
-    @st.cache_resource(ttl="1h")
+    @st.cache_resource()
     def get_connection(db_path, last_modified_time):
-            st.cache_data.clear()
             # read_only=True ist wichtig für Multi-Reader Szenarien
             con = duckdb.connect(db_path, read_only=True)
             return con
