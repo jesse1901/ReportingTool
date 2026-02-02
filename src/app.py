@@ -373,7 +373,7 @@ if __name__ == "__main__":
         """)
 
     db_path = '/var/www/max-reports/ReportingTool/database/max-reports.duckdb'
-
+    
     current_mtime = helpers.get_db_mtime(db_path)
 
     if "db_last_mtime" not in st.session_state:
@@ -381,18 +381,28 @@ if __name__ == "__main__":
 
     if current_mtime != st.session_state.db_last_mtime:
         
-        st.cache_data.clear()     # Löscht gecachte Dataframes/Queries
-        st.cache_resource.clear() # Löscht gecachte Verbindungen/Objekte
+        st.toast("Neue Daten erkannt! Aktualisiere...", icon="🔄")
         
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        
+        if "con" in st.session_state:
+            try:
+                st.session_state.con.close()
+            except:
+                pass
+            del st.session_state.con # Aus dem State werfen
+
         st.session_state.db_last_mtime = current_mtime
         
         st.rerun()
 
+    
     try:
-
         con = helpers.get_connection(db_path)
         
-        # Initialisiere Klassen
+        st.session_state.con = con 
+
         frames = DataFrames(con)
         bar = BarCharts(con)
         pie = PieCharts(con)
@@ -400,13 +410,6 @@ if __name__ == "__main__":
         
         main()
         
-        # Optional: Verbindung am Ende explizit schließen
-        con.close()
-
-    except duckdb.IOException:
-        st.error("⚠️ Datenbank wird gerade kopiert. Bitte in 5 Sekunden neu laden.")
-        time.sleep(5)
-        st.rerun()
     except Exception as e:
         st.error(f"Fehler: {e}")
 
