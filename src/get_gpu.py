@@ -5,6 +5,7 @@ import toml
 import gpu_node_data
 from collections import defaultdict
 import os
+import sys
 
 def get_available_gpus_per_node(prom_base_url):
     url = f"{prom_base_url}/api/v1/query?query=nvidia_smi_gpu_info"
