@@ -372,7 +372,7 @@ if __name__ == "__main__":
         </style>
         """)
 
-    current_mtime = helpers.get_last_timestamp(db_path)
+    current_mtime = helpers.get_db_timestamp(db_path)
 
     # 2. Prüfen: Haben wir diesen Zeitstempel schon im Session State?
     if "db_last_mtime" not in st.session_state:
