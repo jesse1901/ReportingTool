@@ -169,13 +169,13 @@ class helpers:
                 val = f.read().strip() # 'a' oder 'b'
                 
             if val == "b":
-                return os.path.join(BASE_DIR, "max-reports_b.duckdb")
+                return os.path.join(BASE_DIR, "max-reports-b.duckdb")
             else:
-                return os.path.join(BASE_DIR, "max-reports_a.duckdb")
+                return os.path.join(BASE_DIR, "max-reports-a.duckdb")
                 
         except Exception:
             # Fallback auf A
-            return os.path.join(BASE_DIR, "max-reports_a.duckdb")
+            return os.path.join(BASE_DIR, "max-reports-a.duckdb")
 
     def get_pointer_mtime():
         """Prüft, wann umgeschaltet wurde."""

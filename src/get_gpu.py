@@ -193,16 +193,19 @@ BASE_DIR = "/var/www/max-reports/ReportingTool/database"
 POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
 
 def get_current_db_path():
-        """Liest den Pfad zur aktuell aktiven Datenbank aus der Textdatei."""
+        """Liest a oder b und gibt den vollen Pfad zurück."""
         try:
             with open(POINTER_FILE, "r") as f:
-                filename = f.read().strip()
-                full_path = os.path.join(BASE_DIR, filename)
-                if os.path.exists(full_path):
-                    return full_path
+                val = f.read().strip() # 'a' oder 'b'
+                
+            if val == "b":
+                return os.path.join(BASE_DIR, "max-reports-b.duckdb")
+            else:
+                return os.path.join(BASE_DIR, "max-reports-a.duckdb")
+                
         except Exception:
-            pass
-        return os.path.join(BASE_DIR, "max-reports.duckdb")
+            # Fallback auf A
+            return os.path.join(BASE_DIR, "max-reports-a.duckdb")
 
 
 if __name__ == "__main__":

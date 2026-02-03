@@ -25,8 +25,6 @@ else
     SOURCE_DB="$DB_B"
 fi
 
-# 3. Vorbereitung: Kopiere die aktuelle DB in die Ziel-DB als Basis
-# (Nur nötig, wenn slurm2sql auf alten Daten aufbaut)
 if [ -f "$SOURCE_DB" ]; then
     cp "$SOURCE_DB" "$TARGET_DB"
 fi
