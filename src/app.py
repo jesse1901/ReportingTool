@@ -380,6 +380,7 @@ if __name__ == "__main__":
         st.session_state.last_pointer_update = pointer_mtime
 
     if pointer_mtime != st.session_state.last_pointer_update:
+        st.toast("Wechsle Datenbank (A/B Switch)...", icon="🔀")
         
         if "con" in st.session_state:
             try:
@@ -387,15 +388,16 @@ if __name__ == "__main__":
             except:
                 pass
             del st.session_state.con
-
-        gc.collect()
+        
         st.cache_data.clear()
         st.cache_resource.clear()
 
+        gc.collect()
+
         st.session_state.last_pointer_update = pointer_mtime
-        
         time.sleep(0.5)
         st.rerun()
+
 
     try:
         current_db_path = helpers.get_current_db_path()
@@ -412,9 +414,5 @@ if __name__ == "__main__":
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
         
-        main()
-
     except Exception as e:
-        st.error(f"Warte auf Datenbank... ({e})")
-
-
+        st.error(f"Fehler: {e}")
