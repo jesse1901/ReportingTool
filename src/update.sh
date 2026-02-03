@@ -4,8 +4,8 @@ set -e
 # Pfade
 BASE_DIR="/var/www/max-reports/ReportingTool/database"
 POINTER_FILE="$BASE_DIR/current_db.txt"
-DB_A="$BASE_DIR/max-reports_a.duckdb"
-DB_B="$BASE_DIR/max-reports_b.duckdb"
+DB_A="$BASE_DIR/max-reports-a.duckdb"
+DB_B="$BASE_DIR/max-reports-b.duckdb"
 
 # 1. Bestimmen, wer gerade aktiv ist
 if [ ! -f "$POINTER_FILE" ]; then
