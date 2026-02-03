@@ -4,6 +4,8 @@ import sqlite3
 import toml
 import duckdb
 import subprocess
+import time 
+import gc
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
@@ -387,6 +389,7 @@ if __name__ == "__main__":
                 pass
             del st.session_state.con
 
+        gc.collect()
         st.cache_data.clear()
         st.cache_resource.clear()
 
