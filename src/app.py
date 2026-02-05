@@ -413,6 +413,6 @@ if __name__ == "__main__":
         bar = BarCharts(con)
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
-        
+        main()
     except Exception as e:
         st.error(f"Fehler: {e}")
