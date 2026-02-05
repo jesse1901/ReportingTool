@@ -8,7 +8,6 @@ class BarCharts:
     def __init__(self, connection):
         self.con = connection
 
-    @st.cache_data(ttl=3600, show_spinner=False)
     def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         st.markdown('Total Lost CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded')
 
@@ -116,7 +115,6 @@ class BarCharts:
 
         st.plotly_chart(fig)
     
-    @st.cache_data(ttl=3600, show_spinner=False)
     def job_counts_by_log2(_self, start_date, end_date, number, partition_selector, user_role, current_user=None, allowed_groups=None) -> None:
         st.markdown('Job Count by Job Time', help='Partition "jhub" and Interactive Jobs are excluded')
 
