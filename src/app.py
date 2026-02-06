@@ -15,12 +15,12 @@ from documentation import Documentation
 from helpers import helpers
 secrets = toml.load('.streamlit/secrets.toml')
 
-ALLOWED_USERS = secrets['users']['allowed_users']
-ADMIN_USERS = secrets['users']['admin_users']
-XFEL_USERS = secrets['users']['xfel_users']
-UHH_USERS = secrets['users']['uhh_users']
-PINKTUM_USERS = secrets['users']['pinktum_users']
-CRYSTAL_USERS = secrets['users']['crystalsfirst_users']
+ALLOWED_USER = secrets['user']['allowed_user']
+ADMIN_USER = secrets['user']['admin_user']
+XFEL_USER = secrets['user']['xfel_user']
+UHH_USER = secrets['user']['uhh_user']
+PINKTUM_USER = secrets['user']['pinktum_user']
+CRYSTAL_USER = secrets['user']['crystalsfirst_user']
 
 LOGO_URL = secrets['urls']['logo']
 ICON_URL = secrets['urls']['icon']
@@ -33,22 +33,22 @@ def login():
         st.stop()
 
 def is_user_crystalsfirst(username):
-    return username in CRYSTAL_USERS
+    return username in CRYSTAL_USER
 
 def is_user_pinktum(username):
-    return username in PINKTUM_USERS
+    return username in PINKTUM_USER
 
 def is_user_allowed(username):
-    return username in ALLOWED_USERS
+    return username in ALLOWED_USER
 
 def is_user_admin(username):
-    return username in ADMIN_USERS
+    return username in ADMIN_USER
 
 def is_user_xfel(username):
-    return username in XFEL_USERS
+    return username in XFEL_USER
 
 def is_user_uhh(username):
-    return username in UHH_USERS
+    return username in UHH_USER
 
 def get_slurm_partitions():
     """
@@ -415,6 +415,6 @@ if __name__ == "__main__":
         scatter = ScatterCharts(con)
         main()
         con.close()
-        
+
     except Exception as e:
         st.error(f"Fehler: {e}")
