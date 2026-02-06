@@ -35,7 +35,7 @@ class DataFrames:
         </html>
         """
 
-    @st.cache_data(ttl=3600, show_spinner=False)
+    @st.cache_data(ttl=600, show_spinner=False)
     def fetch_all_data(
         _self, 
         current_user: str, 
@@ -179,6 +179,7 @@ no matter which option is selected
             if len(filtered_df) > 0:
                 helpers.get_job_script(jobid=filtered_df.JobID.iloc[0])
 
+    @st.cache_data(ttl=600, show_spinner=False)
     def frame_group_by_user(
         _self, 
         start_date: str, 

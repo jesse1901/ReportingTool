@@ -16,6 +16,7 @@ class PieCharts:
         'NODE_FAIL': '#566573'
         }
     
+    @st.cache_data(ttl=600, show_spinner=False)
     def pie_chart_by_session_state(
         _self,
         start_date,
@@ -110,7 +111,8 @@ class PieCharts:
         df_sorted = grouped_raw.sort_values(by="lost_cpu_days", ascending=False)
         st.dataframe(df_sorted[["Category", "lost_cpu_days"]], hide_index=True, use_container_width=False)
 
-
+    
+    @st.cache_data(ttl=600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
         # DuckDB Notes:
         # 1. "Partition", "User", "Start", "End" quoted.
@@ -181,6 +183,9 @@ class PieCharts:
         df_sorted = df.sort_values(by='JobCount', ascending=False)
         st.dataframe(df_sorted, hide_index=True, use_container_width=False)
 
+
+    
+    @st.cache_data(ttl=600, show_spinner=False)
     def pie_chart_job_runtime(
         _self,
         start_date,
@@ -292,7 +297,7 @@ class PieCharts:
         st.write("Cluster Efficiency")
         st.dataframe(df2, use_container_width=False)
 
-
+    @st.cache_data(ttl=600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         
         scale = "0.5" if scale_efficiency else "1.0"
