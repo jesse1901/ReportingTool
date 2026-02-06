@@ -414,5 +414,7 @@ if __name__ == "__main__":
         pie = PieCharts(con)
         scatter = ScatterCharts(con)
         main()
+        con.close()
+        
     except Exception as e:
         st.error(f"Fehler: {e}")
