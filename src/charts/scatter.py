@@ -7,7 +7,6 @@ class ScatterCharts:
     def __init__(self, connection):
         self.con = connection
     
-    @st.cache_data(ttl=3600, show_spinner=False)
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
         st.markdown('CPU & GPU Efficiency by Job Duration', help='Partition "jhub" and Interactive Jobs are excluded')
         

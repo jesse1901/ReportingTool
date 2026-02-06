@@ -16,7 +16,6 @@ class PieCharts:
         'NODE_FAIL': '#566573'
         }
     
-    @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_session_state(
         _self,
         start_date,
@@ -76,8 +75,6 @@ class PieCharts:
             st.warning("No data available for the selected date range or partition.")
             return
 
-        # --- Data Processing (Pandas logic remains the same) ---
-
         # Sum lost time per category (still raw; may contain negatives)
         grouped_raw = df.groupby("Category", as_index=False)["lost_cpu_days"].sum()
         grouped_raw.rename(columns={"lost_cpu_days": "lost_days_raw"}, inplace=True)
@@ -96,7 +93,7 @@ class PieCharts:
             else:
                 grouped_raw["lost_cpu_days"] = 0.0
 
-        grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round(1)
+        grouped_raw["lost_cpu_days"] = grouped_raw["lost_cpu_days"].round()
 
         # Plot
         fig = px.pie(
@@ -114,7 +111,6 @@ class PieCharts:
         st.dataframe(df_sorted[["Category", "lost_cpu_days"]], hide_index=True, use_container_width=False)
 
 
-    @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_by_job_count(_self, start_date, end_date, current_user, user_role, partition_selector=None, allowed_groups=None):
         # DuckDB Notes:
         # 1. "Partition", "User", "Start", "End" quoted.
@@ -185,7 +181,6 @@ class PieCharts:
         df_sorted = df.sort_values(by='JobCount', ascending=False)
         st.dataframe(df_sorted, hide_index=True, use_container_width=False)
 
-    @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_job_runtime(
         _self,
         start_date,
@@ -298,7 +293,6 @@ class PieCharts:
         st.dataframe(df2, use_container_width=False)
 
 
-    @st.cache_data(ttl=3600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         
         scale = "0.5" if scale_efficiency else "1.0"

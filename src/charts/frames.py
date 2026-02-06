@@ -49,20 +49,23 @@ class DataFrames:
         allowed_groups=None
     ) -> pd.DataFrame:
 
-        base_query = """
-        SELECT 
-            jobID, JobName, "User", "Account", State, 
-            ROUND(Elapsed / 3600, 2) AS Elapsed_hours, 
-            "Start", "End", "Partition", NodeList, AllocCPUS,  
-            ROUND((CPUTime / 3600), 2) AS CPU_hours, 
-            ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
-            ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
-            ROUND(CPUEff * 100, 2) AS CPUEff, 
-            NGPUS AS AllocGPUS, 
-            ROUND(GpuUtil * 100, 2) AS GPUEff,
-            ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
-            Comment, SubmitLine 
-        FROM allocations
+        # base_query = """
+        # SELECT 
+        #     jobID, JobName, "User", "Account", State, 
+        #     ROUND(Elapsed / 3600, 2) AS Elapsed_hours, 
+        #     "Start", "End", "Partition", NodeList, AllocCPUS,  
+        #     ROUND((CPUTime / 3600), 2) AS CPU_hours, 
+        #     ROUND((TotalCPU / 3600), 2) AS CPU_hours_used, 
+        #     ROUND((CPUTime - TotalCPU) / 3600, 2) AS CPU_hours_lost, 
+        #     CONCAT(ROUND(CPUEff * 100, 2), '%') AS CPUEff, 
+        #     NGPUS AS AllocGPUS, 
+        #     CASE WHEN GpuUtil IS NOT NULL THEN CONCAT(ROUND(GpuUtil * 100, 2), '%') ELSE NULL END AS GPUEff,
+        #     ROUND((NGPUS * Elapsed) * (1 - GpuUtil) / 3600, 2) AS GPU_hours_lost, 
+        #     Comment, SubmitLine 
+        # FROM allocations
+        # """
+        base_query = """ 
+        SELECT * FROM allocations
         """
 
         conditions = []
@@ -87,7 +90,7 @@ class DataFrames:
             params.extend(partition_selector)
 
 
-        if allowed_groups is not None and user_role == 'uhh':
+        if allowed_groups is not None and user_role in ["uhh", "crystalsfirst", "pinktum"]:
             placeholders = ','.join('?' for _ in allowed_groups)
             conditions.append(f'"Account" IN ({placeholders})')
             params.extend(allowed_groups)
@@ -176,7 +179,6 @@ no matter which option is selected
             if len(filtered_df) > 0:
                 helpers.get_job_script(jobid=filtered_df.JobID.iloc[0])
 
-    @st.cache_data(ttl=3600, show_spinner=False)
     def frame_group_by_user(
         _self, 
         start_date: str, 
@@ -203,46 +205,49 @@ no matter which option is selected
         # 4. NULLIF used to prevent division by zero.
         
         base_query_normal = """
-        SELECT
+            SELECT
             eff."User",
             STRING_AGG(DISTINCT eff."Account", ',') AS "Account",
             COUNT(eff.JobID) AS JobCount,
-            ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
+            
+            -- CPU Metrics (NO DIVISION BY 2)
+            -- Calculates Lost Days based on raw reserved time. 
+            -- GREATEST(0, ...) ensures we don't get negative lost days.
+            ROUND(GREATEST(0, SUM(eff.cpu_s_reserved - eff.cpu_s_used)) / 86400.0, 1) AS Lost_CPU_days,
+            
+            -- Raw CPU Days (NO DIVISION BY 2)
             ROUND(SUM(slurm.CPUTime) / 86400.0, 1) AS cpu_days,
-            printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / SUM(eff.Elapsed * eff.NCPUS)) AS CPUEff,
-            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
-            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
-            CASE WHEN SUM(eff.NGPUs) > 0 
-                 THEN printf('%2.0f%%', 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)) 
-                 ELSE NULL END AS GPUEff,
-            ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
-            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
-        FROM eff
-        JOIN slurm ON eff.JobID = slurm.JobID
-        WHERE eff."Start" >= ?
-        AND eff."End" <= ?
-        AND eff."End" IS NOT NULL 
-        AND slurm."Partition" != 'jhub'
-        AND slurm.JobName != 'interactive'
-        """
+            
+            -- CPUEff (NO DIVISION BY 2)
+            -- Calculated dynamically: (Used / Reserved) * 100
+            -- Clipped at 100% using LEAST
+            CONCAT(ROUND(LEAST(100.0, 
+                (SUM(eff.cpu_s_used) / NULLIF(SUM(eff.cpu_s_reserved), 0)) * 100
+            ), 1), '%') AS CPUEff,
 
-        # Query with hyperthreading scaling applied
-        # Uses LEAST(100, ...) to cap efficiency at 100% cleanly
-        base_query_scaled = """
-        SELECT
-            eff."User",
-            STRING_AGG(DISTINCT eff."Account", ',') AS "Account",
-            COUNT(eff.JobID) AS JobCount,
-            ROUND(SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used) / 86400.0, 1) AS Lost_CPU_days,
-            ROUND(SUM(slurm.CPUTime) / 86400.0 / 2.0, 1) AS cpu_days,
-            ROUND(LEAST(100, (100 * SUM(eff.Elapsed * eff.NCPUS * eff.CPUEff) / NULLIF(SUM(eff.Elapsed * eff.NCPUS), 0)) * 2), 1) AS CPUEff,
-            ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1) AS GPU_Days,
-            ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - eff.GPUeff)) / 86400.0, 1) AS Lost_GPU_Days,
-            CASE WHEN SUM(eff.NGPUs) > 0 
-                 THEN 100 * SUM(eff.Elapsed * eff.NGPUs * eff.GPUeff) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
-                 ELSE NULL END AS GPUEff,
+            -- GPU Metrics (Sanitized)
+            -- GPU_Days: Returns NULL if 0
+            NULLIF(ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1), 0) AS GPU_Days,
+            
+            -- Lost_GPU_Days: Sanitize NaN/NULL values to 0
+            CASE WHEN SUM(eff.NGPUs) > 0 THEN
+                ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - 
+                    CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+                )) / 86400.0, 1)
+            ELSE NULL END AS Lost_GPU_Days,
+            
+            -- GPUEff: Sanitize NaN/NULL values to 0%
+            CASE WHEN SUM(eff.NGPUs) > 0 THEN 
+                CONCAT(ROUND(
+                    100.0 * SUM(eff.Elapsed * eff.NGPUs * CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+                    ) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
+                , 0),'%')
+            ELSE NULL END AS GPUEff,
+
+            -- IO Metrics
             ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
             ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
+
         FROM eff
         JOIN slurm ON eff.JobID = slurm.JobID
         WHERE eff."Start" >= ?
@@ -250,7 +255,60 @@ no matter which option is selected
         AND eff."End" IS NOT NULL 
         AND slurm."Partition" != 'jhub'
         AND slurm.JobName != 'interactive'
+
         """
+
+        base_query_scaled = """
+        SELECT
+            eff."User",
+            STRING_AGG(DISTINCT eff."Account", ',') AS "Account",
+            COUNT(eff.JobID) AS JobCount,
+            
+            -- CPU Metrics
+            ROUND(GREATEST(0, SUM((eff.cpu_s_reserved / 2.0) - eff.cpu_s_used)) / 86400.0, 1) AS Lost_CPU_days,
+            ROUND(SUM(slurm.CPUTime) / 86400.0 / 2.0, 1) AS cpu_days,
+            
+            -- CPUEff: Clipped at 100%
+            CONCAT(ROUND(LEAST(100.0, 
+                (SUM(eff.cpu_s_used) / NULLIF(SUM(eff.cpu_s_reserved / 2.0), 0)) * 100
+            ), 1), '%') AS CPUEff,
+
+            -- GPU Metrics
+            -- GPU_Days: Returns NULL if 0
+            NULLIF(ROUND(SUM(eff.Elapsed * eff.NGPUs) / 86400.0, 1), 0) AS GPU_Days,
+            
+            -- Lost_GPU_Days: SANITIZED
+            -- We use a CASE statement to verify GPUeff is a valid number between 0 and 1. 
+            -- If it is NaN, NULL, or negative, we treat it as 0.
+            CASE WHEN SUM(eff.NGPUs) > 0 THEN
+                ROUND(SUM((eff.NGPUS * eff.Elapsed) * (1 - 
+                    CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+                )) / 86400.0, 1)
+            ELSE NULL END AS Lost_GPU_Days,
+            
+            -- GPUEff: SANITIZED
+            -- Same logic: If GPUeff is NaN, it fails the 'BETWEEN' check and becomes 0.
+            CASE WHEN SUM(eff.NGPUs) > 0 THEN 
+                CONCAT(ROUND(
+                    100.0 * SUM(eff.Elapsed * eff.NGPUs * CASE WHEN eff.GPUeff BETWEEN 0 AND 1 THEN eff.GPUeff ELSE 0 END
+                    ) / NULLIF(SUM(eff.Elapsed * eff.NGPUs), 0)
+                , 0),'%')
+            ELSE NULL END AS GPUEff,
+
+            -- IO Metrics
+            ROUND(SUM(eff.TotDiskRead / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS read_MiBps,
+            ROUND(SUM(eff.TotDiskWrite / 1048576.0) / NULLIF(SUM(eff.Elapsed), 0), 2) AS write_MiBps
+
+        FROM eff
+        JOIN slurm ON eff.JobID = slurm.JobID
+        WHERE eff."Start" >= ?
+        AND eff."End" <= ? 
+        AND eff."End" IS NOT NULL 
+        AND slurm."Partition" != 'jhub'
+        AND slurm.JobName != 'interactive'
+
+        """
+
 
         # Choose query based on scaling preference
         base_query = base_query_scaled if scale_efficiency else base_query_normal

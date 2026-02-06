@@ -3,10 +3,14 @@ import pandas as pd
 import pytz
 import subprocess
 from datetime import timedelta
+import os
+import duckdb
 
-
+BASE_DIR = "/var/www/max-reports/ReportingTool/database"
+POINTER_FILE = os.path.join(BASE_DIR, "current_db.txt")
 
 class helpers:
+
     def timestring_to_seconds(timestring):
         if pd.isna(timestring) or timestring == '0' or timestring == 0 or timestring.strip() == '':
             return 0
@@ -157,3 +161,29 @@ class helpers:
             params.extend(allowed_groups)
 
         return query, params
+
+    def get_current_db_path():
+        """Liest a oder b und gibt den vollen Pfad zurück."""
+        try:
+            with open(POINTER_FILE, "r") as f:
+                val = f.read().strip() # 'a' oder 'b'
+                
+            if val == "b":
+                return os.path.join(BASE_DIR, "max-reports-b.duckdb")
+            else:
+                return os.path.join(BASE_DIR, "max-reports-a.duckdb")
+                
+        except Exception:
+            # Fallback auf A
+            return os.path.join(BASE_DIR, "max-reports-a.duckdb")
+
+    def get_pointer_mtime():
+        """Prüft, wann umgeschaltet wurde."""
+        try:
+            return os.path.getmtime(POINTER_FILE)
+        except OSError:
+            return 0
+
+    def get_connection(db_path):
+        # read_only=True ist wichtig!
+        return duckdb.connect(db_path, read_only=True)
