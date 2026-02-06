@@ -380,7 +380,6 @@ if __name__ == "__main__":
         st.session_state.last_pointer_update = pointer_mtime
 
     if pointer_mtime != st.session_state.last_pointer_update:
-        st.toast("Wechsle Datenbank (A/B Switch)...", icon="🔀")
         
         if "con" in st.session_state:
             try:
