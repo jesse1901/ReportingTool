@@ -64,6 +64,7 @@ class GpuBarCharts:
             st.warning("No data available for the selected criteria.")
             return
         
+
         result_df['Lost GPU Days'] = result_df['Lost GPU Days'].clip(lower=0)
         result_df['Total GPU Days'] = result_df['Total GPU Days'].clip(lower=0)
         result_df['Used GPU Days'] = result_df['Total GPU Days'] - result_df['Lost GPU Days']
@@ -75,15 +76,18 @@ class GpuBarCharts:
                                    var_name='Time Type', 
                                    value_name='GPU Days')
 
+        # 3. Create the figure
         fig = px.bar(df_melted, 
                      x='User', 
                      y='GPU Days', 
                      color='Time Type',
-                     barmode='stack',
+                     # It is safer to remove barmode from here and put it in update_layout
                      hover_data=['job_count', 'Account', 'Total GPU Days'],
                      color_discrete_map={'Used GPU Days': '#5ce488', 'Lost GPU Days': '#ff2b2b'})
 
+        # 4. Enforce Stacking in Layout
         fig.update_layout(
+            barmode='stack',  # <--- This forces the bars to stack on top of each other
             xaxis=dict(
                 title='User',
                 tickangle=-45
@@ -94,4 +98,3 @@ class GpuBarCharts:
         )
 
         st.plotly_chart(fig)
-
