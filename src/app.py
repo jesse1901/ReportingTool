@@ -232,7 +232,7 @@ def main():
             username = None
 
         if user_role != 'user':
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview", "GPU Charts", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["All Jobs & User", "CPU-Time Charts", "CPU-Charts", "Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
@@ -291,7 +291,7 @@ def main():
                     Documentation.documentation()
                 
         elif user_role == 'user':    
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tables", "Charts", "Overview", "GPU Charts", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["All Jobs", "CPU-Charts", "Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
@@ -314,11 +314,11 @@ def main():
                         pie.pie_chart_by_job_count(start_date, end_date, username, user_role, partition_selector)
                     with col4_5:
                         pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-                with tab3:
+                with tab4:
                     col1,col2 = st.columns([1,1])
                     with col1:
                             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
-                with tab4:
+                with tab3:
                     col_num_gpu, _ = st.columns([1, 2])
                     with col_num_gpu:
                         number_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number_user")
