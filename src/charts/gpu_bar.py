@@ -79,11 +79,11 @@ class GpuBarCharts:
                      x='User', 
                      y='GPU Days', 
                      color='Time Type',
+                     barmode='stack',
                      hover_data=['job_count', 'Account', 'Total GPU Days'],
                      color_discrete_map={'Used GPU Days': '#5ce488', 'Lost GPU Days': '#ff2b2b'})
 
         fig.update_layout(
-            barmode='stack',
             xaxis=dict(
                 title='User',
                 tickangle=-45
