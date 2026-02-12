@@ -10,7 +10,7 @@ class GpuBarCharts:
         
     @st.cache_data(ttl=600, show_spinner=False) 
     def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None) -> None:
-        st.markdown('Total Lost GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
+        st.markdown('Total GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
 
         params = [start_date, end_date]
 
@@ -28,7 +28,8 @@ class GpuBarCharts:
             SELECT 
                 "User",
                 COUNT(JobID) AS job_count,
-                ROUND(SUM((NGPUS * Elapsed) * (1 - CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS lost_gpu_days,
+                ROUND(SUM((NGPUS * Elapsed) * (1 - CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS "Lost GPU Days",
+                ROUND(SUM((NGPUS * Elapsed) * (CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS "Used GPU Days",
                 STRING_AGG(DISTINCT "Account", ',') As Account
             FROM allocations
             {base_conditions}
@@ -49,9 +50,9 @@ class GpuBarCharts:
             params.extend(allowed_groups)
         
         if number:
-            query += f' GROUP BY "User" ORDER BY lost_gpu_days DESC LIMIT {number}'
+            query += f' GROUP BY "User" ORDER BY "Used GPU Days" + "Lost GPU Days" DESC LIMIT {number}'
         else:
-            query += ' GROUP BY "User" ORDER BY lost_gpu_days DESC'
+            query += ' GROUP BY "User" ORDER BY "Used GPU Days" + "Lost GPU Days" DESC'
 
         try:
             result_df = _self.con.execute(query, params).df()
@@ -63,30 +64,32 @@ class GpuBarCharts:
             st.warning("No data available for the selected criteria.")
             return
         
-        result_df['lost_gpu_days'] = result_df['lost_gpu_days'].clip(lower=0)
-        
-        max_lost_time = result_df['lost_gpu_days'].max()
-        if max_lost_time > 0:
-            tick_vals = np.linspace(0, max_lost_time, num=10)
-            tick_text = [int(val) for val in tick_vals]
-        else:
-            tick_vals = [0]
-            tick_text = [0]
+        result_df['Lost GPU Days'] = result_df['Lost GPU Days'].clip(lower=0)
+        result_df['Used GPU Days'] = result_df['Used GPU Days'].clip(lower=0)
+        result_df['Total GPU Days'] = result_df['Lost GPU Days'] + result_df['Used GPU Days']
 
-        fig = px.bar(result_df, x='User', y='lost_gpu_days', hover_data=['job_count', 'Account'])
+        df_melted = result_df.melt(id_vars=['User', 'job_count', 'Account', 'Total GPU Days'], 
+                                   value_vars=['Used GPU Days', 'Lost GPU Days'],
+                                   var_name='Time Type', 
+                                   value_name='GPU Days')
+
+        fig = px.bar(df_melted, 
+                     x='User', 
+                     y='GPU Days', 
+                     color='Time Type',
+                     hover_data=['job_count', 'Account', 'Total GPU Days'],
+                     color_discrete_map={'Used GPU Days': '#5ce488', 'Lost GPU Days': '#ff2b2b'})
 
         fig.update_layout(
+            barmode='stack',
             xaxis=dict(
                 title='User',
                 tickangle=-45
             ),
             yaxis=dict(
-                title='Total Lost GPU Time (in Days)',
-                tickmode='array',
-                tickvals=tick_vals,
-                ticktext=tick_text,
-                tickformat='d'
+                title='Total GPU Time (in Days)'
             )
         )
 
         st.plotly_chart(fig)
+
