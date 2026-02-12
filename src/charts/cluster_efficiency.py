@@ -20,25 +20,41 @@ class ClusterEfficiencyCharts:
 
     @st.cache_data(ttl=600, show_spinner=False)
     def get_cpu_efficiency_data(_self, start_date, end_date, scale_efficiency):
+        # Scale Efficiency Faktor: 0.5 wenn aktiv, sonst 1.0
+        # Dieser Faktor gilt NUR für "Lost CPU Time" auf Nicht-GPU Nodes.
+        cpu_scale_factor = 0.5 if scale_efficiency else 1.0
         
         cpu_query = f"""
-        WITH cpu_data AS (
-            SELECT 
-                SUM(CASE WHEN slurm. => 0 THEN eff.cpu_s_used ELSE 0 END) AS cpu_with_gpu_seconds,
-                SUM(CASE WHEN slurm.NGPUS = 0 THEN eff.cpu_s_used ELSE 0 END) AS used_cpu_seconds,
-                SUM(eff.cpu_s_reserved - eff.cpu_s_used) AS lost_cpu_seconds
-            FROM eff
-            JOIN slurm ON eff.JobID = slurm.JobID
-            WHERE eff."Start" >= ? AND eff."End" <= ?
-            AND eff."End" IS NOT NULL
-            AND slurm."Partition" != 'jhub'
-            AND slurm.JobName != 'interactive'
-        )
-        SELECT
-            (cpu_with_gpu_seconds / 86400.0) * {0.5 if scale_efficiency else 1.0} AS cpu_with_gpu_days,
-            (used_cpu_seconds / 86400.0) * {0.5 if scale_efficiency else 1.0} AS used_cpu_days,
-            (lost_cpu_seconds / 86400.0) * {0.5 if scale_efficiency else 1.0} AS lost_cpu_days
-        FROM cpu_data;
+        SELECT 
+            -- 1. Total Used CPU Days (Grün) - Keine Skalierung
+            SUM(eff.cpu_s_used) / 86400.0 AS used_cpu_days,
+
+            -- 2. Lost CPU Days auf CPU Nodes (Rot) - Hier greift scale_efficiency
+            -- Bedingung: GpuUtil IS NULL (bedeutet keine GPU)
+            SUM(
+                CASE 
+                    WHEN slurm.GpuUtil IS NULL 
+                    THEN (eff.cpu_s_reserved - eff.cpu_s_used) * {cpu_scale_factor}
+                    ELSE 0 
+                END
+            ) / 86400.0 AS lost_cpu_days,
+
+            -- 3. Lost CPU Days auf GPU Nodes (Lila) - Hier KEINE Skalierung
+            -- Bedingung: GpuUtil IS NOT NULL (bedeutet GPU Job)
+            SUM(
+                CASE 
+                    WHEN slurm.GpuUtil IS NOT NULL 
+                    THEN (eff.cpu_s_reserved - eff.cpu_s_used)
+                    ELSE 0 
+                END
+            ) / 86400.0 AS lost_gpu_node_cpu_days
+
+        FROM eff
+        JOIN slurm ON eff.JobID = slurm.JobID
+        WHERE eff."Start" >= ? AND eff."End" <= ?
+        AND eff."End" IS NOT NULL
+        AND slurm."Partition" != 'jhub'
+        AND slurm.JobName != 'interactive'
         """
         
         with duckdb.connect(_self.db_path, read_only=True) as con:
@@ -53,38 +69,50 @@ class ClusterEfficiencyCharts:
             st.warning("No CPU data available for the selected time range.")
             return
 
-        cpu_with_gpu_days = cpu_df['cpu_with_gpu_days'].iloc[0]
-        used_cpu_days = cpu_df['used_cpu_days'].iloc[0]
-        lost_cpu_days = cpu_df['lost_cpu_days'].iloc[0]
+        # Werte extrahieren (mit Fallback auf 0 falls None)
+        used_cpu_days = cpu_df['used_cpu_days'].iloc[0] or 0
+        lost_cpu_days = cpu_df['lost_cpu_days'].iloc[0] or 0
+        lost_gpu_node_cpu_days = cpu_df['lost_gpu_node_cpu_days'].iloc[0] or 0
         
-        fig = go.Figure()
+        # Negative Werte bereinigen (Clipping)
+        used_cpu_days = max(0, used_cpu_days)
+        lost_cpu_days = max(0, lost_cpu_days)
+        lost_gpu_node_cpu_days = max(0, lost_gpu_node_cpu_days)
 
-        fig.add_trace(go.Bar(
-            name='CPU with GPU',
-            x=['Cluster'],
-            y=[cpu_with_gpu_days],
-            marker_color='#5ce488'
-        ))
+        fig = go.Figure()
         
+        # 1. Used CPU (Grün)
         fig.add_trace(go.Bar(
             name='Used CPU',
             x=['Cluster'],
             y=[used_cpu_days],
-            marker_color='#1c83e1'
+            marker_color='#5ce488',
+            hovertemplate="Used CPU Days: %{y:.1f}<extra></extra>"
         ))
 
+        # 2. Lost CPU auf GPU Nodes (Lila) - Entschuldbar
+        fig.add_trace(go.Bar(
+            name='Lost CPU (GPU Context)',
+            x=['Cluster'],
+            y=[lost_gpu_node_cpu_days],
+            marker_color='#bf55ec',
+            hovertemplate="Lost CPU (GPU Context): %{y:.1f}<br><i>(Excusable due to GPU usage)</i><extra></extra>"
+        ))
+
+        # 3. Lost CPU Standard (Rot)
         fig.add_trace(go.Bar(
             name='Lost CPU',
             x=['Cluster'],
             y=[lost_cpu_days],
-            marker_color='#ff2b2b'
+            marker_color='#ff2b2b',
+            hovertemplate="Lost CPU Days: %{y:.1f}<extra></extra>"
         ))
         
         fig.update_layout(
             barmode='stack',
-            title_text='CPU Usage',
+            title_text='Overall CPU Usage',
             yaxis_title='CPU Days',
-            xaxis_title='Cluster',
+            xaxis_title='',
             legend_title_text='Usage Type'
         )
 
@@ -93,6 +121,8 @@ class ClusterEfficiencyCharts:
 
     @st.cache_data(ttl=600, show_spinner=False)
     def get_gpu_efficiency_data(_self, start_date, end_date):
+        # Hier wird GpuUtil IS NOT NULL verwendet, um sicherzustellen, dass nur Jobs mit GPUs betrachtet werden.
+        # Scale Efficiency wird hier NICHT angewendet.
         gpu_query = """
         SELECT 
             SUM(NGPUS * Elapsed * GpuUtil) / 86400.0 AS used_gpu_days,
@@ -100,7 +130,7 @@ class ClusterEfficiencyCharts:
         FROM allocations
         WHERE "Start" >= ? AND "End" <= ?
         AND "End" IS NOT NULL
-        AND NGPUS > 0
+        AND GpuUtil IS NOT NULL
         AND "Partition" != 'jhub'
         AND JobName != 'interactive'
         """
@@ -113,12 +143,12 @@ class ClusterEfficiencyCharts:
     def display_gpu_efficiency_chart(self, start_date, end_date):
         gpu_df = self.get_gpu_efficiency_data(start_date, end_date)
 
-        if gpu_df.empty:
+        if gpu_df.empty or gpu_df['used_gpu_days'].iloc[0] is None:
             st.warning("No GPU data available for the selected time range.")
             return
 
-        used_gpu_days = gpu_df['used_gpu_days'].iloc[0]
-        unused_gpu_days = gpu_df['unused_gpu_days'].iloc[0]
+        used_gpu_days = gpu_df['used_gpu_days'].iloc[0] or 0
+        unused_gpu_days = gpu_df['unused_gpu_days'].iloc[0] or 0
 
         fig = go.Figure()
 
@@ -138,11 +168,10 @@ class ClusterEfficiencyCharts:
 
         fig.update_layout(
             barmode='stack',
-            title_text='GPU Usage',
+            title_text='Overall GPU Usage',
             yaxis_title='GPU Days',
-            xaxis_title='Cluster',
+            xaxis_title='',
             legend_title_text='Usage Type'
         )
 
         st.plotly_chart(fig)
-
