@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 from helpers import helpers
+import duckdb
 
 class DataFrames:
-    def __init__(self, connection):
-        self.con = connection
+    def __init__(self, db_path):
+        self.db_path = db_path
 
         self.SCROLLBAR_CSS = """
         <html>
@@ -110,7 +111,8 @@ class DataFrames:
         base_query += 'ORDER BY "End" DESC LIMIT ?'
         params.append(int(number))
 
-        return _self.con.execute(base_query, params).df()
+        with duckdb.connect(_self.db_path, read_only=True) as con:
+            return con.execute(base_query, params).df()
 
 
 
@@ -331,7 +333,8 @@ no matter which option is selected
 
         # Execute query
         try:
-            df = _self.con.execute(base_query + ' GROUP BY eff."User"', params).df()
+            with duckdb.connect(_self.db_path, read_only=True) as con:
+                df = con.execute(base_query + ' GROUP BY eff."User"', params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return
@@ -356,4 +359,3 @@ no matter which option is selected
             help='Partition "jhub" and Interactive Jobs are excluded'
         )
         st.dataframe(df, use_container_width=False)
-

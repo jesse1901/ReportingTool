@@ -414,26 +414,17 @@ if __name__ == "__main__":
         time.sleep(0.5)
         st.rerun()
 
-    con = None
     try:
         current_db_path = helpers.get_current_db_path()
         
-        # Verbindung herstellen
-        con = helpers.get_connection(current_db_path)
-    
         # Klassen initialisieren
-        frames = DataFrames(con)
-        bar = BarCharts(con)
-        pie = PieCharts(con)
-        gpu_bar = GpuBarCharts(con)
-        gpu_pie = GpuPieCharts(con)
-        scatter = ScatterCharts(con)
+        frames = DataFrames(current_db_path)
+        bar = BarCharts(current_db_path)
+        pie = PieCharts(current_db_path)
+        gpu_bar = GpuBarCharts(current_db_path)
+        gpu_pie = GpuPieCharts(current_db_path)
+        scatter = ScatterCharts(current_db_path)
         main()
 
     except Exception as e:
         st.error(f"Fehler: {e}")
-    if con:
-        try:
-            con.close()
-        except Exception:
-            pass

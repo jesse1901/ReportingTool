@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from helpers import helpers
+import duckdb
 
 class ScatterCharts:
-    def __init__(self, connection):
-        self.con = connection
+    def __init__(self, db_path):
+        self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False)     
     def scatter_chart_data_cpu_gpu_eff(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None):
@@ -55,7 +56,8 @@ class ScatterCharts:
         query += ' ORDER BY "Elapsed" ASC'
         
         try:
-            df = _self.con.execute(query, params).df()
+            with duckdb.connect(_self.db_path, read_only=True) as con:
+                df = con.execute(query, params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return
@@ -117,4 +119,3 @@ class ScatterCharts:
         )
 
         st.plotly_chart(fig, theme=None)
-

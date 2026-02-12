@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from helpers import helpers
+import duckdb
 
 class GpuPieCharts:
-    def __init__(self, connection):
-        self.con = connection
+    def __init__(self, db_path):
+        self.db_path = db_path
         self.color_map = {
          'CANCELLED': "#803df5",
          'COMPLETED':  "#5ce488",
@@ -61,7 +62,8 @@ class GpuPieCharts:
         query += " GROUP BY Category"
 
         try:
-            df = _self.con.execute(query, params).df()
+            with duckdb.connect(_self.db_path, read_only=True) as con:
+                df = con.execute(query, params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return

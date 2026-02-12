@@ -4,10 +4,11 @@ import numpy as np
 import plotly.express as px
 from helpers import helpers
 import plotly.graph_objects as go
+import duckdb
 
 class BarCharts:
-    def __init__(self, connection):
-        self.con = connection
+    def __init__(self, db_path):
+        self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
     def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, use_log_scale=None) -> None:
@@ -71,7 +72,8 @@ class BarCharts:
             query += f' GROUP BY eff."User" ORDER BY {order_logic} DESC'
 
         try:
-            result_df = _self.con.execute(query, params).df()
+            with duckdb.connect(_self.db_path, read_only=True) as con:
+                result_df = con.execute(query, params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return
@@ -159,7 +161,8 @@ class BarCharts:
             params.append(current_user)
 
         try:
-            df = _self.con.execute(query, params).df()
+            with duckdb.connect(_self.db_path, read_only=True) as con:
+                df = con.execute(query, params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return
