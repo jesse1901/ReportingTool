@@ -63,10 +63,12 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
+        order_logic = '"Used CPU Days" + (CASE WHEN "Lost CPU Days" > 0 THEN "Lost CPU Days" ELSE 0 END)'
+
         if number:
-            query += f' GROUP BY eff."User" ORDER BY "Used CPU Days" + "Lost CPU Days" DESC LIMIT {number}'
+            query += f' GROUP BY eff."User" ORDER BY {order_logic} DESC LIMIT {number}'
         else:
-            query += ' GROUP BY eff."User" ORDER BY "Used CPU Days" + "Lost CPU Days" DESC'
+            query += f' GROUP BY eff."User" ORDER BY {order_logic} DESC'
 
         try:
             result_df = _self.con.execute(query, params).df()
@@ -116,10 +118,16 @@ class BarCharts:
             )
         ))
 
+        use_log_scale = st.checkbox("Logarithmic Scale", key="cpu_log_scale")
+
+        y_axis_config = {'title': 'Total CPU Time (in Days)'}
+        if use_log_scale:
+            y_axis_config['type'] = 'log'
+
         fig.update_layout(
             barmode='stack',
             xaxis=dict(title='User', tickangle=-45),
-            yaxis=dict(title='Total CPU Time (in Days)', type='log'),
+            yaxis=y_axis_config,
             legend_title_text='Time Type',
             hovermode="x unified"
         )

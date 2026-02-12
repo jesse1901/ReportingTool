@@ -109,11 +109,17 @@ class GpuBarCharts:
             )
         ))
 
+        use_log_scale = st.checkbox("Logarithmic Scale", key="gpu_log_scale")
+
+        y_axis_config = {'title': 'Total GPU Time (in Days)'}
+        if use_log_scale:
+            y_axis_config['type'] = 'log'
+
         # 3. Force the layout to stack
         fig.update_layout(
             barmode='stack',
             xaxis=dict(title='User', tickangle=-45),
-            yaxis=dict(title='Total GPU Time (in Days)', type='log'),
+            yaxis=y_axis_config,
             legend_title_text='Time Type',
             hovermode="x unified" # Optional: makes comparing easier
         )
