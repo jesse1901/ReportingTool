@@ -420,10 +420,7 @@ if __name__ == "__main__":
         
         # Verbindung herstellen
         con = helpers.get_connection(current_db_path)
-        
-        # Im State speichern, damit wir sie oben schließen können
-        st.session_state.con = con 
-
+    
         # Klassen initialisieren
         frames = DataFrames(con)
         bar = BarCharts(con)
