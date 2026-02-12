@@ -295,7 +295,7 @@ def main():
                     Documentation.documentation()
                 
         elif user_role == 'user':    
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["All Jobs", "CPU-Charts", "Overview", "GPU Charts", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["All Jobs", "CPU-Charts", "CPU-Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
