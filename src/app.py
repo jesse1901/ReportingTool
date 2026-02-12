@@ -9,6 +9,8 @@ import gc
 
 from charts.bar import BarCharts
 from charts.pie import PieCharts
+from charts.gpu_bar import GpuBarCharts
+from charts.gpu_pie import GpuPieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
 from documentation import Documentation
@@ -230,7 +232,7 @@ def main():
             username = None
 
         if user_role != 'user':
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Tables", "Job Data Charts", "Job State Charts", "Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
@@ -277,10 +279,19 @@ def main():
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
+                    col_num3, _ = st.columns([1,2])
+                    with col_num3:
+                        number3 = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                    col1, col2 = st.columns([1,1])
+                    with col1:
+                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups)
+                    with col2:
+                        gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector, allowed_groups)
+                with tab6:
                     Documentation.documentation()
                 
         elif user_role == 'user':    
-            tab1, tab2, tab3, tab4 = st.tabs(["Tables", "Charts", "Overview", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tables", "Charts", "Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_jobid, col_username, _ = st.columns([1, 1, 1, 2])
@@ -308,6 +319,15 @@ def main():
                     with col1:
                             scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector)
                 with tab4:
+                    col_num_gpu, _ = st.columns([1, 2])
+                    with col_num_gpu:
+                        number_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number_user")
+                    gpu_col1, gpu_col2 = st.columns([1,1])
+                    with gpu_col1:
+                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number_gpu, partition_selector)
+                    with gpu_col2:
+                        gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector)
+                with tab5:
                     Documentation.documentation()
     else:
         _ , col1, _ = st.columns([1, 2, 1])    
@@ -411,6 +431,8 @@ if __name__ == "__main__":
         frames = DataFrames(con)
         bar = BarCharts(con)
         pie = PieCharts(con)
+        gpu_bar = GpuBarCharts(con)
+        gpu_pie = GpuPieCharts(con)
         scatter = ScatterCharts(con)
         main()
         con.close()
