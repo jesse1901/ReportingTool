@@ -331,7 +331,7 @@ def main():
                         number_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number_user")
                     gpu_col1, gpu_col2 = st.columns([1,1])
                     with gpu_col1:
-                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number_gpu, partition_selector)
+                        gpu_bar.bar_chart_by_user(start_date, end_date, username, user_role, number_gpu, partition_selector)
                     with gpu_col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector)
                 with tab5:
