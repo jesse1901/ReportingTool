@@ -29,7 +29,7 @@ class GpuBarCharts:
                 "User",
                 COUNT(JobID) AS job_count,
                 ROUND(SUM((NGPUS * Elapsed) * (1 - CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS "Lost GPU Days",
-                ROUND(SUM((NGPUS * Elapsed) * (CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS "Used GPU Days",
+                ROUND(SUM(NGPUS * Elapsed) / 86400, 1) AS "Total GPU Days",
                 STRING_AGG(DISTINCT "Account", ',') As Account
             FROM allocations
             {base_conditions}
@@ -50,9 +50,9 @@ class GpuBarCharts:
             params.extend(allowed_groups)
         
         if number:
-            query += f' GROUP BY "User" ORDER BY "Used GPU Days" + "Lost GPU Days" DESC LIMIT {number}'
+            query += f' GROUP BY "User" ORDER BY "Total GPU Days" DESC LIMIT {number}'
         else:
-            query += ' GROUP BY "User" ORDER BY "Used GPU Days" + "Lost GPU Days" DESC'
+            query += ' GROUP BY "User" ORDER BY "Total GPU Days" DESC'
 
         try:
             result_df = _self.con.execute(query, params).df()
@@ -65,8 +65,10 @@ class GpuBarCharts:
             return
         
         result_df['Lost GPU Days'] = result_df['Lost GPU Days'].clip(lower=0)
+        result_df['Total GPU Days'] = result_df['Total GPU Days'].clip(lower=0)
+        result_df['Used GPU Days'] = result_df['Total GPU Days'] - result_df['Lost GPU Days']
         result_df['Used GPU Days'] = result_df['Used GPU Days'].clip(lower=0)
-        result_df['Total GPU Days'] = result_df['Lost GPU Days'] + result_df['Used GPU Days']
+
 
         df_melted = result_df.melt(id_vars=['User', 'job_count', 'Account', 'Total GPU Days'], 
                                    value_vars=['Used GPU Days', 'Lost GPU Days'],
