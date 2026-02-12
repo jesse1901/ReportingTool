@@ -8,7 +8,7 @@ POINTER_FILE="$DB_DIR/current_db.txt"
 
 # Database files
 DB_A="$DB_DIR/max-reports-a.duckdb"
-DB_B="$DB_DIR/max-reports_b.duckdb"
+DB_B="$DB_DIR/max-reports-b.duckdb"
 
 # Ensure the db directory exists
 mkdir -p "$DB_DIR"
