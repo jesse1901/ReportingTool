@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from helpers import helpers
+import plotly.graph_objects as go
 
 class BarCharts:
     def __init__(self, connection):
@@ -81,27 +82,46 @@ class BarCharts:
         result_df['Used CPU Days'] = result_df['Used CPU Days'].clip(lower=0)
         result_df['Total CPU Days'] = result_df['Lost CPU Days'] + result_df['Used CPU Days']
         
-        df_melted = result_df.melt(id_vars=['User', 'job_count', 'Account', 'Total CPU Days'], 
-                                   value_vars=['Used CPU Days', 'Lost CPU Days'],
-                                   var_name='Time Type', 
-                                   value_name='CPU Days')
+        fig = go.Figure()
 
-        fig = px.bar(df_melted, 
-                     x='User', 
-                     y='CPU Days', 
-                     color='Time Type',
-                     barmode='stack',
-                     hover_data=['job_count', 'Account', 'Total CPU Days'],
-                     color_discrete_map={'Used CPU Days': '#5ce488', 'Lost CPU Days': '#ff2b2b'})
+        fig.add_trace(go.Bar(
+            name='Used CPU Days',
+            x=result_df['User'],
+            y=result_df['Used CPU Days'],
+            marker_color='#5ce488',
+            customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
+            hovertemplate=(
+                "<b>%{x}</b><br>" +
+                "Used CPU Days: %{y}<br>" +
+                "Job Count: %{customdata[0]}<br>" +
+                "Account: %{customdata[1]}<br>" +
+                "Total CPU Days: %{customdata[2]}" +
+                "<extra></extra>"
+            )
+        ))
+
+        fig.add_trace(go.Bar(
+            name='Lost CPU Days',
+            x=result_df['User'],
+            y=result_df['Lost CPU Days'],
+            marker_color='#ff2b2b',
+            customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
+            hovertemplate=(
+                "<b>%{x}</b><br>" +
+                "Lost CPU Days: %{y}<br>" +
+                "Job Count: %{customdata[0]}<br>" +
+                "Account: %{customdata[1]}<br>" +
+                "Total CPU Days: %{customdata[2]}" +
+                "<extra></extra>"
+            )
+        ))
 
         fig.update_layout(
-            xaxis=dict(
-                title='User',
-                tickangle=-45
-            ),
-            yaxis=dict(
-                title='Total CPU Time (in Days)'
-            )
+            barmode='stack',
+            xaxis=dict(title='User', tickangle=-45),
+            yaxis=dict(title='Total CPU Time (in Days)'),
+            legend_title_text='Time Type',
+            hovermode="x unified"
         )
 
         st.plotly_chart(fig)

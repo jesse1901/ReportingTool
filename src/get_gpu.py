@@ -81,15 +81,12 @@ def get_rows_without_gpu(con, prom_base_url):
             update_batch = []
 
             for row in data:
-                if row[0] and row[1]:  # Sicherstellen, dass Start und End vorhanden sind
+                if row[0] and row[1]:  
                     try:
-                        # Wir übergeben 'cur' nicht mehr, da wir nur Daten zurückhaben wollen
                         result_tuple = get_gpu_data(row, step, prom_base_url=prom_base_url)
                         
                         if result_tuple:
-                            # result_tuple ist (total_gpus, gpu_eff, gpu_available)
-                            # Wir hängen die JobID (row[4]) für das WHERE Statement an
-                            # Das Tupel für das Update muss sein: (NGpus, GpuUtil, ReqGPUS, JobID)
+
                             full_record = result_tuple + (row[4],)
                             update_batch.append(full_record)
                             jobs_processed += 1
@@ -97,8 +94,6 @@ def get_rows_without_gpu(con, prom_base_url):
                     except Exception as e:
                         print(f"Failed to process JobID {row[4]}: {e}")
 
-            # --- BULK UPDATE ---
-            # Wir führen das Update nur aus, wenn wir Daten gesammelt haben
             if update_batch:
                 try:
                     print(f"Committing batch of {len(update_batch)} records...")
@@ -107,7 +102,6 @@ def get_rows_without_gpu(con, prom_base_url):
                         SET NGpus = ?, GpuUtil = ?, ReqGPUS = ?
                         WHERE JobID = ?
                     """
-                    # executemany ist hier der Schlüssel zur Performance
                     cur.executemany(update_query, update_batch)
                     con.commit() # Ein einziger Commit für alle Zeilen
                     print("Batch commit successful.")
@@ -136,8 +130,6 @@ def get_gpu_data(row, step, prom_base_url):
     start = row[0]
     end = row[1]
     nodelist = row[2]
-    # elapsed = row[3] # Wird aktuell nicht genutzt
-    # jobID = row[4]   # Wird hier nicht mehr benötigt, da wir nicht updaten
     
     nodelist = hostlist.expand_hostlist(nodelist)
     nodelist = [host + '.desy.de' for host in nodelist]
@@ -182,8 +174,6 @@ def get_gpu_data(row, step, prom_base_url):
 
         except requests.exceptions.RequestException as e:
             print(f"Request error: {e}")
-            # Auch bei Request Errors geben wir die bis dahin ermittelten Werte zurück (oder None?)
-            # Im original Skript lief es weiter. Wir behalten die Werte bei.
             pass
 
     return (total_gpus, gpu_eff, gpu_available)
