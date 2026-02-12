@@ -405,13 +405,6 @@ if __name__ == "__main__":
 
     if pointer_mtime != st.session_state.last_pointer_update:
         
-        if "con" in st.session_state:
-            try:
-                st.session_state.con.close()
-            except:
-                pass
-            del st.session_state.con
-        
         st.cache_data.clear()
         st.cache_resource.clear()
 
@@ -421,7 +414,7 @@ if __name__ == "__main__":
         time.sleep(0.5)
         st.rerun()
 
-
+    con = None
     try:
         current_db_path = helpers.get_current_db_path()
         
@@ -439,7 +432,11 @@ if __name__ == "__main__":
         gpu_pie = GpuPieCharts(con)
         scatter = ScatterCharts(con)
         main()
-        con.close()
 
     except Exception as e:
         st.error(f"Fehler: {e}")
+    if con
+        try:
+            con.close()
+        except Exception:
+            pass

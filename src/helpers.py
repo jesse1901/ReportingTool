@@ -185,5 +185,4 @@ class helpers:
             return 0
 
     def get_connection(db_path):
-        # read_only=True ist wichtig!
         return duckdb.connect(db_path, read_only=True)
