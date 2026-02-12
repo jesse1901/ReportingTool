@@ -127,7 +127,7 @@ class BarCharts:
             name='Lost CPU Days (GPU)',
             x=result_df['User'],
             y=result_df['Lost GPU CPU Days'],
-            marker_color='#bf55ec',
+            marker_color='#4169E1',
             customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
             hovertemplate=(
                 "<b>%{x}</b><br>" +
