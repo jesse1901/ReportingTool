@@ -9,12 +9,14 @@ class ClusterEfficiencyCharts:
 
     def display_cluster_efficiency(self, start_date, end_date, scale_efficiency):
         st.header("Cluster Efficiency")
-
+        col1, col2 = st.columns([1,1])
         # CPU Chart
-        self.display_cpu_efficiency_chart(start_date, end_date, scale_efficiency)
+        with col1:
+            self.display_cpu_efficiency_chart(start_date, end_date, scale_efficiency)
 
         # GPU Chart
-        self.display_gpu_efficiency_chart(start_date, end_date)
+        with col2: 
+            self.display_gpu_efficiency_chart(start_date, end_date)
 
     @st.cache_data(ttl=600, show_spinner=False)
     def get_cpu_efficiency_data(_self, start_date, end_date, scale_efficiency):
@@ -22,7 +24,7 @@ class ClusterEfficiencyCharts:
         cpu_query = f"""
         WITH cpu_data AS (
             SELECT 
-                SUM(CASE WHEN slurm.NGPUS > 0 THEN eff.cpu_s_used ELSE 0 END) AS cpu_with_gpu_seconds,
+                SUM(CASE WHEN slurm. => 0 THEN eff.cpu_s_used ELSE 0 END) AS cpu_with_gpu_seconds,
                 SUM(CASE WHEN slurm.NGPUS = 0 THEN eff.cpu_s_used ELSE 0 END) AS used_cpu_seconds,
                 SUM(eff.cpu_s_reserved - eff.cpu_s_used) AS lost_cpu_seconds
             FROM eff
