@@ -10,13 +10,10 @@ class BarCharts:
         
     @st.cache_data(ttl=600, show_spinner=False) 
     def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
-        st.markdown('Total Lost CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded')
+        st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded')
 
-        # Set parameters for the SQL query
         params = [start_date, end_date]
 
-        # Build query with common filters first
-        # DuckDB: Quote reserved keywords "Start", "End", "Partition"
         base_conditions = """
             WHERE eff."Start" >= ? 
             AND eff."Start" IS NOT NULL
@@ -26,16 +23,13 @@ class BarCharts:
             AND slurm.JobName != 'interactive'
         """
         
-        # DuckDB: 
-        # 1. Quote "User", "Account"
-        # 2. Use ANY_VALUE(eff."Account") because we are grouping by User only. 
-        #    SQLite allows selecting non-grouped columns loosely; DuckDB is strict.
         if scale_efficiency:
             query = f"""
                 SELECT 
                     eff.User,
                     COUNT(eff.JobID) AS job_count,
-                    ROUND(SUM((eff.cpu_s_reserved * 0.5) - eff.cpu_s_used) / 86400, 1) AS lost_cpu_days,
+                    ROUND(SUM((eff.cpu_s_reserved * 0.5) - eff.cpu_s_used) / 86400, 1) AS "Lost CPU Days",
+                    ROUND(SUM(eff.cpu_s_used) / 86400, 1) AS "Used CPU Days",
                     STRING_AGG(DISTINCT eff.Account, ',') As Account
                 FROM eff
                 JOIN slurm ON eff.JobID = slurm.JobID
@@ -45,9 +39,9 @@ class BarCharts:
             query = f"""
                 SELECT 
                     eff."User",
-                    ROUND(SUM((eff.cpu_s_reserved - eff.cpu_s_used) / 86400), 1) AS lost_cpu_days,
+                    ROUND(SUM(eff.cpu_s_reserved - eff.cpu_s_used) / 86400, 1) AS "Lost CPU Days",
+                    ROUND(SUM(eff.cpu_s_used) / 86400, 1) AS "Used CPU Days",
                     COUNT(eff.JobID) AS job_count,
-                    ROUND(SUM(eff.Elapsed * eff.NCPUS) / 86400, 1) AS total_cpu_days,
                     STRING_AGG(DISTINCT eff.Account, ',') AS Account
                 FROM eff
                 JOIN slurm ON eff.JobID = slurm.JobID
@@ -68,37 +62,37 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-        # Add grouping and ordering with LIMIT in SQL if number is specified
         if number:
-            query += f' GROUP BY eff."User" ORDER BY lost_cpu_days DESC LIMIT {number}'
+            query += f' GROUP BY eff."User" ORDER BY "Used CPU Days" + "Lost CPU Days" DESC LIMIT {number}'
         else:
-            query += ' GROUP BY eff."User" ORDER BY lost_cpu_days DESC'
+            query += ' GROUP BY eff."User" ORDER BY "Used CPU Days" + "Lost CPU Days" DESC'
 
-        # Execute query using native DuckDB method for speed
         try:
             result_df = _self.con.execute(query, params).df()
         except Exception as e:
             st.error(f"Database Error: {e}")
             return
         
-        # Early exit if no data
         if result_df.empty:
             st.warning("No data available for the selected criteria.")
             return
         
-        # Clip negative values
-        result_df['lost_cpu_days'] = result_df['lost_cpu_days'].clip(lower=0)
+        result_df['Lost CPU Days'] = result_df['Lost CPU Days'].clip(lower=0)
+        result_df['Used CPU Days'] = result_df['Used CPU Days'].clip(lower=0)
+        result_df['Total CPU Days'] = result_df['Lost CPU Days'] + result_df['Used CPU Days']
         
-        max_lost_time = result_df['lost_cpu_days'].max()
-        if max_lost_time > 0:
-            tick_vals = np.linspace(0, max_lost_time, num=10)
-            tick_text = [int(val) for val in tick_vals]
-        else:
-            tick_vals = [0]
-            tick_text = [0]
+        df_melted = result_df.melt(id_vars=['User', 'job_count', 'Account', 'Total CPU Days'], 
+                                   value_vars=['Used CPU Days', 'Lost CPU Days'],
+                                   var_name='Time Type', 
+                                   value_name='CPU Days')
 
-        # Create chart with optimized settings
-        fig = px.bar(result_df, x='User', y='lost_cpu_days', hover_data=['job_count', 'Account'])
+        fig = px.bar(df_melted, 
+                     x='User', 
+                     y='CPU Days', 
+                     color='Time Type',
+                     barmode='stack',
+                     hover_data=['job_count', 'Account', 'Total CPU Days'],
+                     color_discrete_map={'Used CPU Days': '#5ce488', 'Lost CPU Days': '#ff2b2b'})
 
         fig.update_layout(
             xaxis=dict(
@@ -106,11 +100,7 @@ class BarCharts:
                 tickangle=-45
             ),
             yaxis=dict(
-                title='Total Lost CPU Time (in Days)',
-                tickmode='array',
-                tickvals=tick_vals,
-                ticktext=tick_text,
-                tickformat='d'
+                title='Total CPU Time (in Days)'
             )
         )
 

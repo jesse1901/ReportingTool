@@ -232,7 +232,7 @@ def main():
             username = None
 
         if user_role != 'user':
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["All Jobs & User", "CPU-Time Charts", "CPU-Charts", "Overview", "GPU Charts", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["All Jobs & User", "CPU-Time Charts", "CPU Charts", "Overview", "GPU Charts", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
