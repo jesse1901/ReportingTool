@@ -256,7 +256,7 @@ def main():
                     with col_num2:
                         number2 = st.number_input("select jobs with a runtime greater than:", min_value=0, value=0)
                     with col3:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, number2, partition_selector,user_role, username, allowed_groups)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number2, scale_efficiency, partition_selector, allowed_groups, use_log_scale)
                     with col4:
                         pie.pie_chart_job_runtime(start_date, end_date, scale_efficiency, partition_selector,user_role, username, allowed_groups) 
           
