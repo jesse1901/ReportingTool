@@ -113,7 +113,7 @@ class GpuBarCharts:
         fig.update_layout(
             barmode='stack',
             xaxis=dict(title='User', tickangle=-45),
-            yaxis=dict(title='Total GPU Time (in Days)'),
+            yaxis=dict(title='Total GPU Time (in Days)', type='log'),
             legend_title_text='Time Type',
             hovermode="x unified" # Optional: makes comparing easier
         )

@@ -119,7 +119,7 @@ class BarCharts:
         fig.update_layout(
             barmode='stack',
             xaxis=dict(title='User', tickangle=-45),
-            yaxis=dict(title='Total CPU Time (in Days)'),
+            yaxis=dict(title='Total CPU Time (in Days)', type='log'),
             legend_title_text='Time Type',
             hovermode="x unified"
         )
