@@ -270,21 +270,25 @@ def main():
                     with col4_5:
                         pie.pie_chart_batch_inter(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab4:
-                    col_num2, _ = st.columns([1, 2])
+                    col_in2, col_in3, _ = st.columns([1, 1, 2])
                     col5, col6 = st.columns([1,1])
-                    with col_num2:
+                    with col_in2:
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
+                    with col_in3: 
+                        use_log_scale = st.checkbox("Log Scale", key="cpu_log_scale")
                     with col5:
-                        bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups)
+                        bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
-                    col_num3, _ = st.columns([1,2])
-                    with col_num3:
-                        number3 = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                    col_in4,col_in5, _ = st.columns([1,1,2])
                     col1, col2 = st.columns([1,1])
+                    with col_in4:
+                        number3 = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                    with col_in5:
+                        use_log_scale = st.checkbox("Log Scale", key="gpu_log_scale")
                     with col1:
-                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups)
+                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups, use_log_scale)
                     with col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                 with tab6:
