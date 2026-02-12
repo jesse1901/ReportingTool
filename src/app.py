@@ -13,6 +13,7 @@ from charts.gpu_bar import GpuBarCharts
 from charts.gpu_pie import GpuPieCharts
 from charts.scatter import ScatterCharts
 from charts.frames import DataFrames
+from charts.cluster_efficiency import ClusterEfficiencyCharts
 from documentation import Documentation
 from helpers import helpers
 secrets = toml.load('.streamlit/secrets.toml')
@@ -232,7 +233,7 @@ def main():
             username = None
 
         if user_role != 'user':
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["All Jobs & User", "CPU-Time Charts", "CPU Charts", "Overview", "GPU Charts", "Docs"]) 
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["All Jobs & User", "CPU-Time Charts", "CPU Charts", "Overview", "GPU Charts", "Cluster Efficiency", "Docs"]) 
             with st.spinner("loading"):
                 with tab1:
                     col_num, col_username, col_jobid,_ = st.columns([1, 1, 1, 2])
@@ -277,7 +278,7 @@ def main():
                     with col_in3: 
                         use_log_scale1 = st.checkbox("Log Scale", key="cpu_log_scale")
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1)
+                        bar.bar_char_by_user(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
@@ -288,10 +289,12 @@ def main():
                     with col_in5:
                         use_log_scale = st.checkbox("Log Scale", key="gpu_log_scale")
                     with col1:
-                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups, use_log_scale)
+                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups, use_log_scale)
                     with col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                 with tab6:
+                    cluster_efficiency.display_cluster_efficiency(start_date, end_date, scale_efficiency)
+                with tab7:
                     Documentation.documentation()
                 
         elif user_role == 'user':    
@@ -328,7 +331,7 @@ def main():
                         number_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number_user")
                     gpu_col1, gpu_col2 = st.columns([1,1])
                     with gpu_col1:
-                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number_gpu, partition_selector)
+                        gpu_bar.bar_char_by_user(start_date, end_date, username, user_role, number_gpu, partition_selector)
                     with gpu_col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector)
                 with tab5:
@@ -424,6 +427,7 @@ if __name__ == "__main__":
         gpu_bar = GpuBarCharts(current_db_path)
         gpu_pie = GpuPieCharts(current_db_path)
         scatter = ScatterCharts(current_db_path)
+        cluster_efficiency = ClusterEfficiencyCharts(current_db_path)
         main()
 
     except Exception as e:

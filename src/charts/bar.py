@@ -38,7 +38,7 @@ class BarCharts:
 
                 ROUND(SUM(
                     CASE 
-                        WHEN slurm.ngpus IS NULL 
+                        WHEN slurm.gpuutil IS NULL 
                         THEN ((eff.cpu_s_reserved * {cpu_reserved_factor}) - eff.cpu_s_used)
                         ELSE 0 
                     END
@@ -46,7 +46,7 @@ class BarCharts:
 
                 ROUND(SUM(
                     CASE 
-                        WHEN slurm.ngpus IS NOT NULL 
+                        WHEN slurm.gpuutil IS NOT NULL 
                         THEN (eff.cpu_s_reserved * {cpu_reserved_factor} - eff.cpu_s_used)
                         ELSE 0 
                     END
