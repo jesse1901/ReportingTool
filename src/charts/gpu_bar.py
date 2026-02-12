@@ -71,24 +71,50 @@ class GpuBarCharts:
         result_df['Used GPU Days'] = result_df['Used GPU Days'].clip(lower=0)
 
 
-        df_melted = result_df.melt(id_vars=['User', 'job_count', 'Account', 'Total GPU Days'], 
-                                   value_vars=['Used GPU Days', 'Lost GPU Days'],
-                                   var_name='Time Type', 
-                                   value_name='GPU Days')
+        fig = go.Figure()
 
-        # Create the figure WITHOUT barmode here
-        fig = px.bar(df_melted, 
-                     x='User', 
-                     y='GPU Days', 
-                     color='Time Type',
-                     hover_data=['job_count', 'Account', 'Total GPU Days'],
-                     color_discrete_map={'Used GPU Days': '#5ce488', 'Lost GPU Days': '#ff2b2b'})
+        # 1. Add the "Used" bar (Bottom of the stack)
+        fig.add_trace(go.Bar(
+            name='Used GPU Days',
+            x=result_df['User'],
+            y=result_df['Used GPU Days'],
+            marker_color='#5ce488',
+            # Pass extra data for hover
+            customdata=result_df[['job_count', 'Account', 'Total GPU Days']],
+            hovertemplate=(
+                "<b>%{x}</b><br>" +
+                "Used GPU Days: %{y}<br>" +
+                "Job Count: %{customdata[0]}<br>" +
+                "Account: %{customdata[1]}<br>" +
+                "Total GPU Days: %{customdata[2]}" +
+                "<extra></extra>" # Hides the secondary box
+            )
+        ))
 
-        # Force stacking in the layout
+        # 2. Add the "Lost" bar (Top of the stack)
+        fig.add_trace(go.Bar(
+            name='Lost GPU Days',
+            x=result_df['User'],
+            y=result_df['Lost GPU Days'],
+            marker_color='#ff2b2b',
+            customdata=result_df[['job_count', 'Account', 'Total GPU Days']],
+            hovertemplate=(
+                "<b>%{x}</b><br>" +
+                "Lost GPU Days: %{y}<br>" +
+                "Job Count: %{customdata[0]}<br>" +
+                "Account: %{customdata[1]}<br>" +
+                "Total GPU Days: %{customdata[2]}" +
+                "<extra></extra>"
+            )
+        ))
+
+        # 3. Force the layout to stack
         fig.update_layout(
-            barmode='stack',  # <--- This is the mandatory switch
+            barmode='stack',
             xaxis=dict(title='User', tickangle=-45),
-            yaxis=dict(title='Total GPU Time (in Days)')
+            yaxis=dict(title='Total GPU Time (in Days)'),
+            legend_title_text='Time Type',
+            hovermode="x unified" # Optional: makes comparing easier
         )
 
         st.plotly_chart(fig)
