@@ -289,18 +289,6 @@ class PieCharts:
         fig = px.pie(grouped, names="runtime_interval", values="lost_cpu_days")
         st.plotly_chart(fig)
 
-        # Summary (uses the same net definition)
-        cluster_efficiency = ((total_cpu_days - total_lost_cpu_days) / total_cpu_days * 100.0) if total_cpu_days > 0 else 0.0
-        summary_data = {
-            "total CPU days booked": f"{int(round(total_cpu_days)):,}",
-            "total CPU days lost": f"{int(round(total_lost_cpu_days)):,}",
-            "cluster efficiency": f"{cluster_efficiency:.2f}%"
-        }
-        df2 = pd.DataFrame(list(summary_data.items()), columns=["Metric", "Time in days"]).set_index("Metric")
-
-        st.write("Cluster Efficiency")
-        st.dataframe(df2, use_container_width=False)
-
     @st.cache_data(ttl=600, show_spinner=False)
     def pie_chart_batch_inter(_self, start_date, end_date, current_user, user_role, scale_efficiency=True, partition_selector=None, allowed_groups=None) -> None:
         
