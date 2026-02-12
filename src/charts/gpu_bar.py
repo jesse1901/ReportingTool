@@ -10,7 +10,7 @@ class GpuBarCharts:
         self.con = connection
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None) -> None:
+    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, use_log_scale=None) -> None:
         st.markdown('Total GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
 
         params = [start_date, end_date]
@@ -109,7 +109,6 @@ class GpuBarCharts:
             )
         ))
 
-        use_log_scale = st.checkbox("Logarithmic Scale", key="gpu_log_scale")
 
         y_axis_config = {'title': 'Total GPU Time (in Days)'}
         if use_log_scale:
