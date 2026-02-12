@@ -435,7 +435,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         st.error(f"Fehler: {e}")
-    if con
+    if con:
         try:
             con.close()
         except Exception:
