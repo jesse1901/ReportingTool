@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from helpers import helpers
+import plotly.graph_objects as go
 
 class GpuBarCharts:
     def __init__(self, connection):
