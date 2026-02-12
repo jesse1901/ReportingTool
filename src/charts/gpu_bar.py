@@ -11,7 +11,7 @@ class GpuBarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_char_by_user(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, use_log_scale=None) -> None:
+    def bar_chart_by_user_gpu(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, use_log_scale=None) -> None:
         st.markdown('Total GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
 
         params = [start_date, end_date]
