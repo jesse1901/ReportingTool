@@ -2,8 +2,8 @@
 set -e
 
 # Base directory where the script and dbs are located
-BASE_DIR="/var/www/max-reports/ReportingTool/database"
-DB_DIR="$BASE_DIR/db"
+BASE_DIR="/var/www/max-reports/ReportingTool"
+DB_DIR="$BASE_DIR/database"
 POINTER_FILE="$DB_DIR/current_db.txt"
 
 # Database files
