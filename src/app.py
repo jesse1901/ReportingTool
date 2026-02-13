@@ -292,7 +292,7 @@ def main():
                             exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
                  
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, bar_mode_selection, scale_selection , sort_selection, sort_percent, exclude_gpu_toggle)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, scale_selection , sort_selection, sort_percent, exclude_gpu_toggle)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
