@@ -93,11 +93,10 @@ class BarCharts:
         # Fallback, falls ein ungültiger Wert übergeben wird
         order_col = sort_mapping.get(sort_by, total_cpu_expr)
 
-        # Aufsteigende (ASC) Sortierung nach dem berechneten Ausdruck
         if number:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC LIMIT {number}'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC LIMIT {number}'
         else:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
