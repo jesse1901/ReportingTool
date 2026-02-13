@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Used CPU") -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU") -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -25,8 +25,10 @@ class BarCharts:
             AND slurm.JobName != 'interactive'
         """
         
+        # Logik für Scale Efficiency (nur für reine CPU Jobs ohne GPU)
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
+        # HIER: Nutzung von slurm.ngpus statt AllocTRES
         query = f"""
             SELECT 
                 eff.User,
@@ -70,14 +72,18 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
+        # -------------------------------------------------------------------
+        # NEU: Mapping der UI-Auswahl, jetzt mit "Total CPU"
+        # -------------------------------------------------------------------
         sort_mapping = {
             "Used CPU": '"Used CPU Days"',
             "Lost CPU": '"Lost CPU Days"',
-            "Lost GPU": '"Lost GPU CPU Days"'
+            "Lost GPU": '"Lost GPU CPU Days"',
+            "Total CPU": '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")'
         }
         
-        # Standard-Fallback, 
-        order_col = sort_mapping.get(sort_by, '"Used CPU Days"')
+        # Standard-Fallback, falls mal etwas schiefgeht
+        order_col = sort_mapping.get(sort_by, '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")')
 
         # Aufsteigende (ASC) Sortierung nach dem ausgewählten Parameter
         if number:
