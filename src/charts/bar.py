@@ -12,7 +12,7 @@ class BarCharts:
     
     @st.cache_data(ttl=600, show_spinner=False) 
     def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False, min_total_days=0) -> None:
-        st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
+        st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded.')
 
         params = [start_date, end_date]
 
@@ -163,7 +163,6 @@ class BarCharts:
                 hovertemplate=(
                     "<b>%{x}</b><br>" +
                     "Lost CPU Days on GPU-Nodes: %{y}<br>" +
-                    "<i>(Excusable due to GPU usage)</i><br>" +
                     "Job Count: %{customdata[0]}<br>" +
                     "Account: %{customdata[1]}<br>" +
                     "Total CPU Days: %{customdata[2]}" +
