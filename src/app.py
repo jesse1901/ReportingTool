@@ -299,7 +299,12 @@ def main():
                     col_in4,col_in5, _ = st.columns([1,1,2])
                     col1, col2 = st.columns([1,1])
                     with col_in4:
-                        number_a_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                        col_4_1, col_4_2 = st.columns([1, 1])
+                        with col_4_1:
+                            number_a_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                        with col_4_2:
+                            ignore_user_gpu = st.number_input("ignore user with GPU-days <", min_value=0, value=0, key="ignore_user_gpu")
+                        
                         sort_selection_a_gpu = st.segmented_control(
                                 "Sort By", 
                                 options=["Total GPU","Used GPU", "Lost GPU"], 
