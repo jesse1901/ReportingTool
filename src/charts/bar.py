@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU") -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -25,10 +25,8 @@ class BarCharts:
             AND slurm.JobName != 'interactive'
         """
         
-        # Logik für Scale Efficiency (nur für reine CPU Jobs ohne GPU)
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
-        # HIER: Nutzung von slurm.ngpus statt AllocTRES
         query = f"""
             SELECT 
                 eff.User,
@@ -72,24 +70,34 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-        # -------------------------------------------------------------------
-        # NEU: Mapping der UI-Auswahl, jetzt mit "Total CPU"
-        # -------------------------------------------------------------------
-        sort_mapping = {
-            "Used CPU": '"Used CPU Days"',
-            "Lost CPU": '"Lost CPU Days"',
-            "Lost GPU": '"Lost GPU CPU Days"',
-            "Total CPU": '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")'
-        }
-        
-        # Standard-Fallback, falls mal etwas schiefgeht
-        order_col = sort_mapping.get(sort_by, '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")')
 
-        # Aufsteigende (ASC) Sortierung nach dem ausgewählten Parameter
-        if number:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC LIMIT {number}'
+        total_cpu_expr = '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")'
+        
+        if sort_by_percentage:
+
+            sort_mapping = {
+                "Used CPU": f'"Used CPU Days" / NULLIF({total_cpu_expr}, 0)',
+                "Lost CPU": f'"Lost CPU Days" / NULLIF({total_cpu_expr}, 0)',
+                "Lost GPU": f'"Lost GPU CPU Days" / NULLIF({total_cpu_expr}, 0)',
+                "Total CPU": total_cpu_expr 
+            }
         else:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC'
+            # Klassische absolute Sortierung
+            sort_mapping = {
+                "Used CPU": '"Used CPU Days"',
+                "Lost CPU": '"Lost CPU Days"',
+                "Lost GPU": '"Lost GPU CPU Days"',
+                "Total CPU": total_cpu_expr
+            }
+        
+        # Fallback, falls ein ungültiger Wert übergeben wird
+        order_col = sort_mapping.get(sort_by, total_cpu_expr)
+
+        # Aufsteigende (ASC) Sortierung nach dem berechneten Ausdruck
+        if number:
+            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC LIMIT {number}'
+        else:
+            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
@@ -165,22 +173,19 @@ class BarCharts:
         ))
 
         # -------------------------------------------------------------------
-        # Layout-Konfiguration basierend auf den Segmented Controls
+        # Layout-Konfiguration
         # -------------------------------------------------------------------
-        
-        # 1. Bar Mode (Stacked vs Grouped)
         barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
         
-        # 2. Scale Type (Absolute, Percentage, Log)
         y_axis_config = {'title': 'Total CPU Time (in Days)'}
-        barnorm_setting = None # Standard: keine Normalisierung
+        barnorm_setting = None
 
         if scale_type == 'Log':
             y_axis_config['type'] = 'log'
         elif scale_type == 'Percentage':
             barnorm_setting = 'percent'
-            y_axis_config['title'] = 'Percentage of CPU Time (%)'
-            # Percentage sieht nur im Stacked Modus gut aus, zur Sicherheit erzwingen wir es:
+            y_axis_config['title'] = 'Percentage of CPU Time'
+            y_axis_config['ticksuffix'] = '%' # <-- Kleines Detail für schönere Y-Achse
             barmode_selection = 'stack'
 
         fig.update_layout(
