@@ -10,7 +10,7 @@ class BarCharts:
     def __init__(self, db_path):
         self.db_path = db_path
         
-@st.cache_data(ttl=600, show_spinner=False) 
+    @st.cache_data(ttl=600, show_spinner=False) 
     def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, use_log_scale=None, stacked_barchart=True) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
