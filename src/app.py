@@ -279,7 +279,7 @@ def main():
                         sort_selection = st.segmented_control(
                                 "Sort By (Ascending)", 
                                 options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
-                                default="Total CPU  "
+                                default="Total CPU"
                             )
                     with col_in3: 
                             bar_mode_selection = st.segmented_control(
