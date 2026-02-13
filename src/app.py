@@ -274,8 +274,12 @@ def main():
                     col_in2, col_in3, _ = st.columns([1, 1, 2])
                     col5, col6 = st.columns([1,1])
                     with col_in2:
-                        number3 = st.number_input("select number of user:", min_value=0, value=20)
-
+                        col_2_1, col_2_2 = st.columns([1, 1])
+                        with col_2_1:
+                            number_a_cpu = st.number_input("select number of user:", min_value=0, value=20, key="cpu_user_number")
+                        with col_2_2:
+                            ignore_user_cpu = st.number_input("ignore user with GPU-days <", min_value=0, value=0, key="ignore_user_cpu")
+                     
                         sort_selection = st.segmented_control(
                                 "Sort By", 
                                 options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
@@ -292,7 +296,7 @@ def main():
                             exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
                  
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, scale_selection , sort_selection, sort_percent, exclude_gpu_toggle)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number_a_cpu, scale_efficiency, partition_selector, allowed_groups, scale_selection , sort_selection, sort_percent, exclude_gpu_toggle, ignore_user_cpu)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:

@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
     
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False) -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False, min_total_days=0) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -27,7 +27,7 @@ class BarCharts:
         
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
-        # NEU: Auch hier nutzen wir GREATEST, damit der Wert niemals kleiner als 0 wird.
+        # GREATEST, damit der Wert niemals kleiner als 0 wird.
         gpu_calc = "0" if exclude_gpu else f"""
                 ROUND(SUM(
                     CASE 
@@ -38,7 +38,7 @@ class BarCharts:
                 ) / 86400, 1)
         """
 
-        # NEU: Bei 'Lost CPU Days' ist jetzt GREATEST(..., 0) eingefügt.
+        # Bei 'Lost CPU Days' ist GREATEST(..., 0) eingefügt.
         query = f"""
             SELECT 
                 eff.User,
@@ -76,7 +76,9 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
+        # -------------------------------------------------------------------
         # Dynamische Sortierlogik (Absolut vs. Prozentual)
+        # -------------------------------------------------------------------
         total_cpu_expr = '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")'
         
         if sort_by_percentage:
@@ -96,10 +98,20 @@ class BarCharts:
         
         order_col = sort_mapping.get(sort_by, total_cpu_expr)
 
+        # -------------------------------------------------------------------
+        # Zusammenbau von GROUP BY, HAVING (Filter) und ORDER BY
+        # -------------------------------------------------------------------
+        query += ' GROUP BY eff."User"'
+
+        # Filter für User mit weniger als X CPU Days (HAVING)
+        if min_total_days > 0:
+            query += f' HAVING {total_cpu_expr} >= ?'
+            params.append(min_total_days)
+
+        query += f' ORDER BY {order_col} DESC'
+
         if number:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC LIMIT {number}'
-        else:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC'
+            query += f' LIMIT {number}'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
@@ -176,6 +188,7 @@ class BarCharts:
             )
         ))
 
+        # Hier behalten wir deine Logik "barmode_selection = 'stack'" wie in deinem Snippet bei
         barmode_selection = 'stack'
         
         y_axis_config = {'title': 'Total CPU Time (in Days)'}
@@ -200,7 +213,6 @@ class BarCharts:
         )
 
         st.plotly_chart(fig)
-    
 
 
     @st.cache_data(ttl=600, show_spinner=False)    
