@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False) -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -27,6 +27,18 @@ class BarCharts:
         
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
+        # Wenn exclude_gpu True ist, setzen wir den Wert im SQL direkt auf 0. 
+        # Dadurch stimmt die gesamte Mathematik (Total & Prozent) automatisch!
+        gpu_calc = "0" if exclude_gpu else f"""
+                ROUND(SUM(
+                    CASE 
+                        WHEN slurm.gpuutil IS NOT NULL 
+                        THEN (eff.cpu_s_reserved * {cpu_reserved_factor} - eff.cpu_s_used)
+                        ELSE 0 
+                    END
+                ) / 86400, 1)
+        """
+
         query = f"""
             SELECT 
                 eff.User,
@@ -42,13 +54,7 @@ class BarCharts:
                     END
                 ) / 86400, 1) AS "Lost CPU Days",
 
-                ROUND(SUM(
-                    CASE 
-                        WHEN slurm.gpuutil IS NOT NULL 
-                        THEN (eff.cpu_s_reserved * {cpu_reserved_factor} - eff.cpu_s_used)
-                        ELSE 0 
-                    END
-                ) / 86400, 1) AS "Lost GPU CPU Days",
+                {gpu_calc} AS "Lost GPU CPU Days",
 
                 STRING_AGG(DISTINCT eff.Account, ',') As Account
             FROM eff
@@ -70,19 +76,17 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-
+        # Dynamische Sortierlogik (Absolut vs. Prozentual)
         total_cpu_expr = '("Used CPU Days" + "Lost CPU Days" + "Lost GPU CPU Days")'
         
         if sort_by_percentage:
-
             sort_mapping = {
                 "Used CPU": f'"Used CPU Days" / NULLIF({total_cpu_expr}, 0)',
                 "Lost CPU": f'"Lost CPU Days" / NULLIF({total_cpu_expr}, 0)',
                 "Lost GPU": f'"Lost GPU CPU Days" / NULLIF({total_cpu_expr}, 0)',
-                "Total CPU": total_cpu_expr 
+                "Total CPU": total_cpu_expr # Fallback auf Absolut
             }
         else:
-            # Klassische absolute Sortierung
             sort_mapping = {
                 "Used CPU": '"Used CPU Days"',
                 "Lost CPU": '"Lost CPU Days"',
@@ -90,7 +94,6 @@ class BarCharts:
                 "Total CPU": total_cpu_expr
             }
         
-        # Fallback, falls ein ungültiger Wert übergeben wird
         order_col = sort_mapping.get(sort_by, total_cpu_expr)
 
         if number:
@@ -114,7 +117,7 @@ class BarCharts:
         result_df['Lost GPU CPU Days'] = result_df['Lost GPU CPU Days'].clip(lower=0)
         result_df['Used CPU Days'] = result_df['Used CPU Days'].clip(lower=0)
         
-        # Total berechnen
+        # Total berechnen (Berücksichtigt automatisch den 0-Wert durch exclude_gpu)
         result_df['Total CPU Days'] = result_df['Lost CPU Days'] + result_df['Lost GPU CPU Days'] + result_df['Used CPU Days']
         
         fig = go.Figure()
@@ -136,23 +139,24 @@ class BarCharts:
             )
         ))
 
-        # Trace 2: Lost GPU (Lila)
-        fig.add_trace(go.Bar(
-            name='Lost CPU Days (GPU)',
-            x=result_df['User'],
-            y=result_df['Lost GPU CPU Days'],
-            marker_color='#4169E1',
-            customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
-            hovertemplate=(
-                "<b>%{x}</b><br>" +
-                "Lost CPU Days (GPU): %{y}<br>" +
-                "<i>(Excusable due to GPU usage)</i><br>" +
-                "Job Count: %{customdata[0]}<br>" +
-                "Account: %{customdata[1]}<br>" +
-                "Total CPU Days: %{customdata[2]}" +
-                "<extra></extra>"
-            )
-        ))
+        # NEU: Trace 2 (Lost GPU) wird nur gezeichnet, wenn exclude_gpu NICHT aktiv ist
+        if not exclude_gpu:
+            fig.add_trace(go.Bar(
+                name='Lost CPU Days (GPU)',
+                x=result_df['User'],
+                y=result_df['Lost GPU CPU Days'],
+                marker_color='#4169E1',
+                customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
+                hovertemplate=(
+                    "<b>%{x}</b><br>" +
+                    "Lost CPU Days (GPU): %{y}<br>" +
+                    "<i>(Excusable due to GPU usage)</i><br>" +
+                    "Job Count: %{customdata[0]}<br>" +
+                    "Account: %{customdata[1]}<br>" +
+                    "Total CPU Days: %{customdata[2]}" +
+                    "<extra></extra>"
+                )
+            ))
 
         # Trace 3: Lost Standard (Rot)
         fig.add_trace(go.Bar(
@@ -184,7 +188,7 @@ class BarCharts:
         elif scale_type == 'Percentage':
             barnorm_setting = 'percent'
             y_axis_config['title'] = 'Percentage of CPU Time'
-            y_axis_config['ticksuffix'] = '%' # <-- Kleines Detail für schönere Y-Achse
+            y_axis_config['ticksuffix'] = '%'
             barmode_selection = 'stack'
 
         fig.update_layout(
