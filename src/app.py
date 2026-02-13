@@ -277,7 +277,7 @@ def main():
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
                     with col_in3: 
                         use_log_scale1 = st.checkbox("Log Scale", key="cpu_log_scale")
-                        switch_bar_mode = st.toggle("Bar Layout (Stacked/Grouped)", key="switch_bar_mode)    
+                        switch_bar_mode = st.toggle("Bar Layout (Stacked/Grouped)", key="switch_bar_mode")    
                     with col5:
                         bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1, switch_bar_mode)
                     with col6:    
