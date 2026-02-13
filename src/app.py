@@ -281,7 +281,7 @@ def main():
                                 options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
                                 default="Total CPU"
                             )
-                    exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
+                        exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
                     with col_in3: 
                             bar_mode_selection = st.segmented_control(
                                 "Bar Mode", 
