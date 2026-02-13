@@ -278,7 +278,7 @@ def main():
                         with col_2_1:
                             number_a_cpu = st.number_input("select number of user:", min_value=0, value=20, key="cpu_user_number")
                         with col_2_2:
-                            ignore_user_cpu = st.number_input("ignore user with GPU-days <", min_value=0, value=0, key="ignore_user_cpu")
+                            ignore_user_cpu = st.number_input("ignore user with CPU-days <", min_value=0, value=0, key="ignore_user_cpu")
                      
                         sort_selection = st.segmented_control(
                                 "Sort By", 
