@@ -303,15 +303,15 @@ def main():
                         sort_selection_a_gpu = st.segmented_control(
                                 "Sort By", 
                                 options=["Total GPU","Used GPU", "Lost GPU"], 
-                                default="Total GPU"
+                                default="Total GPU", key="sort_by_gpu""
                             )
                     with col_in5:
                         scale_selection_a_gpu = st.segmented_control(
                                 "Scale Type", 
                                 options=["Absolute", "Percentage", "Log"], 
-                                default="Absolute"
+                                default="Absolute", key="scale_type_gpu"
                             )
-                        sort_percent_a_gpu = st.toggle("Sort by Absolut/Percentage", key="sort_percent")   
+                        sort_percent_a_gpu = st.toggle("Sort by Absolut/Percentage", key="sort_percent_gpu")   
                     with col1:
                         gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number_a_gpu, partition_selector, allowed_groups, scale_selection_a_gpu, sort_selection_a_gpu, sort_percent_a_gpu)
                     with col2:
