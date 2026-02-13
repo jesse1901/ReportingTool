@@ -277,7 +277,7 @@ def main():
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
 
                         sort_selection = st.segmented_control(
-                                "Sort By (Ascending)", 
+                                "Sort By", 
                                 options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
                                 default="Total CPU"
                             )

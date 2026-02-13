@@ -175,9 +175,7 @@ class BarCharts:
             )
         ))
 
-        # -------------------------------------------------------------------
         # Layout-Konfiguration
-        # -------------------------------------------------------------------
         barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
         
         y_axis_config = {'title': 'Total CPU Time (in Days)'}
@@ -194,6 +192,7 @@ class BarCharts:
         fig.update_layout(
             barmode=barmode_selection,
             barnorm=barnorm_setting,
+            bargap=0,
             xaxis=dict(title='User', tickangle=-45),
             yaxis=y_axis_config,
             legend_title_text='Time Type',
