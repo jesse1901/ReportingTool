@@ -276,10 +276,25 @@ def main():
                     with col_in2:
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
                     with col_in3: 
-                        use_log_scale1 = st.checkbox("Log Scale", key="cpu_log_scale")
-                        switch_bar_mode = st.toggle("Bar Layout (Stacked/Grouped)", key="switch_bar_mode")    
+                            bar_mode_selection = st.segmented_control(
+                                "Bar Mode", 
+                                options=["Stacked", "Grouped"], 
+                                default="Stacked"
+                            )
+
+                            scale_selection = st.segmented_control(
+                                "Scale Type", 
+                                options=["Absolute", "Percentage", "Log"], 
+                                default="Absolute"
+                            )
+
+                            sort_selection = st.segmented_control(
+                                "Sort By (Ascending)", 
+                                options=["Used CPU", "Lost CPU", "Lost GPU"], 
+                                default="Used CPU"
+                            )
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1, switch_bar_mode)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, scale_selection, bar_mode_selection, sort_selection)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:

@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, use_log_scale=None, stacked_barchart=True) -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Used CPU") -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -25,10 +25,8 @@ class BarCharts:
             AND slurm.JobName != 'interactive'
         """
         
-        # Logik für Scale Efficiency (nur für reine CPU Jobs ohne GPU)
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
-        # HIER: Nutzung von slurm.ngpus statt AllocTRES
         query = f"""
             SELECT 
                 eff.User,
@@ -72,17 +70,20 @@ class BarCharts:
             query += f' AND eff."Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-        # Sortierlogik: Used + Lost (CPU) + Lost (GPU)
-        order_logic = """
-            "Used CPU Days" + 
-            (CASE WHEN "Lost CPU Days" > 0 THEN "Lost CPU Days" ELSE 0 END) +
-            (CASE WHEN "Lost GPU CPU Days" > 0 THEN "Lost GPU CPU Days" ELSE 0 END)
-        """
+        sort_mapping = {
+            "Used CPU": '"Used CPU Days"',
+            "Lost CPU": '"Lost CPU Days"',
+            "Lost GPU": '"Lost GPU CPU Days"'
+        }
+        
+        # Standard-Fallback, 
+        order_col = sort_mapping.get(sort_by, '"Used CPU Days"')
 
+        # Aufsteigende (ASC) Sortierung nach dem ausgewählten Parameter
         if number:
-            query += f' GROUP BY eff."User" ORDER BY {order_logic} DESC LIMIT {number}'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC LIMIT {number}'
         else:
-            query += f' GROUP BY eff."User" ORDER BY {order_logic} DESC'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
@@ -157,15 +158,28 @@ class BarCharts:
             )
         ))
 
+        # -------------------------------------------------------------------
+        # Layout-Konfiguration basierend auf den Segmented Controls
+        # -------------------------------------------------------------------
+        
+        # 1. Bar Mode (Stacked vs Grouped)
+        barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
+        
+        # 2. Scale Type (Absolute, Percentage, Log)
         y_axis_config = {'title': 'Total CPU Time (in Days)'}
-        if use_log_scale:
-            y_axis_config['type'] = 'log'
+        barnorm_setting = None # Standard: keine Normalisierung
 
-        # Barmode abhängig vom Parameter setzen ('stack' oder 'group')
-        barmode_selection = 'stack' if stacked_barchart else 'group'
+        if scale_type == 'Log':
+            y_axis_config['type'] = 'log'
+        elif scale_type == 'Percentage':
+            barnorm_setting = 'percent'
+            y_axis_config['title'] = 'Percentage of CPU Time (%)'
+            # Percentage sieht nur im Stacked Modus gut aus, zur Sicherheit erzwingen wir es:
+            barmode_selection = 'stack'
 
         fig.update_layout(
             barmode=barmode_selection,
+            barnorm=barnorm_setting,
             xaxis=dict(title='User', tickangle=-45),
             yaxis=y_axis_config,
             legend_title_text='Time Type',
