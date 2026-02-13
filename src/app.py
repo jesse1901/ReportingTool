@@ -303,7 +303,7 @@ def main():
                         sort_selection_a_gpu = st.segmented_control(
                                 "Sort By", 
                                 options=["Total GPU","Used GPU", "Lost GPU"], 
-                                default="Total GPU", key="sort_by_gpu""
+                                default="Total GPU", key="sort_by_gpu"
                             )
                     with col_in5:
                         scale_selection_a_gpu = st.segmented_control(
