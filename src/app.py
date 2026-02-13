@@ -293,8 +293,9 @@ def main():
                                 options=["Absolute", "Percentage", "Log"], 
                                 default="Absolute"
                             )
+                            sort_percent = st.toggle("Sort by Absolut/Percentage", key="sort_percent")                    
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, bar_mode_selection, scale_selection , sort_selection)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, bar_mode_selection, scale_selection , sort_selection, sort_percent)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
