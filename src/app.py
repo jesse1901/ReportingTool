@@ -282,7 +282,7 @@ def main():
                      
                         sort_selection = st.segmented_control(
                                 "Sort By", 
-                                options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
+                                options=["Total CPU","Used CPU", "Lost CPU", "Lost CPU on GPU"], 
                                 default="Total CPU"
                             )
                     with col_in3: 
