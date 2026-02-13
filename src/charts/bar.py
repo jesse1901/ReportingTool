@@ -87,9 +87,9 @@ class BarCharts:
 
         # Aufsteigende (ASC) Sortierung nach dem ausgewählten Parameter
         if number:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC LIMIT {number}'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC LIMIT {number}'
         else:
-            query += f' GROUP BY eff."User" ORDER BY {order_col} ASC'
+            query += f' GROUP BY eff."User" ORDER BY {order_col} DESC'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
