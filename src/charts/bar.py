@@ -142,14 +142,14 @@ class BarCharts:
         # NEU: Trace 2 (Lost GPU) wird nur gezeichnet, wenn exclude_gpu NICHT aktiv ist
         if not exclude_gpu:
             fig.add_trace(go.Bar(
-                name='Lost CPU Days (GPU)',
+                name='Lost CPU Days on GPU-Nodes',
                 x=result_df['User'],
                 y=result_df['Lost GPU CPU Days'],
                 marker_color='#4169E1',
                 customdata=result_df[['job_count', 'Account', 'Total CPU Days']],
                 hovertemplate=(
                     "<b>%{x}</b><br>" +
-                    "Lost CPU Days (GPU): %{y}<br>" +
+                    "Lost CPU Days on GPU-Nodes: %{y}<br>" +
                     "<i>(Excusable due to GPU usage)</i><br>" +
                     "Job Count: %{customdata[0]}<br>" +
                     "Account: %{customdata[1]}<br>" +
