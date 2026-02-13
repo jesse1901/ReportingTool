@@ -318,7 +318,7 @@ def main():
                             )
                         sort_percent_a_gpu = st.toggle("Sort by Absolut/Percentage", key="sort_percent_gpu")   
                     with col1:
-                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number_a_gpu, partition_selector, allowed_groups, scale_selection_a_gpu, sort_selection_a_gpu, sort_percent_a_gpu)
+                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number_a_gpu, partition_selector, allowed_groups, scale_selection_a_gpu, sort_selection_a_gpu, sort_percent_a_gpu, ignore_user_gpu)
                     with col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                 with tab6:

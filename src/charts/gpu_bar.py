@@ -11,7 +11,7 @@ class GpuBarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_gpu(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total GPU", sort_by_percentage=False) -> None:
+    def bar_chart_by_user_gpu(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total GPU", sort_by_percentage=False, min_total_days=0) -> None:
         st.markdown('Total GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
 
         params = [start_date, end_date]
@@ -26,7 +26,6 @@ class GpuBarCharts:
             AND NGPUS > 0
         """
         
-
         query = f"""
             SELECT 
                 "User",
@@ -57,14 +56,14 @@ class GpuBarCharts:
             query += f' AND "Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-
+        # Dynamische Sortierlogik (Absolut vs. Prozentual)
         total_gpu_expr = '("Used GPU Days" + "Lost GPU Days")'
         
         if sort_by_percentage:
             sort_mapping = {
                 "Used GPU": f'"Used GPU Days" / NULLIF({total_gpu_expr}, 0)',
                 "Lost GPU": f'"Lost GPU Days" / NULLIF({total_gpu_expr}, 0)',
-                "Total GPU": total_gpu_expr # Fallback, falls man % und Total kombiniert
+                "Total GPU": total_gpu_expr 
             }
         else:
             sort_mapping = {
@@ -75,11 +74,20 @@ class GpuBarCharts:
             
         order_col = sort_mapping.get(sort_by, total_gpu_expr)
 
-        if number:
-            query += f' GROUP BY "User" ORDER BY {order_col} DESC LIMIT {number}'
-        else:
-            query += f' GROUP BY "User" ORDER BY {order_col} DESC'
+        # Zusammenbau von GROUP BY, HAVING (Filter) und ORDER BY
+        query += ' GROUP BY "User"'
 
+        # Filter für User mit weniger als X GPU Days (HAVING)
+        if min_total_days > 0:
+            query += ' HAVING ROUND(SUM(GREATEST(NGPUS * Elapsed, 0)) / 86400, 1) >= ?'
+            params.append(min_total_days)
+
+        query += f' ORDER BY {order_col} DESC'
+
+        if number:
+            query += f' LIMIT {number}'
+
+        # Datenbank-Ausführung
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
                 result_df = con.execute(query, params).df()
@@ -95,7 +103,7 @@ class GpuBarCharts:
         result_df['Lost GPU Days'] = result_df['Lost GPU Days'].clip(lower=0)
         result_df['Used GPU Days'] = result_df['Used GPU Days'].clip(lower=0)
         
-        # Total für den Hover dynamisch neu berechnen, um 100% konsistent zu sein
+        # Total für den Hover dynamisch neu berechnen
         result_df['Total GPU Days'] = result_df['Used GPU Days'] + result_df['Lost GPU Days']
 
         fig = go.Figure()
@@ -134,7 +142,10 @@ class GpuBarCharts:
             )
         ))
 
-        barmode_selection = 'stack'
+        # -------------------------------------------------------------------
+        # Layout-Konfiguration
+        # -------------------------------------------------------------------
+        barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
         
         y_axis_config = {'title': 'Total GPU Time (in Days)'}
         barnorm_setting = None
@@ -150,7 +161,7 @@ class GpuBarCharts:
         fig.update_layout(
             barmode=barmode_selection,
             barnorm=barnorm_setting,
-            bargap=0,  # Auch hier Lücken schließen für das durchgehende "Farbband"
+            bargap=0,
             xaxis=dict(title='User', tickangle=-45),
             yaxis=y_axis_config,
             legend_title_text='Time Type',
