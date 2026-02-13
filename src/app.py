@@ -181,7 +181,7 @@ def input_controls(user_role=None):
             else:
                 partition_selector = [choice]
 
-        scale = st.checkbox("take hyperthreading cores into account", key=f"checkbox", help=help_hyper)        
+        scale = st.toggle("take hyperthreading cores into account", key=f"checkbox", help=help_hyper)        
         scale_efficiency = not scale
 
     return start_date, end_date, scale_efficiency, partition_selector, allowed_groups, search_user
@@ -277,8 +277,9 @@ def main():
                         number3 = st.number_input("select number of user:", min_value=0, value=20)
                     with col_in3: 
                         use_log_scale1 = st.checkbox("Log Scale", key="cpu_log_scale")
+                        switch_bar_mode = st.toggle("Bar Layout (Stacked/Grouped)", key="switch_bar_mode)    
                     with col5:
-                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1)
+                        bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, use_log_scale1, switch_bar_mode)
                     with col6:    
                         scatter.scatter_chart_data_cpu_gpu_eff(start_date, end_date, username, user_role, scale_efficiency, partition_selector, allowed_groups)
                 with tab5:
@@ -287,7 +288,7 @@ def main():
                     with col_in4:
                         number3 = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
                     with col_in5:
-                        use_log_scale = st.checkbox("Log Scale", key="gpu_log_scale")
+                        use_log_scale = st.toggle("Log Scale", key="gpu_log_scale")
                     with col1:
                         gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups, use_log_scale)
                     with col2:
