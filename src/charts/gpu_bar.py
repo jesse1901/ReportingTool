@@ -145,7 +145,7 @@ class GpuBarCharts:
         # -------------------------------------------------------------------
         # Layout-Konfiguration
         # -------------------------------------------------------------------
-        barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
+        barmode_selection ='stack'
         
         y_axis_config = {'title': 'Total GPU Time (in Days)'}
         barnorm_setting = None
