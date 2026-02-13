@@ -11,7 +11,7 @@ class BarCharts:
         self.db_path = db_path
     
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False) -> None:
+    def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
 
         params = [start_date, end_date]
@@ -176,8 +176,7 @@ class BarCharts:
             )
         ))
 
-        # Layout-Konfiguration
-        barmode_selection = 'group' if bar_mode == 'Grouped' else 'stack'
+        barmode_selection = 'stack'
         
         y_axis_config = {'title': 'Total CPU Time (in Days)'}
         barnorm_setting = None

@@ -281,20 +281,16 @@ def main():
                                 options=["Total CPU","Used CPU", "Lost CPU", "Lost GPU"], 
                                 default="Total CPU"
                             )
-                        exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
                     with col_in3: 
-                            bar_mode_selection = st.segmented_control(
-                                "Bar Mode", 
-                                options=["Stacked", "Grouped"], 
-                                default="Stacked"
-                            )
 
                             scale_selection = st.segmented_control(
                                 "Scale Type", 
                                 options=["Absolute", "Percentage", "Log"], 
                                 default="Absolute"
                             )
-                            sort_percent = st.toggle("Sort by Absolut/Percentage", key="sort_percent")                    
+                            sort_percent = st.toggle("Sort by Absolut/Percentage", key="sort_percent")   
+                            exclude_gpu_toggle = st.toggle("Exclude CPU usage on GPU-Nodes", key="exclude_gpu")
+                 
                     with col5:
                         bar.bar_chart_by_user_cpu(start_date, end_date, username, user_role, number3, scale_efficiency, partition_selector, allowed_groups, bar_mode_selection, scale_selection , sort_selection, sort_percent, exclude_gpu_toggle)
                     with col6:    
@@ -303,11 +299,21 @@ def main():
                     col_in4,col_in5, _ = st.columns([1,1,2])
                     col1, col2 = st.columns([1,1])
                     with col_in4:
-                        number3 = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                        number_a_gpu = st.number_input("select number of user:", min_value=0, value=20, key="gpu_user_number")
+                        sort_selection_a_gpu = st.segmented_control(
+                                "Sort By", 
+                                options=["Total GPU","Used GPU", "Lost GPU"], 
+                                default="Total GPU"
+                            )
                     with col_in5:
-                        use_log_scale = st.toggle("Log Scale", key="gpu_log_scale")
+                        scale_selection_a_gpu = st.segmented_control(
+                                "Scale Type", 
+                                options=["Absolute", "Percentage", "Log"], 
+                                default="Absolute"
+                            )
+                        sort_percent_a_gpu = st.toggle("Sort by Absolut/Percentage", key="sort_percent")   
                     with col1:
-                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number3, partition_selector, allowed_groups, use_log_scale)
+                        gpu_bar.bar_chart_by_user_gpu(start_date, end_date, username, user_role, number_a_gpu, partition_selector, allowed_groups, scale_selection_a_gpu, sort_selection_a_gpu, sort_percent_a_gpu)
                     with col2:
                         gpu_pie.pie_chart_by_session_state(start_date, end_date, username, user_role, partition_selector, allowed_groups)
                 with tab6:

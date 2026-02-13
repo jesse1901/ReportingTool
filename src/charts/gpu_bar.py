@@ -11,7 +11,7 @@ class GpuBarCharts:
         self.db_path = db_path
         
     @st.cache_data(ttl=600, show_spinner=False) 
-    def bar_chart_by_user_gpu(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, use_log_scale=None) -> None:
+    def bar_chart_by_user_gpu(_self, start_date, end_date, current_user, user_role, number=None, partition_selector=None, allowed_groups=None, scale_type="Absolute", sort_by="Total GPU", sort_by_percentage=False) -> None:
         st.markdown('Total GPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Only jobs with allocated GPUs are considered.')
 
         params = [start_date, end_date]
@@ -26,12 +26,18 @@ class GpuBarCharts:
             AND NGPUS > 0
         """
         
+
         query = f"""
             SELECT 
                 "User",
                 COUNT(JobID) AS job_count,
-                ROUND(SUM((NGPUS * Elapsed) * (1 - CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END)) / 86400, 1) AS "Lost GPU Days",
-                ROUND(SUM(NGPUS * Elapsed) / 86400, 1) AS "Total GPU Days",
+                
+                ROUND(SUM(GREATEST((NGPUS * Elapsed) * (CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END), 0)) / 86400, 1) AS "Used GPU Days",
+                
+                ROUND(SUM(GREATEST((NGPUS * Elapsed) * (1 - CASE WHEN GpuUtil BETWEEN 0 AND 1 THEN GpuUtil ELSE 0 END), 0)) / 86400, 1) AS "Lost GPU Days",
+                
+                ROUND(SUM(GREATEST(NGPUS * Elapsed, 0)) / 86400, 1) AS "Total GPU Days",
+                
                 STRING_AGG(DISTINCT "Account", ',') As Account
             FROM allocations
             {base_conditions}
@@ -51,10 +57,28 @@ class GpuBarCharts:
             query += f' AND "Account" IN ({placeholders})'
             params.extend(allowed_groups)
         
-        if number:
-            query += f' GROUP BY "User" ORDER BY "Total GPU Days" DESC LIMIT {number}'
+
+        total_gpu_expr = '("Used GPU Days" + "Lost GPU Days")'
+        
+        if sort_by_percentage:
+            sort_mapping = {
+                "Used GPU": f'"Used GPU Days" / NULLIF({total_gpu_expr}, 0)',
+                "Lost GPU": f'"Lost GPU Days" / NULLIF({total_gpu_expr}, 0)',
+                "Total GPU": total_gpu_expr # Fallback, falls man % und Total kombiniert
+            }
         else:
-            query += ' GROUP BY "User" ORDER BY "Total GPU Days" DESC'
+            sort_mapping = {
+                "Used GPU": '"Used GPU Days"',
+                "Lost GPU": '"Lost GPU Days"',
+                "Total GPU": total_gpu_expr
+            }
+            
+        order_col = sort_mapping.get(sort_by, total_gpu_expr)
+
+        if number:
+            query += f' GROUP BY "User" ORDER BY {order_col} DESC LIMIT {number}'
+        else:
+            query += f' GROUP BY "User" ORDER BY {order_col} DESC'
 
         try:
             with duckdb.connect(_self.db_path, read_only=True) as con:
@@ -67,12 +91,12 @@ class GpuBarCharts:
             st.warning("No data available for the selected criteria.")
             return
         
-
+        # Clipping negative values zur Sicherheit
         result_df['Lost GPU Days'] = result_df['Lost GPU Days'].clip(lower=0)
-        result_df['Total GPU Days'] = result_df['Total GPU Days'].clip(lower=0)
-        result_df['Used GPU Days'] = result_df['Total GPU Days'] - result_df['Lost GPU Days']
         result_df['Used GPU Days'] = result_df['Used GPU Days'].clip(lower=0)
-
+        
+        # Total für den Hover dynamisch neu berechnen, um 100% konsistent zu sein
+        result_df['Total GPU Days'] = result_df['Used GPU Days'] + result_df['Lost GPU Days']
 
         fig = go.Figure()
 
@@ -82,7 +106,6 @@ class GpuBarCharts:
             x=result_df['User'],
             y=result_df['Used GPU Days'],
             marker_color='#5ce488',
-            # Pass extra data for hover
             customdata=result_df[['job_count', 'Account', 'Total GPU Days']],
             hovertemplate=(
                 "<b>%{x}</b><br>" +
@@ -90,7 +113,7 @@ class GpuBarCharts:
                 "Job Count: %{customdata[0]}<br>" +
                 "Account: %{customdata[1]}<br>" +
                 "Total GPU Days: %{customdata[2]}" +
-                "<extra></extra>" # Hides the secondary box
+                "<extra></extra>" 
             )
         ))
 
@@ -111,18 +134,27 @@ class GpuBarCharts:
             )
         ))
 
-
+        barmode_selection = 'stack'
+        
         y_axis_config = {'title': 'Total GPU Time (in Days)'}
-        if use_log_scale:
-            y_axis_config['type'] = 'log'
+        barnorm_setting = None
 
-        # 3. Force the layout to stack
+        if scale_type == 'Log':
+            y_axis_config['type'] = 'log'
+        elif scale_type == 'Percentage':
+            barnorm_setting = 'percent'
+            y_axis_config['title'] = 'Percentage of GPU Time'
+            y_axis_config['ticksuffix'] = '%'
+            barmode_selection = 'stack'
+
         fig.update_layout(
-            barmode='stack',
+            barmode=barmode_selection,
+            barnorm=barnorm_setting,
+            bargap=0,  # Auch hier Lücken schließen für das durchgehende "Farbband"
             xaxis=dict(title='User', tickangle=-45),
             yaxis=y_axis_config,
             legend_title_text='Time Type',
-            hovermode="x unified" # Optional: makes comparing easier
+            hovermode="x unified" 
         )
 
         st.plotly_chart(fig)
