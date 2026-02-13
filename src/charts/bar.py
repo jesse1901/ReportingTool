@@ -9,7 +9,7 @@ import duckdb
 class BarCharts:
     def __init__(self, db_path):
         self.db_path = db_path
-        
+    
     @st.cache_data(ttl=600, show_spinner=False) 
     def bar_chart_by_user_cpu(_self, start_date, end_date, current_user, user_role, number=None, scale_efficiency=True, partition_selector=None, allowed_groups=None, bar_mode="Stacked", scale_type="Absolute", sort_by="Total CPU", sort_by_percentage=False, exclude_gpu=False) -> None:
         st.markdown('Total CPU-Time per User', help='Partition "jhub" and Interactive Jobs are excluded. Purple bars indicate lost CPU time on GPU nodes (excusable due to GPU workflow).')
@@ -27,18 +27,18 @@ class BarCharts:
         
         cpu_reserved_factor = 0.5 if scale_efficiency else 1.0
         
-        # Wenn exclude_gpu True ist, setzen wir den Wert im SQL direkt auf 0. 
-        # Dadurch stimmt die gesamte Mathematik (Total & Prozent) automatisch!
+        # NEU: Auch hier nutzen wir GREATEST, damit der Wert niemals kleiner als 0 wird.
         gpu_calc = "0" if exclude_gpu else f"""
                 ROUND(SUM(
                     CASE 
                         WHEN slurm.gpuutil IS NOT NULL 
-                        THEN (eff.cpu_s_reserved * {cpu_reserved_factor} - eff.cpu_s_used)
+                        THEN GREATEST((eff.cpu_s_reserved * {cpu_reserved_factor} - eff.cpu_s_used), 0)
                         ELSE 0 
                     END
                 ) / 86400, 1)
         """
 
+        # NEU: Bei 'Lost CPU Days' ist jetzt GREATEST(..., 0) eingefügt.
         query = f"""
             SELECT 
                 eff.User,
@@ -49,7 +49,7 @@ class BarCharts:
                 ROUND(SUM(
                     CASE 
                         WHEN slurm.gpuutil IS NULL 
-                        THEN ((eff.cpu_s_reserved * {cpu_reserved_factor}) - eff.cpu_s_used)
+                        THEN GREATEST(((eff.cpu_s_reserved * {cpu_reserved_factor}) - eff.cpu_s_used), 0)
                         ELSE 0 
                     END
                 ) / 86400, 1) AS "Lost CPU Days",
@@ -112,7 +112,8 @@ class BarCharts:
             st.warning("No data available for the selected criteria.")
             return
         
-        # Clipping negative values
+        # Clipping negative values - Diese Zeilen behalten wir zur Sicherheit, 
+        # auch wenn das SQL die Hauptarbeit (und Sortierung) jetzt sauber löst.
         result_df['Lost CPU Days'] = result_df['Lost CPU Days'].clip(lower=0)
         result_df['Lost GPU CPU Days'] = result_df['Lost GPU CPU Days'].clip(lower=0)
         result_df['Used CPU Days'] = result_df['Used CPU Days'].clip(lower=0)
@@ -139,7 +140,7 @@ class BarCharts:
             )
         ))
 
-        # NEU: Trace 2 (Lost GPU) wird nur gezeichnet, wenn exclude_gpu NICHT aktiv ist
+        # Trace 2 (Lost GPU) wird nur gezeichnet, wenn exclude_gpu NICHT aktiv ist
         if not exclude_gpu:
             fig.add_trace(go.Bar(
                 name='Lost CPU Days on GPU-Nodes',
