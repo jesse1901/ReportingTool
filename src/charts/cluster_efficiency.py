@@ -34,7 +34,7 @@ class ClusterEfficiencyCharts:
             SUM(
                 CASE 
                     WHEN slurm.GpuUtil IS NULL 
-                    THEN (eff.cpu_s_reserved - eff.cpu_s_used) * {cpu_scale_factor}
+                    THEN (eff.cpu_s_reserved * {cpu_scale_factor} )  - eff.cpu_s_used 
                     ELSE 0 
                 END
             ) / 86400.0 AS lost_cpu_days,
